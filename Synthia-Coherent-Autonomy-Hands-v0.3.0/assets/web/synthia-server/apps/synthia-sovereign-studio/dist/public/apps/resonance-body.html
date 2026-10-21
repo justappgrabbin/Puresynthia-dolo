@@ -1,0 +1,1050 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="theme-color" content="#030408"/>
+<title>Resonance Body · App Center · Synthia Bridge</title>
+<script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+<style>
+:root{
+  --void:#030408; --deep:#060912; --surface:#0a0f1a; --raised:#101620; --edge:#1a2235;
+  --glow:#2a3a55; --gold:#f5c518; --green:#10d474; --red:#ff6b6b; --violet:#a855f7;
+  --text:#e8e8e8; --muted:#8899aa; --dim:#556677; --mono:"SF Mono",Monaco,"Cascadia Code",monospace;
+  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; --status:28px; --dock:58px; --r:14px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:100%;height:100%;overflow:hidden;background:var(--void);color:var(--text);font-family:var(--sans);user-select:none}
+button,input,textarea{font:inherit}
+#body-shell{height:100%;display:flex;flex-direction:column;background:
+  linear-gradient(180deg,#05070d 0%,#080b12 48%,#030408 100%);transition:background .8s ease}
+#body-shell.active{background:
+  linear-gradient(180deg,#070a10 0%,#0b1018 52%,#030408 100%)}
+#status-bar{height:var(--status);display:flex;align-items:center;gap:10px;padding:0 12px;background:rgba(6,9,18,.92);border-bottom:1px solid var(--edge);backdrop-filter:blur(12px);z-index:100}
+#vitality-pulse{width:8px;height:8px;border-radius:50%;background:var(--dim);box-shadow:0 0 8px var(--dim);transition:.25s}
+#vitality-pulse.active{background:var(--green);box-shadow:0 0 10px var(--green)}
+#vitality-pulse.morphing{background:var(--gold);box-shadow:0 0 12px var(--gold);animation:pulse 1s infinite}
+@keyframes pulse{50%{transform:scale(1.45)}}
+#phase{font:10px var(--mono);letter-spacing:.12em;color:var(--muted);text-transform:uppercase}
+#clock{margin-left:auto;font:10px var(--mono);color:var(--dim)}
+#desktop{flex:1;position:relative;overflow:hidden}
+.wallpaper{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;pointer-events:none;opacity:.75}
+.wallpaper .glyph{font:42px var(--mono);letter-spacing:.2em;color:rgba(245,197,24,.10)}
+.wallpaper .title{font:700 13px var(--mono);letter-spacing:.24em;color:rgba(232,232,232,.34)}
+.window{position:absolute;background:rgba(10,15,26,.98);border:1px solid var(--edge);border-radius:var(--r);box-shadow:0 20px 60px rgba(0,0,0,.55);overflow:hidden;display:flex;flex-direction:column;min-width:280px;min-height:220px;animation:birth .18s ease}
+@keyframes birth{from{opacity:0;transform:scale(.96) translateY(8px)}to{opacity:1;transform:none}}
+.window-header{height:36px;background:var(--raised);border-bottom:1px solid var(--edge);display:flex;align-items:center;gap:8px;padding:0 10px;cursor:grab}
+.window-title{flex:1;font:600 12px var(--mono);color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.win-btn{width:12px;height:12px;border:none;border-radius:50%;cursor:pointer}
+.close{background:var(--red)} .min{background:var(--gold)} .max{background:var(--green)}
+.window-body{flex:1;min-height:0;overflow:auto;padding:12px}
+#dock{height:var(--dock);background:rgba(6,9,18,.97);border-top:1px solid var(--edge);display:flex;align-items:center;justify-content:center;gap:14px;padding:0 16px;z-index:90}
+.dock-btn{width:44px;height:44px;border-radius:13px;background:var(--raised);border:1px solid var(--edge);color:var(--text);display:flex;align-items:center;justify-content:center;font-size:21px;cursor:pointer;transition:.15s;position:relative}
+.dock-btn:hover,.dock-btn.active{border-color:var(--gold);box-shadow:0 0 16px rgba(245,197,24,.16);transform:translateY(-2px)}
+.badge{position:absolute;top:-5px;right:-5px;background:var(--red);color:white;border-radius:99px;min-width:17px;height:17px;font:700 10px var(--mono);display:flex;align-items:center;justify-content:center;padding:0 4px}
+.section h2{font:700 13px var(--mono);letter-spacing:.12em;color:var(--gold);margin-bottom:10px;text-transform:uppercase;border-bottom:1px solid var(--edge);padding-bottom:8px}
+.section h3{font:700 11px var(--mono);letter-spacing:.09em;color:var(--muted);margin:14px 0 8px;text-transform:uppercase}
+.section p{font-size:13px;line-height:1.45;color:var(--muted);margin-bottom:8px}
+.info{background:rgba(245,197,24,.06);border:1px solid rgba(245,197,24,.18);border-radius:8px;padding:10px;font:11px var(--mono);color:var(--muted);line-height:1.45}
+.actions{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
+.action{background:var(--raised);border:1px solid var(--edge);color:var(--text);border-radius:8px;padding:8px 10px;font:11px var(--mono);cursor:pointer}
+.action:hover{border-color:var(--gold)}
+.server-row{display:flex;gap:8px;margin:10px 0;align-items:center;flex-wrap:wrap}.server-input{flex:1;min-width:220px;background:var(--deep);border:1px solid var(--edge);border-radius:8px;color:var(--text);padding:8px 10px;font:11px var(--mono);user-select:text}.chip{border:1px solid var(--edge);border-radius:999px;padding:4px 8px;font:10px var(--mono);color:var(--muted)}.chip.online{color:var(--green);border-color:rgba(16,212,116,.35)}.chip.offline{color:var(--red);border-color:rgba(255,107,107,.35)}
+.upload-zone{border:2px dashed var(--edge);border-radius:12px;min-height:160px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:10px;cursor:pointer;background:rgba(255,255,255,.015);transition:.2s;text-align:center;padding:18px}
+.upload-zone:hover,.upload-zone.drag{border-color:var(--gold);background:rgba(245,197,24,.06)}
+.upload-zone input{display:none}
+.file-list,.capsule-list{display:flex;flex-direction:column;gap:6px}
+.file-row,.capsule-row{background:var(--raised);border:1px solid var(--edge);border-radius:8px;padding:8px 10px;display:flex;align-items:center;gap:8px;font:11px var(--mono);color:var(--muted)}
+.file-row strong,.capsule-row strong{color:var(--text)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px}
+.app-card{border:1px solid var(--edge);background:var(--raised);border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:8px;min-height:122px}
+.app-card .icon{font-size:26px}.app-card .name{font:700 12px var(--mono);color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.app-card .meta{font:10px var(--mono);color:var(--dim);line-height:1.4}.app-card button{margin-top:auto}
+.regen-view{display:flex;flex-direction:column;gap:10px}
+.regen-toolbar{display:flex;gap:8px;flex-wrap:wrap}
+.regen-output{background:#f9fafb;color:#111;border-radius:10px;padding:14px;min-height:180px;font-family:system-ui,sans-serif;user-select:text}
+.regen-output h1,.regen-output h2{margin-bottom:8px}.regen-output pre{white-space:pre-wrap;background:#111827;color:#e5e7eb;padding:10px;border-radius:8px;overflow:auto}
+.message-log{height:150px;overflow:auto;background:var(--deep);border:1px solid var(--edge);border-radius:8px;padding:8px;font:10px var(--mono);color:var(--muted);line-height:1.5}
+.node-map{display:grid;grid-template-columns:repeat(8,1fr);gap:4px;margin-top:8px}
+.node-dot{aspect-ratio:1;border-radius:4px;background:var(--edge);border:1px solid rgba(255,255,255,.04);font:9px var(--mono);display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.45)}
+.node-dot.active{background:rgba(245,197,24,.22);color:var(--gold);border-color:rgba(245,197,24,.4)}
+textarea.code{width:100%;min-height:220px;resize:vertical;background:var(--deep);border:1px solid var(--edge);border-radius:8px;color:var(--text);padding:10px;font:11px var(--mono);user-select:text}
+.toast{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%) scale(.9);background:rgba(10,15,26,.98);border:1px solid var(--edge);border-radius:12px;padding:14px 18px;z-index:999;opacity:0;pointer-events:none;transition:.2s;font:12px var(--mono);color:var(--text);max-width:82vw;text-align:center}
+.toast.show{opacity:1;transform:translate(-50%,-50%) scale(1)}
+
+.smart-browser-shell{display:flex;flex-direction:column;gap:10px;height:100%}
+.browser-bar{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.browser-url{flex:1;min-width:220px;background:var(--deep);border:1px solid var(--edge);border-radius:8px;color:var(--text);padding:8px 10px;font:11px var(--mono);user-select:text}
+.browser-page{background:linear-gradient(180deg,#f8fafc,#e5e7eb);color:#111827;border-radius:12px;border:1px solid rgba(255,255,255,.1);min-height:190px;padding:18px;font-family:system-ui,sans-serif;user-select:text;overflow:auto}
+.browser-page .page-title{font-weight:700;font-size:18px;margin-bottom:8px}.browser-page .page-url{font:12px var(--mono);color:#6b7280;margin-bottom:12px}.browser-page .page-note{font-size:13px;line-height:1.5;color:#374151}.task-panel{background:rgba(168,85,247,.07);border:1px solid rgba(168,85,247,.22);border-radius:12px;padding:10px;display:none;gap:8px;flex-direction:column}.task-panel.open{display:flex}.task-input{width:100%;min-height:78px;resize:vertical;background:var(--deep);border:1px solid var(--edge);border-radius:8px;color:var(--text);padding:10px;font:11px var(--mono);user-select:text}.progress{height:8px;background:var(--deep);border:1px solid var(--edge);border-radius:99px;overflow:hidden}.progress-fill{height:100%;width:0%;background:linear-gradient(90deg,var(--violet),var(--gold),var(--green));transition:width .25s ease}.task-status{font:10px var(--mono);color:var(--muted);line-height:1.5}.setting-block{background:var(--raised);border:1px solid var(--edge);border-radius:12px;padding:12px;margin:10px 0}.setting-row{display:flex;gap:8px;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.04);font:11px var(--mono);color:var(--muted)}.setting-row:last-child{border-bottom:none}.setting-row input{background:var(--deep);border:1px solid var(--edge);border-radius:8px;color:var(--text);padding:7px 9px;font:11px var(--mono);min-width:220px;user-select:text}
+
+</style>
+</head>
+<body>
+<div id="body-shell">
+  <div id="status-bar">
+    <div id="vitality-pulse"></div>
+    <div id="phase">dormant · local runtime</div>
+    <div id="clock"></div>
+  </div>
+  <main id="desktop">
+    <div class="wallpaper">
+      <div class="glyph">⬡</div>
+      <div class="title">SYNTHIA OS</div>
+      <div style="font:11px var(--mono);color:rgba(136,153,170,.35)">App Tray · Browser · App Center · Settings</div>
+    </div>
+  </main>
+  <div id="dock">
+    <button class="dock-btn" data-app="home" title="Home">⌂</button>
+    <button class="dock-btn" data-app="launcher" title="App Tray">⊞<span id="appBadge" class="badge" style="display:none">0</span></button>
+    <button class="dock-btn" data-app="appcenter" title="App Center">◈</button>
+    <button class="dock-btn" data-app="settings" title="Settings">⚙</button>
+  </div>
+</div>
+<div id="toast" class="toast"></div>
+
+<script>
+const $ = id => document.getElementById(id);
+const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
+const uid = p => p + '_' + Math.random().toString(36).slice(2,9);
+const TEXT_EXT = /\.(html|css|js|mjs|ts|tsx|jsx|json|md|txt|csv|svg)$/i;
+const APP_EXT = /\.(html|js|mjs|ts|tsx|jsx|css|json|md|txt|csv|svg)$/i;
+
+const State = {
+  windows:{}, z:20,
+  files: JSON.parse(localStorage.getItem('resonance_files_v3') || '{}'),
+  capsules: JSON.parse(localStorage.getItem('resonance_capsules_v3') || '[]'),
+  mounted: JSON.parse(localStorage.getItem('resonance_mounted_v3') || '[]'),
+  messages: [],
+  graph: { nodes:[], edges:[] },
+  serverBase: localStorage.getItem('synthia_server_base') || 'https://synthia-server.onrender.com',
+  serverStatus: 'unknown',
+  browser: JSON.parse(localStorage.getItem('resonance_smart_browser_v1') || '{"url":"https://github.com/mobile-next/mobile-mcp","lastTask":"","status":"idle","progress":0}'),
+  interactionLearning: JSON.parse(localStorage.getItem('resonance_interaction_learning_v1') || '{"enabled":true,"scope":"local+server","events":[]}'),
+  activeCapsuleId:null
+};
+
+function persist(){
+  localStorage.setItem('resonance_files_v3', JSON.stringify(State.files));
+  localStorage.setItem('resonance_capsules_v3', JSON.stringify(State.capsules.slice(0,60)));
+  localStorage.setItem('resonance_mounted_v3', JSON.stringify(State.mounted.slice(0,60)));
+  localStorage.setItem('resonance_smart_browser_v1', JSON.stringify(State.browser));
+  localStorage.setItem('resonance_interaction_learning_v1', JSON.stringify(State.interactionLearning));
+}
+
+function openExternalUrl(url){ window.open(String(url || '').trim(), '_blank', 'noopener,noreferrer'); }
+function recordInteraction(type, data={}){
+  if(!State.interactionLearning?.enabled) return;
+  const event={type, data, ts:Date.now(), app:Object.values(State.windows).slice(-1)[0]?.dataset?.app || null};
+  State.interactionLearning.events.push(event);
+  State.interactionLearning.events = State.interactionLearning.events.slice(-200);
+  localStorage.setItem('resonance_interaction_learning_v1', JSON.stringify(State.interactionLearning));
+  const out=document.querySelector('#adminLearningOutput');
+  if(out) out.textContent=JSON.stringify(State.interactionLearning.events.slice(-12),null,2);
+}
+async function loadServerHealth(){
+  const out=document.querySelector('#adminServerOutput');
+  try{ const r=await fetch(State.serverBase.replace(/\/$/,'')+'/health'); const data=await r.json(); if(out) out.textContent=JSON.stringify(data,null,2); State.serverStatus='online'; }
+  catch(e){ if(out) out.textContent='Health failed: '+e.message; State.serverStatus='offline'; }
+  persist(); refreshAll();
+}
+async function loadServerTools(){
+  const out=document.querySelector('#adminServerOutput');
+  try{ const r=await fetch(State.serverBase.replace(/\/$/,'')+'/tools'); const data=await r.json(); if(out) out.textContent=JSON.stringify(data,null,2); State.serverStatus='online'; }
+  catch(e){ if(out) out.textContent='Tools failed: '+e.message; State.serverStatus='offline'; }
+  persist(); refreshAll();
+}
+async function runBridgeProbe(){
+  const out=document.querySelector('#adminBridgeOutput');
+  const base=State.serverBase.replace(/\/$/,'');
+  const routes=['/mcp/status','/api/v3/mcp/status','/api/v3/mobile-mcp/status','/api/mobile-mcp/status','/tools'];
+  const results=[];
+  for(const route of routes){
+    try{ const r=await fetch(base+route); results.push({route,status:r.status,ok:r.ok}); }
+    catch(e){ results.push({route,error:e.message,ok:false}); }
+  }
+  if(out) out.textContent=JSON.stringify(results,null,2);
+  recordInteraction('bridge.probe',{results});
+}
+async function flushInteractionEvents(){
+  const out=document.querySelector('#adminLearningOutput');
+  const payload={source:'resonance-os', events:State.interactionLearning.events, browser:State.browser, time:Date.now()};
+  const base=State.serverBase.replace(/\/$/,'');
+  const attempts=['/api/v3/interactions','/api/interactions','/memory/save'];
+  for(const path of attempts){
+    try{
+      const r=await fetch(base+path,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(path==='/memory/save'?{user_id:'admin',type:'interaction_events',payload}:payload)});
+      const text=await r.text();
+      if(r.ok){ if(out) out.textContent='Sent to '+path+'\n'+text; toast('Interaction events sent'); return; }
+    }catch(e){}
+  }
+  if(out) out.textContent='No interaction endpoint accepted the payload. Events remain local.';
+  toast('Interaction events remain local');
+}
+function clearInteractionEvents(){
+  State.interactionLearning.events=[];
+  persist(); refreshAll(); toast('Interaction log cleared');
+}
+
+function saveSettingsPanel(){
+  const server = document.querySelector('#settingsServerBase');
+  const browser = document.querySelector('#settingsBrowserUrl');
+  if(server){ State.serverBase = server.value.trim().replace(/\/$/,''); localStorage.setItem('synthia_server_base', State.serverBase); }
+  if(browser){ State.browser.url = browser.value.trim(); }
+  const learning = document.querySelector('#settingsLearningEnabled');
+  if(learning){ State.interactionLearning.enabled = !!learning.checked; }
+  recordInteraction('settings.save',{server:State.serverBase,browser:State.browser.url,learning:State.interactionLearning.enabled});
+  persist(); refreshAll(); toast('Settings saved');
+}
+function saveBrowserUrl(){
+  const input = document.querySelector('#browserUrl');
+  if(input) State.browser.url = input.value.trim() || 'https://github.com/mobile-next/mobile-mcp';
+  State.browser.status = 'page target set'; State.browser.progress = 0;
+  recordInteraction('browser.target',{url:State.browser.url});
+  persist(); refreshAll();
+}
+function openBrowserExternal(){
+  saveBrowserUrl();
+  window.open(State.browser.url, '_blank', 'noopener,noreferrer');
+}
+function toggleBrowserTaskPanel(){
+  const p = document.querySelector('#browserTaskPanel');
+  if(p) p.classList.toggle('open');
+}
+function updateBrowserProgressUI(){
+  const fill=document.querySelector('#browserProgressFill'); if(fill) fill.style.width = Math.max(0,Math.min(100,Number(State.browser.progress||0))) + '%';
+  const status=document.querySelector('#browserTaskStatus'); if(status) status.textContent = State.browser.status || 'idle';
+}
+let browserTaskTimer=null;
+function setBrowserProgress(p,status){ State.browser.progress=p; if(status) State.browser.status=status; updateBrowserProgressUI(); persist(); }
+async function runBrowserTask(){
+  const urlInput=document.querySelector('#browserUrl');
+  const taskInput=document.querySelector('#browserTaskInput');
+  if(urlInput) State.browser.url=urlInput.value.trim();
+  if(taskInput) State.browser.lastTask=taskInput.value.trim();
+  const task=State.browser.lastTask;
+  if(!task){ toast('Describe what the browser should do'); return; }
+  const base=(State.serverBase||'').replace(/\/$/,'');
+  if(!base){ toast('Set Synthia server first'); openApp('settings'); return; }
+  setBrowserProgress(5,'starting task bridge');
+  clearInterval(browserTaskTimer);
+  browserTaskTimer=setInterval(()=>{ if(State.browser.progress<92) setBrowserProgress(State.browser.progress+Math.max(1,Math.round((96-State.browser.progress)*0.08)),'working · '+State.browser.progress+'%'); },450);
+  const payload={ source:'resonance-smart-browser', url:State.browser.url, task, mode:'form-fill-or-page-task', requireUserReview:true, useMobileMCP:true, time:Date.now() };
+  recordInteraction('browser.task.request', payload);
+  const attempts=['/api/v3/browser/task','/api/browser/task','/api/v3/mobile-mcp/task','/api/mobile-mcp/task','/api/v3/mcp/task'];
+  for(const path of attempts){
+    try{
+      const res=await fetch(base+path,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+      const text=await res.text(); let data; try{data=JSON.parse(text)}catch{data={raw:text}};
+      if(!res.ok || data.success===false) throw new Error(data.details||data.error||`HTTP ${res.status}`);
+      clearInterval(browserTaskTimer);
+      setBrowserProgress(100,'done · '+(data.status||'task completed'));
+      log(`SMART BROWSER ${path}: ${task}`);
+      mountBrowserTaskResult(data);
+      toast('Browser task completed');
+      return;
+    }catch(err){ log(`BROWSER TASK MISS ${path}: ${err.message}`); }
+  }
+  clearInterval(browserTaskTimer);
+  setBrowserProgress(0,'server task bridge unavailable · request staged locally');
+  toast('Browser bridge unavailable — request staged');
+}
+function stopBrowserTask(){ clearInterval(browserTaskTimer); setBrowserProgress(0,'stopped'); }
+function mountBrowserTaskResult(data){
+  const surface=document.querySelector('#browserPageSurface'); if(!surface) return;
+  const summary = data.summary || data.result || data.message || data.raw || 'Task response received.';
+  surface.innerHTML = `<div class="page-title">Task Result</div><div class="page-url">${esc(State.browser.url)}</div><div class="page-note"><pre style="white-space:pre-wrap;font:12px var(--mono)">${esc(typeof summary==='string'?summary:JSON.stringify(summary,null,2))}</pre></div>`;
+}
+
+updateBadge();
+
+function toast(msg){
+  const t=$('toast'); t.textContent=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2100);
+}
+
+function tickClock(){
+  $('clock').textContent = new Date().toTimeString().slice(0,8);
+}
+setInterval(tickClock,1000); tickClock();
+
+function setPhase(phase){
+  $('phase').textContent = phase;
+  const pulse=$('vitality-pulse');
+  pulse.className = phase.includes('morph') ? 'morphing' : phase.includes('active') || phase.includes('mounted') ? 'active' : '';
+  $('body-shell').classList.toggle('active', pulse.className !== '');
+}
+
+function updateBadge(){
+  const n = State.mounted.length;
+  const b=$('appBadge');
+  b.style.display = n ? 'flex' : 'none';
+  b.textContent = n;
+}
+
+document.querySelectorAll('.dock-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>openApp(btn.dataset.app));
+});
+
+function openApp(appId){
+  recordInteraction('app.open',{appId});
+  const existing = Object.values(State.windows).find(w => w.dataset.app === appId);
+  if(existing){ bring(existing.id); return; }
+  const id = uid('win');
+  const win = document.createElement('div');
+  win.className='window';
+  win.id=id; win.dataset.app=appId;
+  win.style.left = Math.min(24 + Object.keys(State.windows).length*18, innerWidth-330) + 'px';
+  win.style.top = Math.min(46 + Object.keys(State.windows).length*18, innerHeight-300) + 'px';
+  win.style.width = appId==='launcher' ? 'min(720px, calc(100vw - 24px))' : appId==='appcenter' ? 'min(760px, calc(100vw - 24px))' : appId==='smartbrowser' ? 'min(860px, calc(100vw - 24px))' : 'min(560px, calc(100vw - 24px))';
+  win.style.height = appId==='launcher' ? 'min(560px, calc(100vh - 110px))' : appId==='appcenter' ? 'min(620px, calc(100vh - 110px))' : appId==='smartbrowser' ? 'min(650px, calc(100vh - 110px))' : 'min(500px, calc(100vh - 110px))';
+  win.innerHTML = `
+    <div class="window-header" onmousedown="startDrag(event,'${id}')" ontouchstart="startTouchDrag(event,'${id}')">
+      <button class="win-btn close" onclick="closeWin('${id}')"></button>
+      <button class="win-btn min" onclick="minWin('${id}')"></button>
+      <button class="win-btn max" onclick="maxWin('${id}')"></button>
+      <div class="window-title">${icon(appId)} ${title(appId)}</div>
+    </div>
+    <div class="window-body" id="${id}_body">${content(appId)}</div>`;
+  $('desktop').appendChild(win);
+  State.windows[id]=win; bring(id); initApp(appId, id);
+}
+
+function icon(id){ return ({home:'⌂',launcher:'⊞',appcenter:'◈',settings:'⚙',smartbrowser:'🌐',admin:'⌬',files:'▤',runtime:'▣',body:'🧬'})[id]||'□'; }
+function title(id){ return ({home:'Home',launcher:'App Tray',appcenter:'App Center',settings:'Settings',smartbrowser:'Browser',admin:'Admin Center',files:'Files',runtime:'Runtime',body:'Resonance Body'})[id]||id; }
+function bring(id){ const w=State.windows[id]; if(w) w.style.zIndex = ++State.z; }
+function closeWin(id){ State.windows[id]?.remove(); delete State.windows[id]; }
+function minWin(id){ const w=State.windows[id]; if(w) w.style.display = w.style.display==='none'?'flex':'none'; }
+function maxWin(id){
+  const w=State.windows[id]; if(!w) return;
+  if(w.dataset.max){ w.style.left=w.dataset.l; w.style.top=w.dataset.t; w.style.width=w.dataset.w; w.style.height=w.dataset.h; delete w.dataset.max; }
+  else { w.dataset.l=w.style.left; w.dataset.t=w.style.top; w.dataset.w=w.style.width; w.dataset.h=w.style.height; w.dataset.max='1'; w.style.left='0'; w.style.top='28px'; w.style.width='100%'; w.style.height='calc(100% - 86px)'; }
+}
+
+let drag=null;
+function startDrag(e,id){ bring(id); const w=State.windows[id]; drag={id,x:e.clientX-w.offsetLeft,y:e.clientY-w.offsetTop}; document.addEventListener('mousemove',move); document.addEventListener('mouseup',up); }
+function move(e){ if(!drag)return; const w=State.windows[drag.id]; w.style.left=e.clientX-drag.x+'px'; w.style.top=e.clientY-drag.y+'px'; }
+function up(){ drag=null; document.removeEventListener('mousemove',move); document.removeEventListener('mouseup',up); }
+function startTouchDrag(e,id){ if(e.touches.length!==1)return; bring(id); const t=e.touches[0], w=State.windows[id]; drag={id,x:t.clientX-w.offsetLeft,y:t.clientY-w.offsetTop,touch:true}; document.addEventListener('touchmove',moveTouch,{passive:false}); document.addEventListener('touchend',upTouch); }
+function moveTouch(e){ if(!drag)return; e.preventDefault(); const t=e.touches[0], w=State.windows[drag.id]; w.style.left=t.clientX-drag.x+'px'; w.style.top=t.clientY-drag.y+'px'; }
+function upTouch(){ drag=null; document.removeEventListener('touchmove',moveTouch); document.removeEventListener('touchend',upTouch); }
+
+function content(appId){
+  if(appId==='home') return `
+    <div class="section">
+      <h2>Resonance OS</h2>
+      <p>This is the desktop surface. Keep the bottom dock clean; use the App Tray for tools, settings, files, runtime, and body diagnostics.</p>
+      <div class="info"><strong>OS SHAPE:</strong><br>Browser for web tasks · App Center for ingestion · App Tray for system tools · Settings for server/MCP configuration.</div>
+      <div class="actions">
+        <button class="action" onclick="openApp('launcher')">Open App Tray</button>
+        <button class="action" onclick="openApp('launcher')">Open Tools</button>
+        <button class="action" onclick="openApp('appcenter')">Open App Center</button>
+        <button class="action" onclick="openApp('admin')">Open Admin Center</button>
+      </div>
+    </div>`;
+  if(appId==='launcher') return launcherHTML();
+  if(appId==='appcenter') return appCenterHTML();
+  if(appId==='settings') return settingsHTML();
+  if(appId==='smartbrowser') return smartBrowserHTML();
+  if(appId==='admin') return adminHTML();
+  if(appId==='files') return filesHTML();
+  if(appId==='runtime') return runtimeHTML();
+  if(appId==='body') return bodyHTML();
+  return '<div class="section"><h2>Unknown</h2></div>';
+}
+
+
+function launcherHTML(){
+  const apps = [
+    {id:'settings', icon:'⚙', name:'Settings', meta:'Server, MCP, browser defaults'},
+    {id:'smartbrowser', icon:'🌐', name:'Browser', meta:'Page tasks + mobile-MCP bridge'},
+    {id:'appcenter', icon:'◈', name:'App Center', meta:'Ingest files, ZIPs, apps'},
+    {id:'admin', icon:'⌬', name:'Admin Center', meta:'Synthia server, tools, MCP status'},
+    {id:'files', icon:'▤', name:'Files', meta:'Local stored payloads'},
+    {id:'runtime', icon:'▣', name:'Runtime', meta:'Mounted regenerated apps'},
+    {id:'body', icon:'🧬', name:'Body Status', meta:'Graph, capsules, server state'}
+  ];
+  return `<div class="section">
+    <h2>App Tray</h2>
+    <p>System tools live here. The dock stays minimal like a real OS: Home, App Tray, Browser, and App Center.</p>
+    <div class="info"><strong>Status:</strong> Server ${esc(State.serverStatus)} · Capsules ${State.capsules.length} · Mounted ${State.mounted.length} · Files ${Object.keys(State.files).length}</div>
+    <div class="grid" style="margin-top:12px">
+      ${apps.map(app=>`<div class="app-card">
+        <div class="icon">${app.icon}</div>
+        <div class="name">${esc(app.name)}</div>
+        <div class="meta">${esc(app.meta)}</div>
+        <button class="action" onclick="openApp('${app.id}')">Open</button>
+      </div>`).join('')}
+    </div>
+  </div>`;
+}
+
+function appCenterHTML(){
+  return `
+    <div class="section">
+      <h2>App Center</h2>
+      <p>Drop any file or ZIP. The App Center sends the raw payload to your Synthia server first for universal parsing, storage, and heavier math. When a capsule is opened, it calls the Synthia render endpoint and mounts the regenerated artifact as native DOM. Local parsing only runs as fallback.</p>
+      <div class="server-row"><input class="server-input" id="serverBaseInput" value="${esc(State.serverBase)}" placeholder="https://synthia-server.onrender.com"><button class="action" onclick="saveServerBase()">Save Server</button><button class="action" onclick="checkServer()">Check</button><span id="serverChip" class="chip">${esc(State.serverStatus)}</span></div>
+      <label class="upload-zone" id="uploadZone">
+        <input type="file" id="fileInput" multiple accept="*/*"/>
+        <div style="font-size:34px">⊞</div>
+        <div style="font:12px var(--mono);color:var(--muted)">Tap or drop files here</div>
+      </label>
+      <div class="actions">
+        <button class="action" onclick="openApp('runtime')">Open Runtime</button>
+        <button class="action" onclick="clearAll()">Clear Local Store</button>
+      </div>
+      <h3>Available Capsules</h3>
+      <div class="grid" id="capsuleGrid">${capsulesHTML()}</div>
+      <h3>Message Passing</h3>
+      <div class="message-log" id="messageLog">${State.messages.slice(-20).map(m=>esc(m)).join('<br>') || 'No messages yet.'}</div>
+      <div class="node-map">${Array.from({length:64},(_,i)=>`<div class="node-dot ${State.graph.nodes[i]?.active?'active':''}">${i+1}</div>`).join('')}</div>
+    </div>`;
+}
+
+function capsulesHTML(){
+  if(!State.capsules.length) return '<div class="info" style="grid-column:1/-1">No capsules yet. Feed the App Center.</div>';
+  return State.capsules.map(c=>`
+    <div class="app-card">
+      <div class="icon">${c.kind==='program'?'▣':c.kind==='document'?'◈':'□'}</div>
+      <div class="name" title="${esc(c.name)}">${esc(c.name)}</div>
+      <div class="meta">${esc(c.kind)} · ${c.files.length} files<br>entry: ${esc(c.entry?.path || 'none')}<br>resonance: ${Math.round(c.resonance*100)}%</div>
+      <button class="action" onclick="selectCapsule('${c.id}')">Open</button>
+      <button class="action" onclick="mountCapsule('${c.id}')">Mount</button>
+    </div>`).join('');
+}
+
+
+function settingsHTML(){
+  return `<div class="section">
+    <h2>Settings</h2>
+    <p>Configure the Synthia bridge, browser target, and interaction learning. Your personal/admin build points at your Render server by default.</p>
+    <div class="setting-block">
+      <h3>Synthia Server</h3>
+      <div class="setting-row"><span>Base URL</span><input id="settingsServerBase" value="${esc(State.serverBase)}" placeholder="https://synthia-server.onrender.com"></div>
+      <div class="setting-row"><span>Status</span><span id="settingsServerStatus" class="chip ${esc(State.serverStatus)}">${esc(State.serverStatus)}</span></div>
+      <div class="actions"><button class="action" onclick="saveSettingsPanel()">Save Settings</button><button class="action" onclick="checkServer()">Check Server</button><button class="action" onclick="openApp('admin')">Open Admin Center</button></div>
+    </div>
+    <div class="setting-block">
+      <h3>System Browser / mobile-MCP</h3>
+      <div class="setting-row"><span>Default Page</span><input id="settingsBrowserUrl" value="${esc(State.browser.url || '')}" placeholder="https://github.com/mobile-next/mobile-mCP"></div>
+      <div class="setting-row"><span>Bridge Repo</span><code style="user-select:text;color:var(--gold)">https://github.com/mobile-next/mobile-mcp</code></div>
+      <div class="info"><strong>Boundary:</strong> browser UI lives here, while real page/form automation routes to Synthia/mobile-MCP. Interaction learning is explicit and visible; no creepy invisible goblin surveillance.</div>
+    </div>
+    <div class="setting-block">
+      <h3>Interaction Learning</h3>
+      <div class="setting-row"><span>Capture OS interactions</span><input id="settingsLearningEnabled" type="checkbox" ${State.interactionLearning.enabled ? 'checked' : ''} style="min-width:unset;width:20px"></div>
+      <div class="setting-row"><span>Stored events</span><span>${State.interactionLearning.events.length}</span></div>
+      <div class="actions"><button class="action" onclick="saveSettingsPanel()">Save Learning Settings</button><button class="action" onclick="clearInteractionEvents()">Clear Interaction Log</button></div>
+    </div>
+  </div>`;
+}
+
+function adminHTML(){
+  return `<div class="section">
+    <h2>Admin Center</h2>
+    <p>Personal control panel for Synthia server visibility, MCP bridge assumptions, and interaction telemetry. This is the dashboard layer; the server still owns actual execution.</p>
+    <div class="setting-block">
+      <h3>Synthia Server</h3>
+      <div class="setting-row"><span>Render URL</span><code style="user-select:text;color:var(--gold)">${esc(State.serverBase)}</code></div>
+      <div class="actions"><button class="action" onclick="checkServer()">Check Server</button><button class="action" onclick="openExternalUrl(State.serverBase)">Open Server</button><button class="action" onclick="loadServerHealth()">Load Health</button><button class="action" onclick="loadServerTools()">Load Tools</button></div>
+      <pre class="message-log" id="adminServerOutput">Server output will appear here.</pre>
+    </div>
+    <div class="setting-block">
+      <h3>MCP / Browser Bridge</h3>
+      <div class="setting-row"><span>mobile-MCP repo</span><code style="user-select:text;color:var(--gold)">https://github.com/mobile-next/mobile-mcp</code></div>
+      <div class="actions"><button class="action" onclick="openExternalUrl('https://github.com/mobile-next/mobile-mcp')">Open Repo</button><button class="action" onclick="openApp('smartbrowser')">Open Browser</button><button class="action" onclick="runBridgeProbe()">Probe Bridge Routes</button></div>
+      <pre class="message-log" id="adminBridgeOutput">Bridge probe output will appear here.</pre>
+    </div>
+    <div class="setting-block">
+      <h3>Interaction Learning</h3>
+      <p>These events help future app generation adapt to how the user actually moves through the OS: app opens, browser targets, file ingestion, and task requests.</p>
+      <div class="actions"><button class="action" onclick="recordInteraction('admin.review',{source:'manual'})">Record Review Event</button><button class="action" onclick="flushInteractionEvents()">Send Events to Server</button><button class="action" onclick="clearInteractionEvents()">Clear Events</button></div>
+      <pre class="message-log" id="adminLearningOutput">${esc(JSON.stringify(State.interactionLearning.events.slice(-12), null, 2))}</pre>
+    </div>
+  </div>`;
+}
+
+function smartBrowserHTML(){
+  const url = State.browser.url || 'https://github.com/mobile-next/mobile-mcp';
+  const progress = Number(State.browser.progress || 0);
+  return `<div class="section smart-browser-shell">
+    <h2>Browser</h2>
+    <p>Navigate by URL, open the page externally if needed, and send page tasks to your Synthia server/mobile-MCP bridge. Use it for form filling, GitHub repo posting, app publishing flows, and guided page operations.</p>
+    <div class="browser-bar">
+      <input class="browser-url" id="browserUrl" value="${esc(url)}" placeholder="https://github.com/mobile-next/mobile-mcp">
+      <button class="action" onclick="saveBrowserUrl()">Set Page</button>
+      <button class="action" onclick="openBrowserExternal()">Open External</button>
+      <button class="action" onclick="toggleBrowserTaskPanel()">Ask On Page</button>
+    </div>
+    <div class="browser-page" id="browserPageSurface">
+      <div class="page-title">Smart Browser Surface</div>
+      <div class="page-url">${esc(url)}</div>
+      <div class="page-note">This is a native control surface, not an iframe. The OS can request server-side page context, mobile accessibility snapshots, screenshots, taps, typing, or form filling through your Synthia/mobile-MCP bridge.</div>
+    </div>
+    <div class="task-panel" id="browserTaskPanel">
+      <h3>Page Task Request</h3>
+      <textarea class="task-input" id="browserTaskInput" placeholder="Example: Fill out this GitHub repository form with my app details, then pause before submitting.">${esc(State.browser.lastTask || '')}</textarea>
+      <div class="actions"><button class="action" onclick="runBrowserTask()">Run Task</button><button class="action" onclick="stopBrowserTask()">Stop</button></div>
+      <div class="progress"><div class="progress-fill" id="browserProgressFill" style="width:${progress}%"></div></div>
+      <div class="task-status" id="browserTaskStatus">${esc(State.browser.status || 'idle')}</div>
+    </div>
+  </div>`;
+}
+
+function filesHTML(){
+  const rows = Object.keys(State.files).sort().map(k=>`<div class="file-row"><span>◈</span><strong>${esc(k)}</strong><span style="margin-left:auto">${(State.files[k].length/1024).toFixed(1)} KB</span></div>`).join('');
+  return `<div class="section"><h2>Files</h2><div class="file-list">${rows || '<div class="info">No files stored.</div>'}</div></div>`;
+}
+
+function runtimeHTML(){
+  const list = State.mounted.map(m=>`
+    <div class="app-card">
+      <div class="icon">▣</div><div class="name">${esc(m.name)}</div>
+      <div class="meta">${esc(m.kind)} · ${new Date(m.mountedAt).toLocaleTimeString()}</div>
+      <button class="action" onclick="launchMounted('${m.id}')">Launch</button>
+      <button class="action" onclick="unmount('${m.id}')">Uninstall</button>
+    </div>`).join('');
+  return `<div class="section"><h2>Runtime</h2><p>Mounted regenerated apps. These are rebuilt into native DOM windows, not iframes.</p><div class="grid">${list || '<div class="info" style="grid-column:1/-1">No mounted apps yet.</div>'}</div></div>`;
+}
+
+function bodyHTML(){
+  const caps=State.capsules.length, mounted=State.mounted.length, files=Object.keys(State.files).length;
+  return `<div class="section"><h2>Body Status</h2>
+    <div class="info"><strong>FILES:</strong> ${files}<br><strong>CAPSULES:</strong> ${caps}<br><strong>MOUNTED:</strong> ${mounted}<br><strong>GRAPH NODES:</strong> ${State.graph.nodes.length}<br><strong>SERVER:</strong> ${esc(State.serverBase)} · ${esc(State.serverStatus)}<br><strong>MODE:</strong> server-first ingest · server render callback · local fallback · DOM regeneration</div>
+    <h3>Internal Graph</h3><div class="node-map">${Array.from({length:64},(_,i)=>`<div class="node-dot ${State.graph.nodes[i]?.active?'active':''}">${i+1}</div>`).join('')}</div>
+  </div>`;
+}
+
+function initApp(appId, id){
+  if(appId==='appcenter'){
+    const zone=$(id+'_body').querySelector('#uploadZone'), input=$(id+'_body').querySelector('#fileInput');
+    zone.addEventListener('click',()=>input.click());
+    input.addEventListener('change', e => handleFiles([...e.target.files]));
+    zone.addEventListener('dragover', e=>{e.preventDefault(); zone.classList.add('drag')});
+    zone.addEventListener('dragleave', ()=>zone.classList.remove('drag'));
+    zone.addEventListener('drop', e=>{e.preventDefault(); zone.classList.remove('drag'); handleFiles([...e.dataTransfer.files]);});
+  }
+  if(appId==='smartbrowser') updateBrowserProgressUI();
+}
+
+async function handleFiles(files){
+  if(!files.length) return;
+  recordInteraction('files.ingest.request',{count:files.length,names:files.map(f=>f.name)});
+  setPhase('active · ingesting');
+  for(const file of files) await ingest(file);
+  setPhase('morphing · message passing');
+  runMessagePassing();
+  setTimeout(()=>setPhase('active · ready'),700);
+  refreshAll();
+  persist();
+}
+
+async function ingest(file){
+  // Primary path: universal server ingest. This handles ZIP/PDF/DOCX/XLSX/images/etc.
+  const serverCap = await ingestViaSynthia(file);
+  if(serverCap){
+    State.capsules.unshift(serverCap);
+    log(`SERVER INGEST ${file.name} → ${serverCap.kind}`);
+    return;
+  }
+  // Fallback path: local static parse for offline mode.
+  return ingestLocal(file);
+}
+
+async function ingestLocal(file){
+  if(file.name.toLowerCase().endsWith('.zip')) return ingestZip(file);
+  const node = await fileToNode(file.name, file.name, file);
+  const capsule = capsuleFromNodes(file.name, [node]);
+  capsule.source = 'local';
+  State.capsules.unshift(capsule);
+  log(`LOCAL INGEST ${file.name} → ${capsule.kind}`);
+}
+
+async function ingestViaSynthia(file){
+  const base = (State.serverBase || '').replace(/\/$/, '');
+  if(!base) return null;
+  const attempts = [
+    { path:'/api/v3/ingest', field:'file' },
+    { path:'/api/v2/ingest', field:'payload' },
+    { path:'/api/ingest', field:'file' },
+    { path:'/api/ingest', field:'payload' }
+  ];
+  for(const a of attempts){
+    const form = new FormData();
+    form.append(a.field, file, file.name);
+    try{
+      setPhase(`active · server ingest ${a.path}`);
+      const res = await fetch(base + a.path, { method:'POST', body:form });
+      const text = await res.text();
+      let data; try{ data = JSON.parse(text); }catch{ data = { raw:text }; }
+      if(!res.ok || data.success === false) throw new Error(data.details || data.error || `HTTP ${res.status}`);
+      State.serverStatus = 'online';
+      localStorage.setItem('synthia_server_base', State.serverBase);
+      return capsuleFromSynthia(file, data, a.path);
+    }catch(err){
+      State.serverStatus = 'offline';
+      log(`SERVER MISS ${a.path}: ${err.message}`);
+    }
+  }
+  toast('Synthia server unavailable — using local fallback');
+  return null;
+}
+
+function capsuleFromSynthia(file, data, endpoint){
+  const artifact = data.artifact || data.bundle || data.output || null;
+  const outputs = artifact?.outputs || artifact || {};
+  const meta = data.meta || {};
+  const telemetry = data.telemetry || data.resonanceTelemetry || {};
+  const mappings = data.structuralMappings || data.symbolMappings || [];
+  const sourceSchema = telemetry.sourceSchema || meta.activeParserSignature || meta.sourceSchema || file.name.split('.').pop()?.toLowerCase() || 'unknown';
+  const nodesGenerated = telemetry.nodesGenerated ?? meta.nodesExtracted ?? mappings.length ?? 0;
+  const serverFiles = normalizeServerFiles(file, data, outputs, sourceSchema);
+  const cap = capsuleFromNodes(file.name, serverFiles);
+  cap.source = 'synthia-server';
+  cap.serverEndpoint = endpoint;
+  cap.serverPayload = data;
+  cap.artifact = artifact;
+  cap.kind = outputs.html || outputs.isomorphicHtmlLayout || outputs.markdown ? 'server-rendered' : cap.kind;
+  cap.resonance = Number(telemetry.systemResonance ?? telemetry.coherenceIndex ?? cap.resonance ?? 0.72);
+  cap.entry = serverFiles[0] || cap.entry;
+  cap.serverSummary = { sourceSchema, nodesGenerated, status:data.success !== false ? 'ok':'error' };
+  cap.lineage = ['server-ingest','uast','message-pass','native-dom-regenerate'];
+  return cap;
+}
+
+function normalizeServerFiles(file, data, outputs, sourceSchema){
+  const files=[];
+  const add=(path, text, ext, kind='server-artifact')=>{
+    if(text == null) return;
+    const value = typeof text === 'string' ? text : JSON.stringify(text,null,2);
+    files.push({ id:uid('node'), name:path.split('/').pop(), path, ext, kind, text:value, size:value.length, symbols:extractSymbols(value, ext), deps:deps(value), exports:exportsOf(value), resonance:.82, active:false, server:true });
+  };
+  add('server/render.html', outputs.html || outputs.isomorphicHtmlLayout, 'html', 'server-rendered');
+  add('server/styles.css', outputs.css, 'css', 'style');
+  add('server/script.js', outputs.js, 'js', 'script-static');
+  add('server/markdown.md', outputs.markdown, 'md', 'document');
+  add('server/graph.json', outputs.json || data.topology || data.telemetry || data.resonanceTelemetry, 'json', 'server-telemetry');
+  if(!files.length){
+    const body = JSON.stringify({ file:file.name, schema:sourceSchema, response:data }, null, 2);
+    add(`server/${file.name}.json`, body, 'json', 'server-response');
+  }
+  return files;
+}
+
+async function ingestZip(file){
+  if(file.size > 25*1024*1024){ toast('ZIP rejected: over 25MB'); return; }
+  let totalText = 0; const MAX_TOTAL_TEXT = 8*1024*1024; const MAX_ENTRY_TEXT = 768*1024;
+  const zip = await JSZip.loadAsync(await file.arrayBuffer());
+  const entries = Object.entries(zip.files).filter(([path,e])=>!e.dir && !/__MACOSX|node_modules|\.git\//i.test(e.name || path || '') && !(path||'').includes('..') && !(path.split('/').pop()||'').startsWith('.'));
+  if(entries.length > 250){ toast('ZIP rejected: over 250 files'); return; }
+  const nodes=[];
+  for(const [path, entry] of entries){
+    if(!APP_EXT.test(path)) continue;
+    const textLike = TEXT_EXT.test(path);
+    const content = textLike ? await entry.async('text') : await entry.async('blob');
+    if(textLike){ if(content.length > MAX_ENTRY_TEXT){ log(`SKIP oversized entry ${path}`); continue; } totalText += content.length; if(totalText > MAX_TOTAL_TEXT){ toast('ZIP rejected: decompressed text too large'); return; } }
+    nodes.push(await fileToNode(path.split('/').pop(), path, content));
+  }
+  const capsule = capsuleFromNodes(file.name, nodes);
+  capsule.source = 'local-zip';
+  State.capsules.unshift(capsule);
+  log(`UNZIP ${file.name} → ${nodes.length} nodes`);
+}
+
+async function fileToNode(name,path,blobOrText){
+  const ext = (path.split('.').pop() || '').toLowerCase();
+  const text = typeof blobOrText === 'string' ? blobOrText : await blobOrText.text();
+  State.files[path]=text;
+  const symbols = extractSymbols(text, ext);
+  const kind = classify(path, text);
+  return { id:uid('node'), name, path, ext, kind, text, size:text.length, symbols, deps:deps(text), exports:exportsOf(text), resonance:resonance({kind,text,symbols}), active:false };
+}
+
+function extractSymbols(text, ext){
+  const out=[];
+  if(/js|ts|jsx|tsx|mjs/.test(ext)){
+    [...text.matchAll(/\b(class|function)\s+([A-Za-z_$][\w$]*)/g)].forEach(m=>out.push({type:m[1],name:m[2]}));
+    [...text.matchAll(/\b(?:const|let|var)\s+([A-Za-z_$][\w$]*)\s*=\s*(?:async\s*)?\(?[^=]*=>/g)].forEach(m=>out.push({type:'function',name:m[1]}));
+  }
+  if(ext==='html'){
+    [...text.matchAll(/<([a-z][\w-]*)\b/gi)].slice(0,80).forEach(m=>out.push({type:'tag',name:m[1]}));
+  }
+  if(ext==='md'){
+    [...text.matchAll(/^#{1,6}\s+(.+)$/gm)].forEach(m=>out.push({type:'heading',name:m[1]}));
+  }
+  return out.slice(0,120);
+}
+function deps(text){ return [...text.matchAll(/(?:import\s+.*?from\s+|require\()['"]([^'"]+)['"]/g)].map(m=>m[1]).slice(0,50); }
+function exportsOf(text){ return [...text.matchAll(/\bexport\s+(?:default\s+)?(?:class|function|const|let|var)?\s*([A-Za-z_$][\w$]*)?/g)].map(m=>m[1]||'default').slice(0,50); }
+function classify(path,text){
+  const ext=path.split('.').pop().toLowerCase();
+  if(ext==='html' || /function|class|=>|<script|<style/i.test(text)) return 'program';
+  if(/json|csv|md|txt/.test(ext)) return 'document';
+  return 'asset';
+}
+function resonance(n){ return Math.max(.15, Math.min(.98, .28 + (n.symbols?.length||0)*.025 + (n.deps?.length||0)*.04 + (n.kind==='program'? .22:.05))); }
+function pickEntry(nodes){
+  return nodes.find(n=>/(^|\/)(index|app|main)\.html$/i.test(n.path))
+    || nodes.find(n=>/\.html$/i.test(n.path))
+    || nodes.find(n=>/(^|\/)(main|index|app)\.(js|mjs|ts|tsx|jsx)$/i.test(n.path))
+    || nodes.find(n=>n.kind==='program')
+    || nodes[0];
+}
+function capsuleFromNodes(name,nodes){
+  const entry=pickEntry(nodes);
+  const kind = nodes.some(n=>n.kind==='program') ? 'program' : nodes.some(n=>n.kind==='document') ? 'document' : 'package';
+  const cap={id:uid('cap'),name,kind,files:nodes,entry,resonance:nodes.reduce((s,n)=>s+n.resonance,0)/(nodes.length||1),createdAt:Date.now(),lineage:['ingest','parse','message-pass','regenerate']};
+  return cap;
+}
+
+function runMessagePassing(){
+  const all = State.capsules.flatMap(c=>c.files.map(f=>({...f,capsule:c.id}))).slice(0,64);
+  State.graph.nodes = all.map((f,i)=>({id:i+1, label:f.name, kind:f.kind, ext:f.ext, active:false, value:f.resonance, capsule:f.capsule}));
+  State.graph.edges = [];
+  for(let i=0;i<all.length;i++){
+    for(let j=i+1;j<all.length;j++){
+      let w=0;
+      if(all[i].ext===all[j].ext) w+=.3;
+      if(all[i].deps?.some(d=>all[j].path.includes(d)||all[j].name.includes(d))) w+=.5;
+      if(all[i].kind===all[j].kind) w+=.2;
+      if(w>.35) State.graph.edges.push([i+1,j+1,w]);
+    }
+  }
+  for(let round=1; round<=4; round++){
+    State.graph.nodes.forEach(n=>{
+      const near = State.graph.edges.filter(e=>e[0]===n.id||e[1]===n.id);
+      const boost = near.reduce((s,e)=>s+e[2],0)/Math.max(1,near.length);
+      n.value = Math.min(1, n.value*.72 + boost*.28);
+      n.active = n.value>.42;
+    });
+    log(`PASS ${round}: ${State.graph.nodes.filter(n=>n.active).length}/${State.graph.nodes.length} active nodes`);
+  }
+  toast('Message passing complete — structure regenerated');
+}
+
+function log(msg){
+  State.messages.push(`[${new Date().toTimeString().slice(0,8)}] ${msg}`);
+  State.messages = State.messages.slice(-120);
+}
+
+function selectCapsule(id){
+  State.activeCapsuleId=id;
+  const cap=State.capsules.find(c=>c.id===id); if(!cap)return;
+  openCapsuleWindow(cap);
+}
+function mountCapsule(id){
+  const cap=State.capsules.find(c=>c.id===id); if(!cap)return;
+  if(!State.mounted.find(m=>m.id===id)){
+    State.mounted.unshift({id:cap.id,name:cap.name,kind:cap.kind,mountedAt:Date.now()});
+    log(`MOUNT ${cap.name}`);
+    persist();
+    toast(`${cap.name} mounted`);
+  }
+  refreshAll();
+}
+function unmount(id){
+  State.mounted = State.mounted.filter(m=>m.id!==id);
+  persist(); refreshAll();
+}
+
+function launchMounted(id){
+  const cap=State.capsules.find(c=>c.id===id); if(cap) openCapsuleWindow(cap);
+}
+
+function openCapsuleWindow(cap){
+  const id=uid('regen');
+  const renderId=id+'_render';
+  const win=document.createElement('div');
+  win.className='window'; win.id=id; win.style.left='30px'; win.style.top='48px'; win.style.width='min(840px, calc(100vw - 40px))'; win.style.height='min(650px, calc(100vh - 110px))';
+  win.innerHTML=`<div class="window-header" onmousedown="startDrag(event,'${id}')" ontouchstart="startTouchDrag(event,'${id}')">
+    <button class="win-btn close" onclick="closeWin('${id}')"></button><button class="win-btn min" onclick="minWin('${id}')"></button><button class="win-btn max" onclick="maxWin('${id}')"></button>
+    <div class="window-title">▣ ${esc(cap.name)} · regenerated</div></div>
+    <div class="window-body"><div id="${renderId}">${regeneratedHTML(cap)}</div></div>`;
+  $('desktop').appendChild(win); State.windows[id]=win; bring(id);
+  // Render is server-first. If Synthia has heavier math / PDF / media / app regeneration, it owns that pass.
+  if(State.serverBase) renderCapsuleViaSynthia(cap, renderId);
+}
+
+
+function makeRenderPayload(cap){
+  let budget = 900000;
+  const compactFiles = [];
+  for(const f of (cap.files||[])){
+    const text = String(f.text || '');
+    const slice = text.slice(0, Math.max(0, Math.min(text.length, budget)));
+    budget -= slice.length;
+    compactFiles.push({ path:f.path, name:f.name, ext:f.ext, kind:f.kind, size:f.size, symbols:f.symbols||[], deps:f.deps||[], exports:f.exports||[], text:slice, truncated:slice.length<text.length });
+    if(budget<=0) break;
+  }
+  return {
+    source:'resonance-body-app-center',
+    action:'render',
+    noIframe:true,
+    capsule:{ id:cap.id, name:cap.name, kind:cap.kind, source:cap.source, entry:cap.entry ? {path:cap.entry.path, ext:cap.entry.ext, kind:cap.entry.kind} : null, lineage:cap.lineage||[] },
+    files: compactFiles,
+    serverPayload: cap.source==='synthia-server' ? cap.serverPayload : null,
+    time: Date.now()
+  };
+}
+
+async function renderCapsuleViaSynthia(cap, targetId){
+  const target=$(targetId); if(!target) return false;
+  const base=(State.serverBase||'').replace(/\/$/,''); if(!base) return false;
+  const attempts=['/api/v3/render','/api/render','/api/runtime/render','/api/v3/morph','/api/morph'];
+  const payload=makeRenderPayload(cap);
+  const prior=target.innerHTML;
+  target.innerHTML = `<div class="regen-view"><div class="info"><strong>Synthia render requested.</strong><br>Calling server for regenerated DOM. Local fallback remains available.</div>${prior}</div>`;
+  for(const path of attempts){
+    try{
+      setPhase(`active · server render ${path}`);
+      const res=await fetch(base+path,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+      const text=await res.text();
+      let data; try{ data=JSON.parse(text); }catch{ data={raw:text, artifact:{outputs:{html:text}}}; }
+      if(!res.ok || data.success===false) throw new Error(data.details||data.error||`HTTP ${res.status}`);
+      State.serverStatus='online';
+      const artifact=data.artifact||data.bundle||data.output||data;
+      cap.artifact=artifact;
+      cap.serverRenderPayload=data;
+      cap.source='synthia-server';
+      cap.serverEndpoint=path;
+      cap.serverSummary={...(cap.serverSummary||{}), renderStatus:'ok', sourceSchema:data.telemetry?.sourceSchema||data.meta?.sourceSchema||cap.serverSummary?.sourceSchema||cap.kind};
+      target.innerHTML=regenerateServerArtifact(cap);
+      log(`SERVER RENDER ${cap.name} → ${path}`);
+      persist(); setPhase('active · ready'); toast('Synthia render mounted');
+      return true;
+    }catch(err){
+      State.serverStatus='offline';
+      log(`RENDER MISS ${path}: ${err.message}`);
+    }
+  }
+  target.innerHTML=prior + `<div class="info"><strong>Server render unavailable.</strong><br>Using local fallback regeneration.</div>`;
+  setPhase('active · ready');
+  return false;
+}
+
+function regeneratedHTML(cap){
+  if(cap.source === 'synthia-server') return regenerateServerArtifact(cap);
+  const entry=cap.entry;
+  const files=Object.fromEntries(cap.files.map(f=>[f.path, f.text]));
+  if(entry && entry.ext==='html') return regenerateHTMLApp(entry, cap.files);
+  if(entry && /js|ts|tsx|jsx|mjs/.test(entry.ext)) return regenerateScriptApp(entry, cap.files);
+  if(entry && /md|txt|json|csv/.test(entry.ext)) return regenerateDocumentApp(entry, cap.files);
+  return `<div class="regen-view"><div class="info">Nothing renderable found. Capsule structure is still inspectable.</div>${capsuleInspect(cap)}</div>`;
+}
+
+
+function sanitizeServerHTML(html){
+  const template = document.createElement('template');
+  template.innerHTML = String(html || '');
+  template.content.querySelectorAll('script,iframe,object,embed,link[rel="import"]').forEach(n=>n.remove());
+  template.content.querySelectorAll('*').forEach(el=>{
+    [...el.attributes].forEach(a=>{
+      const name=a.name.toLowerCase(), value=String(a.value||'').trim().toLowerCase();
+      if(name.startsWith('on') || value.startsWith('javascript:')) el.removeAttribute(a.name);
+    });
+  });
+  return template.innerHTML;
+}
+function regenerateServerArtifact(cap){
+  const outputs = cap.artifact?.outputs || cap.artifact || {};
+  const html = outputs.html || outputs.isomorphicHtmlLayout || cap.entry?.text || '';
+  const css = outputs.css || '';
+  const js = outputs.js || '';
+  const json = outputs.json || cap.serverPayload || {};
+  const safeHtml = sanitizeServerHTML(html);
+  return `<div class="regen-view">
+    <div class="info"><strong>Synthia Server Render</strong><br>Schema: ${esc(cap.serverSummary?.sourceSchema || 'unknown')}<br>Nodes: ${esc(cap.serverSummary?.nodesGenerated ?? cap.files.length)}<br>Endpoint: ${esc(cap.serverEndpoint || '')}<br>No iframe. Server artifact mounted as sanitized native DOM.</div>
+    ${css ? `<style>${css}
+.smart-browser-shell{display:flex;flex-direction:column;gap:10px;height:100%}
+.browser-bar{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.browser-url{flex:1;min-width:220px;background:var(--deep);border:1px solid var(--edge);border-radius:8px;color:var(--text);padding:8px 10px;font:11px var(--mono);user-select:text}
+.browser-page{background:linear-gradient(180deg,#f8fafc,#e5e7eb);color:#111827;border-radius:12px;border:1px solid rgba(255,255,255,.1);min-height:190px;padding:18px;font-family:system-ui,sans-serif;user-select:text;overflow:auto}
+.browser-page .page-title{font-weight:700;font-size:18px;margin-bottom:8px}.browser-page .page-url{font:12px var(--mono);color:#6b7280;margin-bottom:12px}.browser-page .page-note{font-size:13px;line-height:1.5;color:#374151}.task-panel{background:rgba(168,85,247,.07);border:1px solid rgba(168,85,247,.22);border-radius:12px;padding:10px;display:none;gap:8px;flex-direction:column}.task-panel.open{display:flex}.task-input{width:100%;min-height:78px;resize:vertical;background:var(--deep);border:1px solid var(--edge);border-radius:8px;color:var(--text);padding:10px;font:11px var(--mono);user-select:text}.progress{height:8px;background:var(--deep);border:1px solid var(--edge);border-radius:99px;overflow:hidden}.progress-fill{height:100%;width:0%;background:linear-gradient(90deg,var(--violet),var(--gold),var(--green));transition:width .25s ease}.task-status{font:10px var(--mono);color:var(--muted);line-height:1.5}.setting-block{background:var(--raised);border:1px solid var(--edge);border-radius:12px;padding:12px;margin:10px 0}.setting-row{display:flex;gap:8px;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.04);font:11px var(--mono);color:var(--muted)}.setting-row:last-child{border-bottom:none}.setting-row input{background:var(--deep);border:1px solid var(--edge);border-radius:8px;color:var(--text);padding:7px 9px;font:11px var(--mono);min-width:220px;user-select:text}
+
+</style>` : ''}
+    <div class="regen-output">${safeHtml || '<p>No HTML artifact returned. Showing server telemetry below.</p>'}</div>
+    ${js ? `<h3>Returned JS (stored, not executed)</h3><textarea class="code" readonly>${esc(js)}</textarea>` : ''}
+    <h3>Server Payload</h3><textarea class="code" readonly>${esc(JSON.stringify(json,null,2))}</textarea>
+    ${capsuleInspect(cap)}
+  </div>`;
+}
+
+function regenerateHTMLApp(entry, files){
+  let html=entry.text;
+  // Extract body only, inline referenced CSS/JS as visible DOM/code blocks, not iframe.
+  const bodyMatch=html.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
+  let body=bodyMatch?bodyMatch[1]:html;
+  const cssBlocks=[];
+  files.filter(f=>f.ext==='css').forEach(f=>cssBlocks.push(f.text));
+  const scripts=files.filter(f=>/js|mjs|ts|tsx|jsx/.test(f.ext));
+  return `<div class="regen-view">
+    <div class="regen-toolbar"><button class="action" onclick="toast('Regenerated as DOM, not iframe')">DOM Mounted</button></div>
+    <style>${cssBlocks.join('\n')}
+.smart-browser-shell{display:flex;flex-direction:column;gap:10px;height:100%}
+.browser-bar{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.browser-url{flex:1;min-width:220px;background:var(--deep);border:1px solid var(--edge);border-radius:8px;color:var(--text);padding:8px 10px;font:11px var(--mono);user-select:text}
+.browser-page{background:linear-gradient(180deg,#f8fafc,#e5e7eb);color:#111827;border-radius:12px;border:1px solid rgba(255,255,255,.1);min-height:190px;padding:18px;font-family:system-ui,sans-serif;user-select:text;overflow:auto}
+.browser-page .page-title{font-weight:700;font-size:18px;margin-bottom:8px}.browser-page .page-url{font:12px var(--mono);color:#6b7280;margin-bottom:12px}.browser-page .page-note{font-size:13px;line-height:1.5;color:#374151}.task-panel{background:rgba(168,85,247,.07);border:1px solid rgba(168,85,247,.22);border-radius:12px;padding:10px;display:none;gap:8px;flex-direction:column}.task-panel.open{display:flex}.task-input{width:100%;min-height:78px;resize:vertical;background:var(--deep);border:1px solid var(--edge);border-radius:8px;color:var(--text);padding:10px;font:11px var(--mono);user-select:text}.progress{height:8px;background:var(--deep);border:1px solid var(--edge);border-radius:99px;overflow:hidden}.progress-fill{height:100%;width:0%;background:linear-gradient(90deg,var(--violet),var(--gold),var(--green));transition:width .25s ease}.task-status{font:10px var(--mono);color:var(--muted);line-height:1.5}.setting-block{background:var(--raised);border:1px solid var(--edge);border-radius:12px;padding:12px;margin:10px 0}.setting-row{display:flex;gap:8px;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.04);font:11px var(--mono);color:var(--muted)}.setting-row:last-child{border-bottom:none}.setting-row input{background:var(--deep);border:1px solid var(--edge);border-radius:8px;color:var(--text);padding:7px 9px;font:11px var(--mono);min-width:220px;user-select:text}
+
+</style>
+    <div class="regen-output">${body}</div>
+    ${scripts.length?`<h3>Attached Scripts (static, not executed)</h3>${scripts.map(s=>`<textarea class="code" readonly>${esc(s.text)}</textarea>`).join('')}`:''}
+    ${capsuleInspect({files,entry})}
+  </div>`;
+}
+
+function regenerateScriptApp(entry, files){
+  const symbols = files.flatMap(f=>f.symbols.map(s=>({...s,file:f.name}))).slice(0,40);
+  return `<div class="regen-view">
+    <div class="regen-output">
+      <h2>${esc(entry.name)}</h2>
+      <p>Regenerated from source structure. Code is displayed and mapped, not executed.</p>
+      <h3>Detected symbols</h3>
+      <ul>${symbols.map(s=>`<li><strong>${esc(s.type)}</strong> ${esc(s.name)} <small>(${esc(s.file)})</small></li>`).join('') || '<li>No symbols detected.</li>'}</ul>
+    </div>
+    <textarea class="code" readonly>${esc(entry.text)}</textarea>
+    ${capsuleInspect({files,entry})}
+  </div>`;
+}
+
+function regenerateDocumentApp(entry, files){
+  let rendered='';
+  if(entry.ext==='md') rendered = markdownToHTML(entry.text);
+  else if(entry.ext==='json') { try{ rendered='<pre>'+esc(JSON.stringify(JSON.parse(entry.text),null,2))+'</pre>'; }catch(e){ rendered='<pre>'+esc(entry.text)+'</pre>'; } }
+  else if(entry.ext==='csv') rendered = csvToTable(entry.text);
+  else rendered = '<pre>'+esc(entry.text)+'</pre>';
+  return `<div class="regen-view"><div class="regen-output">${rendered}</div>${capsuleInspect({files,entry})}</div>`;
+}
+
+function markdownToHTML(md){
+  return md.split(/\n+/).map(line=>{
+    if(/^###\s+/.test(line)) return '<h3>'+esc(line.replace(/^###\s+/,''))+'</h3>';
+    if(/^##\s+/.test(line)) return '<h2>'+esc(line.replace(/^##\s+/,''))+'</h2>';
+    if(/^#\s+/.test(line)) return '<h1>'+esc(line.replace(/^#\s+/,''))+'</h1>';
+    if(/^[-*]\s+/.test(line)) return '<p>• '+esc(line.replace(/^[-*]\s+/,''))+'</p>';
+    return '<p>'+esc(line)+'</p>';
+  }).join('');
+}
+
+function csvToTable(csv){
+  const rows=csv.trim().split(/\r?\n/).slice(0,80).map(r=>r.split(','));
+  if(!rows.length)return '<pre></pre>';
+  return '<table style="border-collapse:collapse;width:100%;font-size:13px">'+rows.map((r,i)=>'<tr>'+r.map(c=>`<${i?'td':'th'} style="border:1px solid #ddd;padding:6px;text-align:left">${esc(c)}</${i?'td':'th'}>`).join('')+'</tr>').join('')+'</table>';
+}
+
+function capsuleInspect(cap){
+  return `<div class="info"><strong>Regeneration record:</strong><br>Entry: ${esc(cap.entry?.path || 'none')}<br>Files: ${cap.files.length}<br>Message graph: ${State.graph.nodes.length} nodes · ${State.graph.edges.length} edges</div>`;
+}
+
+function refreshAll(){
+  Object.values(State.windows).forEach(w=>{
+    const app=w.dataset.app, body=$(w.id+'_body');
+    if(!body)return;
+    if(app==='launcher') body.innerHTML=launcherHTML();
+    if(app==='appcenter') body.innerHTML=appCenterHTML(), initApp('appcenter', w.id);
+    if(app==='settings') body.innerHTML=settingsHTML();
+    if(app==='smartbrowser') body.innerHTML=smartBrowserHTML(), initApp('smartbrowser', w.id);
+    if(app==='admin') body.innerHTML=adminHTML();
+    if(app==='runtime') body.innerHTML=runtimeHTML();
+    if(app==='files') body.innerHTML=filesHTML();
+    if(app==='body') body.innerHTML=bodyHTML();
+  });
+}
+
+function clearAll(){
+  if(!confirm('Clear local files, capsules, and mounted apps?')) return;
+  State.files={}; State.capsules=[]; State.mounted=[]; State.messages=[]; State.graph={nodes:[],edges:[]};
+  persist(); refreshAll(); toast('Local store cleared');
+}
+
+function saveServerBase(){
+  const input = document.querySelector('#serverBaseInput');
+  if(input){ State.serverBase = input.value.trim().replace(/\/$/,''); localStorage.setItem('synthia_server_base', State.serverBase); }
+  toast('Synthia server saved');
+  refreshAll();
+}
+async function checkServer(){
+  const input = document.querySelector('#serverBaseInput');
+  if(input) State.serverBase = input.value.trim().replace(/\/$/,'');
+  const base = State.serverBase;
+  const candidates = ['/health','/api/health','/status','/'];
+  for(const path of candidates){
+    try{ const r = await fetch(base.replace(/\/$/,'') + path); if(r.ok){ State.serverStatus='online'; localStorage.setItem('synthia_server_base', State.serverBase); toast('Synthia server online'); refreshAll(); return true; } }catch(e){}
+  }
+  State.serverStatus='offline'; toast('Synthia server offline'); refreshAll(); return false;
+}
+
+
+function saveSettingsPanel(){
+  const server = document.querySelector('#settingsServerBase');
+  const browser = document.querySelector('#settingsBrowserUrl');
+  if(server){ State.serverBase = server.value.trim().replace(/\/$/,''); localStorage.setItem('synthia_server_base', State.serverBase); }
+  if(browser){ State.browser.url = browser.value.trim(); }
+  persist(); refreshAll(); toast('Settings saved');
+}
+function saveBrowserUrl(){
+  const input = document.querySelector('#browserUrl');
+  if(input) State.browser.url = input.value.trim() || 'https://github.com/mobile-next/mobile-mcp';
+  State.browser.status = 'page target set'; State.browser.progress = 0;
+  persist(); refreshAll();
+}
+function openBrowserExternal(){
+  saveBrowserUrl();
+  window.open(State.browser.url, '_blank', 'noopener,noreferrer');
+}
+function toggleBrowserTaskPanel(){
+  const p = document.querySelector('#browserTaskPanel');
+  if(p) p.classList.toggle('open');
+}
+function updateBrowserProgressUI(){
+  const fill=document.querySelector('#browserProgressFill'); if(fill) fill.style.width = Math.max(0,Math.min(100,Number(State.browser.progress||0))) + '%';
+  const status=document.querySelector('#browserTaskStatus'); if(status) status.textContent = State.browser.status || 'idle';
+}
+let browserTaskTimer=null;
+function setBrowserProgress(p,status){ State.browser.progress=p; if(status) State.browser.status=status; updateBrowserProgressUI(); persist(); }
+async function runBrowserTask(){
+  const urlInput=document.querySelector('#browserUrl');
+  const taskInput=document.querySelector('#browserTaskInput');
+  if(urlInput) State.browser.url=urlInput.value.trim();
+  if(taskInput) State.browser.lastTask=taskInput.value.trim();
+  const task=State.browser.lastTask;
+  if(!task){ toast('Describe what the browser should do'); return; }
+  const base=(State.serverBase||'').replace(/\/$/,'');
+  if(!base){ toast('Set Synthia server first'); openApp('settings'); return; }
+  setBrowserProgress(5,'starting task bridge');
+  clearInterval(browserTaskTimer);
+  browserTaskTimer=setInterval(()=>{ if(State.browser.progress<92) setBrowserProgress(State.browser.progress+Math.max(1,Math.round((96-State.browser.progress)*0.08)),'working · '+State.browser.progress+'%'); },450);
+  const payload={ source:'resonance-smart-browser', url:State.browser.url, task, mode:'form-fill-or-page-task', requireUserReview:true, useMobileMCP:true, time:Date.now() };
+  const attempts=['/api/v3/browser/task','/api/browser/task','/api/v3/mobile-mcp/task','/api/mobile-mcp/task','/api/v3/mcp/task'];
+  for(const path of attempts){
+    try{
+      const res=await fetch(base+path,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+      const text=await res.text(); let data; try{data=JSON.parse(text)}catch{data={raw:text}};
+      if(!res.ok || data.success===false) throw new Error(data.details||data.error||`HTTP ${res.status}`);
+      clearInterval(browserTaskTimer);
+      setBrowserProgress(100,'done · '+(data.status||'task completed'));
+      log(`SMART BROWSER ${path}: ${task}`);
+      mountBrowserTaskResult(data);
+      toast('Browser task completed');
+      return;
+    }catch(err){ log(`BROWSER TASK MISS ${path}: ${err.message}`); }
+  }
+  clearInterval(browserTaskTimer);
+  setBrowserProgress(0,'server task bridge unavailable · request staged locally');
+  toast('Browser bridge unavailable — request staged');
+}
+function stopBrowserTask(){ clearInterval(browserTaskTimer); setBrowserProgress(0,'stopped'); }
+function mountBrowserTaskResult(data){
+  const surface=document.querySelector('#browserPageSurface'); if(!surface) return;
+  const summary = data.summary || data.result || data.message || data.raw || 'Task response received.';
+  surface.innerHTML = `<div class="page-title">Task Result</div><div class="page-url">${esc(State.browser.url)}</div><div class="page-note"><pre style="white-space:pre-wrap;font:12px var(--mono)">${esc(typeof summary==='string'?summary:JSON.stringify(summary,null,2))}</pre></div>`;
+}
+
+updateBadge();
+openApp('home');
+setTimeout(()=>toast('Resonance Body ready · open App Center'),500);
+window.addEventListener('beforeunload', persist);
+</script>
+</body>
+</html>

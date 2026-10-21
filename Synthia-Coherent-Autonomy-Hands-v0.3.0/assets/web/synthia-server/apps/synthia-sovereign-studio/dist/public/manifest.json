@@ -1,0 +1,88 @@
+{
+  "name": "YOU–N–I–VERSE Studio",
+  "short_name": "Indyverse",
+  "description": "A creative IDE with integrated AI consciousness. Code, create, and explore with AI Guard Dog.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0f0f23",
+  "theme_color": "#9b87f5",
+  "orientation": "any",
+  "scope": "/",
+  "icons": [
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-maskable-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/icons/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "categories": ["productivity", "development", "utilities"],
+  "screenshots": [
+    {
+      "src": "/screenshots/dashboard.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "label": "Dashboard with personalized recommendations"
+    },
+    {
+      "src": "/screenshots/ide.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "label": "Browser-based code editor"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Launch IDE",
+      "short_name": "IDE",
+      "description": "Open the code editor",
+      "url": "/ide",
+      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Grove Store",
+      "short_name": "Store",
+      "description": "Browse community marketplace",
+      "url": "/grove-store",
+      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "AI Guard Dog",
+      "short_name": "AI",
+      "description": "Chat with AI assistant",
+      "url": "/",
+      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
+    }
+  ],
+  "share_target": {
+    "action": "/player",
+    "method": "POST",
+    "enctype": "multipart/form-data",
+    "params": {
+      "files": [
+        {
+          "name": "zip",
+          "accept": ["application/zip", ".zip"]
+        }
+      ]
+    }
+  }
+}

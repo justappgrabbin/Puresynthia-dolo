@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Synthia Terminal</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #060709;
+      --panel: #101318;
+      --line: #252b34;
+      --text: #edf2f7;
+      --muted: #9aa5b1;
+      --ok: #20d6a4;
+      --warn: #f4b860;
+      --bad: #ff6b7a;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100svh;
+      background: var(--bg);
+      color: var(--text);
+      font: 14px/1.45 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+    }
+    header {
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--line);
+      background: var(--panel);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+    h1 { margin: 0; font-size: 15px; font-weight: 700; }
+    #status { color: var(--warn); font-size: 12px; white-space: nowrap; }
+    #log {
+      padding: 14px;
+      overflow: auto;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+    .line { margin: 0 0 8px; }
+    .muted { color: var(--muted); }
+    .ok { color: var(--ok); }
+    .bad { color: var(--bad); }
+    form {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 8px;
+      padding: 10px;
+      border-top: 1px solid var(--line);
+      background: var(--panel);
+    }
+    input, button {
+      min-height: 44px;
+      border-radius: 6px;
+      border: 1px solid var(--line);
+      background: #0b0e13;
+      color: var(--text);
+      font: inherit;
+    }
+    input { padding: 0 12px; min-width: 0; }
+    button { padding: 0 14px; background: #16221f; border-color: #24584a; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Synthia Terminal</h1>
+    <div id="status">connecting</div>
+  </header>
+  <main id="log"></main>
+  <form id="command-form">
+    <input id="command" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="status, events, agents, wake mcp">
+    <button type="submit">Send</button>
+  </form>
+  <script>
+    const log = document.getElementById('log');
+    const status = document.getElementById('status');
+    const form = document.getElementById('command-form');
+    const input = document.getElementById('command');
+    let socket;
+
+    function append(text, cls = '') {
+      const row = document.createElement('div');
+      row.className = `line ${cls}`;
+      row.textContent = text;
+      log.appendChild(row);
+      log.scrollTop = log.scrollHeight;
+    }
+
+    function connect() {
+      const scheme = location.protocol === 'https:' ? 'wss:' : 'ws:';
+      socket = new WebSocket(`${scheme}//${location.host}/terminal`);
+      status.textContent = 'connecting';
+      status.className = '';
+
+      socket.addEventListener('open', () => {
+        status.textContent = 'online';
+        status.className = 'ok';
+        append('[boot] terminal connected', 'ok');
+        socket.send(JSON.stringify({ command: 'status' }));
+      });
+
+      socket.addEventListener('message', event => {
+        try {
+          const data = JSON.parse(event.data);
+          if (data.type === 'clear') log.textContent = '';
+          else if (data.output) append(data.output);
+          else if (data.event) append(`[${data.event.type}] ${data.event.source}: ${data.event.message}`, 'muted');
+          else append(JSON.stringify(data));
+        } catch {
+          append(String(event.data));
+        }
+      });
+
+      socket.addEventListener('close', () => {
+        status.textContent = 'reconnecting';
+        status.className = 'bad';
+        append('[boot] terminal disconnected; retrying...', 'bad');
+        setTimeout(connect, 1500);
+      });
+    }
+
+    form.addEventListener('submit', event => {
+      event.preventDefault();
+      const command = input.value.trim();
+      if (!command || !socket || socket.readyState !== WebSocket.OPEN) return;
+      append(`> ${command}`, 'ok');
+      socket.send(JSON.stringify({ command }));
+      input.value = '';
+    });
+
+    connect();
+  </script>
+</body>
+</html>

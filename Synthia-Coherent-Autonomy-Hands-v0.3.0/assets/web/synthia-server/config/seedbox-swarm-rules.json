@@ -1,0 +1,20 @@
+{
+  "five_w": {
+    "who": ["admin", "synthia"],
+    "what": ["watch_inbox_projects", "apk_outputs", "compile_headstart"],
+    "where": {
+      "input": "watch-inbox",
+      "sandbox": "builder-sandbox/seedbox-swarm",
+      "output": "public/autoload"
+    },
+    "when": ["first_synthia_boot", "manual_admin_trigger", "SYNTHIA_SWARM_EVERY_BOOT=1"],
+    "why": "Give Synthia a compile head start while keeping work in an isolated sandbox before promotion."
+  },
+  "autostart_enabled": true,
+  "copy_watch_inbox": true,
+  "run_coordinator": true,
+  "promote_apk_when_found": true,
+  "allowed_inputs": ["zip", "folder", "html", "js", "ts", "tsx", "jsx", "json", "py", "md"],
+  "public_may_trigger_swarm": false,
+  "admin_may_trigger_swarm": true
+}

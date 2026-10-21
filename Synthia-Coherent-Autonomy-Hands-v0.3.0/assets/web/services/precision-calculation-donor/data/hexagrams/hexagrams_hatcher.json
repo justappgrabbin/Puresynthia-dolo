@@ -1,0 +1,322 @@
+[
+  {
+    "num": 1,
+    "pinyin": "Qian",
+    "name_en": "Creating"
+  },
+  {
+    "num": 2,
+    "pinyin": "Kun",
+    "name_en": "Accepting"
+  },
+  {
+    "num": 3,
+    "pinyin": "Zhun (Tun)",
+    "name_en": "Rallying"
+  },
+  {
+    "num": 4,
+    "pinyin": "Meng",
+    "name_en": "Inexperience"
+  },
+  {
+    "num": 5,
+    "pinyin": "Xu",
+    "name_en": "Anticipation"
+  },
+  {
+    "num": 6,
+    "pinyin": "Song",
+    "name_en": "Contention"
+  },
+  {
+    "num": 7,
+    "pinyin": "Shi",
+    "name_en": "The Militia"
+  },
+  {
+    "num": 8,
+    "pinyin": "Bi",
+    "name_en": "Belonging"
+  },
+  {
+    "num": 9,
+    "pinyin": "Xiao Chu",
+    "name_en": "Raising Small Beasts"
+  },
+  {
+    "num": 10,
+    "pinyin": "Lu",
+    "name_en": "Respectful Conduct"
+  },
+  {
+    "num": 11,
+    "pinyin": "Tai",
+    "name_en": "Interplay"
+  },
+  {
+    "num": 12,
+    "pinyin": "Pi",
+    "name_en": "Separating"
+  },
+  {
+    "num": 13,
+    "pinyin": "Tong Ren",
+    "name_en": "Fellowship With Others"
+  },
+  {
+    "num": 14,
+    "pinyin": "Da You",
+    "name_en": "Big Domain"
+  },
+  {
+    "num": 15,
+    "pinyin": "Qian",
+    "name_en": "Authenticity"
+  },
+  {
+    "num": 16,
+    "pinyin": "Yu",
+    "name_en": "Readiness"
+  },
+  {
+    "num": 17,
+    "pinyin": "Sui",
+    "name_en": "Following"
+  },
+  {
+    "num": 18,
+    "pinyin": "Gu",
+    "name_en": "Detoxifying"
+  },
+  {
+    "num": 19,
+    "pinyin": "Lin",
+    "name_en": "Taking Charge"
+  },
+  {
+    "num": 20,
+    "pinyin": "Guan",
+    "name_en": "Perspective"
+  },
+  {
+    "num": 21,
+    "pinyin": "Shi He",
+    "name_en": "Biting Through"
+  },
+  {
+    "num": 22,
+    "pinyin": "Bi",
+    "name_en": "Adornment"
+  },
+  {
+    "num": 23,
+    "pinyin": "Bo",
+    "name_en": "Decomposing"
+  },
+  {
+    "num": 24,
+    "pinyin": "Fu",
+    "name_en": "Returning"
+  },
+  {
+    "num": 25,
+    "pinyin": "Wu Wang",
+    "name_en": "Without Pretense"
+  },
+  {
+    "num": 26,
+    "pinyin": "Da Chu",
+    "name_en": "Raising Great Beasts"
+  },
+  {
+    "num": 27,
+    "pinyin": "Yi",
+    "name_en": "Hungry Mouth"
+  },
+  {
+    "num": 28,
+    "pinyin": "Da Guo",
+    "name_en": "Greatness in Excess"
+  },
+  {
+    "num": 29,
+    "pinyin": "Kan",
+    "name_en": "Exposure"
+  },
+  {
+    "num": 30,
+    "pinyin": "Li",
+    "name_en": "Arising"
+  },
+  {
+    "num": 31,
+    "pinyin": "Xian",
+    "name_en": "Reciprocity"
+  },
+  {
+    "num": 32,
+    "pinyin": "Heng",
+    "name_en": "Continuity"
+  },
+  {
+    "num": 33,
+    "pinyin": "Dun",
+    "name_en": "Distancing"
+  },
+  {
+    "num": 34,
+    "pinyin": "Da Zhuang",
+    "name_en": "Big and Strong"
+  },
+  {
+    "num": 35,
+    "pinyin": "Jin",
+    "name_en": "Expansion"
+  },
+  {
+    "num": 36,
+    "pinyin": "Ming Yi",
+    "name_en": "Brightness Obscured"
+  },
+  {
+    "num": 37,
+    "pinyin": "Jia Ren",
+    "name_en": "Family Members"
+  },
+  {
+    "num": 38,
+    "pinyin": "Kui",
+    "name_en": "Estrangement"
+  },
+  {
+    "num": 39,
+    "pinyin": "Jian",
+    "name_en": "Impasse"
+  },
+  {
+    "num": 40,
+    "pinyin": "Jie",
+    "name_en": "Release"
+  },
+  {
+    "num": 41,
+    "pinyin": "Sun",
+    "name_en": "Decreasing"
+  },
+  {
+    "num": 42,
+    "pinyin": "Yi",
+    "name_en": "Increasing"
+  },
+  {
+    "num": 43,
+    "pinyin": "Guai",
+    "name_en": "Decisiveness"
+  },
+  {
+    "num": 44,
+    "pinyin": "Gou",
+    "name_en": "Dissipation"
+  },
+  {
+    "num": 45,
+    "pinyin": "Cui",
+    "name_en": "Collectedness"
+  },
+  {
+    "num": 46,
+    "pinyin": "Sheng",
+    "name_en": "Advancement"
+  },
+  {
+    "num": 47,
+    "pinyin": "Kun",
+    "name_en": "Exhaustion"
+  },
+  {
+    "num": 48,
+    "pinyin": "Jing",
+    "name_en": "The Well"
+  },
+  {
+    "num": 49,
+    "pinyin": "Ge",
+    "name_en": "Seasonal Change"
+  },
+  {
+    "num": 50,
+    "pinyin": "Ding",
+    "name_en": "The Cauldron"
+  },
+  {
+    "num": 51,
+    "pinyin": "Zhen",
+    "name_en": "Arousal"
+  },
+  {
+    "num": 52,
+    "pinyin": "Gen",
+    "name_en": "Stillness"
+  },
+  {
+    "num": 53,
+    "pinyin": "Jian",
+    "name_en": "Gradual Progress"
+  },
+  {
+    "num": 54,
+    "pinyin": "Gui Mei",
+    "name_en": "Little Sister’s Marriage"
+  },
+  {
+    "num": 55,
+    "pinyin": "Feng",
+    "name_en": "Abundance"
+  },
+  {
+    "num": 56,
+    "pinyin": "Lu",
+    "name_en": "The Wanderer"
+  },
+  {
+    "num": 57,
+    "pinyin": "Xun (Sun)",
+    "name_en": "Adaptation"
+  },
+  {
+    "num": 58,
+    "pinyin": "Dui",
+    "name_en": "Satisfaction"
+  },
+  {
+    "num": 59,
+    "pinyin": "Huan",
+    "name_en": "Scattering"
+  },
+  {
+    "num": 60,
+    "pinyin": "Jie",
+    "name_en": "Boundaries"
+  },
+  {
+    "num": 61,
+    "pinyin": "Zhong Fu",
+    "name_en": "The Truth Within"
+  },
+  {
+    "num": 62,
+    "pinyin": "Xiao Guo",
+    "name_en": "Smallness in Excess"
+  },
+  {
+    "num": 63,
+    "pinyin": "Ji Ji",
+    "name_en": "Already Complete"
+  },
+  {
+    "num": 64,
+    "pinyin": "Wei Ji",
+    "name_en": "Not Yet Complete"
+  }
+]

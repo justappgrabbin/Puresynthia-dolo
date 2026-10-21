@@ -1,0 +1,64 @@
+{
+  "_id": "69c543fb81ef1ebf6849110e",
+  "id": "stellarproximology/Trident",
+  "private": false,
+  "tags": [
+    "region:us"
+  ],
+  "downloads": 0,
+  "likes": 0,
+  "modelId": "stellarproximology/Trident",
+  "author": "stellarproximology",
+  "sha": "674c942ff9cae113d484ad2c7be3abd4638f624e",
+  "lastModified": "2026-03-26T14:35:50Z",
+  "gated": false,
+  "disabled": false,
+  "config": {},
+  "siblings": [
+    {
+      "rfilename": ".gitattributes"
+    },
+    {
+      "rfilename": "README.md"
+    },
+    {
+      "rfilename": "mcp_config.json"
+    },
+    {
+      "rfilename": "mcp_server.py"
+    },
+    {
+      "rfilename": "model.cpython-312.pyc"
+    },
+    {
+      "rfilename": "model.py"
+    },
+    {
+      "rfilename": "rag.cpython-312.pyc"
+    },
+    {
+      "rfilename": "rag.py"
+    },
+    {
+      "rfilename": "rag_client.js"
+    },
+    {
+      "rfilename": "requirements.txt"
+    },
+    {
+      "rfilename": "signal_server.cpython-312.pyc"
+    },
+    {
+      "rfilename": "signal_server.py"
+    },
+    {
+      "rfilename": "train.cpython-312.pyc"
+    },
+    {
+      "rfilename": "train.py"
+    }
+  ],
+  "spaces": [],
+  "createdAt": "2026-03-26T14:34:35Z",
+  "usedStorage": 0
+}

@@ -1,0 +1,101 @@
+{
+  "schema": "synthia.final-inputs.v1",
+  "date": "2026-07-24",
+  "rule": "Every user-supplied final file is preserved by ontological address: source name, role, source path, and runtime fitness. Strongest means best address/runtime fit, not byte identity.",
+  "raw_bundle_path": "bundles/final-2026-07-24",
+  "inputs": [
+    {
+      "role": "full biverse/human-design project bundle",
+      "status": "raw preserved; source repaired",
+      "file": "biverse-human-design-project-so-far.zip",
+      "id": "biverse-human-design-project-so-far",
+      "extracted_to": "tools/lco/biverse-guide-repaired-source",
+      "raw_extracted_to": "tools/lco/biverse-guide",
+      "repaired_bundle": "bundles/final-2026-07-24/biverse-human-design-project-source-repaired.zip"
+    },
+    {
+      "role": "human design python source organ",
+      "status": "extracted",
+      "file": "human-design-source-files.zip",
+      "id": "human-design-source-files",
+      "extracted_to": "tools/lco/human-design-source-files"
+    },
+    {
+      "role": "fuxi/ATO being state python organ",
+      "status": "extracted",
+      "file": "fuxi-ato-being-state.zip",
+      "id": "fuxi-ato-being-state",
+      "extracted_to": "tools/lco/fuxi-ato-being-state"
+    },
+    {
+      "role": "probabilistic narrative/code generation organ",
+      "status": "copied",
+      "file": "automatic-novel-writer.ts",
+      "id": "automatic-novel-writer",
+      "extracted_to": "tools/lco/klein-final-engines/automatic-novel-writer.ts"
+    },
+    {
+      "role": "distributional inference/perception organ",
+      "status": "copied",
+      "file": "disseminer.ts",
+      "id": "disseminer",
+      "extracted_to": "tools/lco/klein-final-engines/disseminer.ts"
+    },
+    {
+      "role": "probabilistic grammar/style engine",
+      "status": "copied",
+      "file": "monte-carlo-grammar-engine.ts",
+      "id": "monte-carlo-grammar-engine",
+      "extracted_to": "tools/lco/klein-final-engines/monte-carlo-grammar-engine.ts"
+    },
+    {
+      "role": "isohuman source module primary named input",
+      "status": "extracted",
+      "file": "isohuman.zip",
+      "id": "isohuman-primary",
+      "extracted_to": "tools/lco/isohuman"
+    },
+    {
+      "role": "isohuman source module secondary named input",
+      "status": "preserved as distinct named alias",
+      "file": "isohuman (1).zip",
+      "id": "isohuman-secondary",
+      "extracted_to": "tools/lco/final-aliases/isohuman-1.zip"
+    },
+    {
+      "role": "DNA/HD compiler source primary named input",
+      "status": "extracted",
+      "file": "dna-hd-compiler.zip",
+      "id": "dna-hd-compiler-primary",
+      "extracted_to": "tools/lco/dna-hd-compiler"
+    },
+    {
+      "role": "DNA/HD compiler source secondary named input",
+      "status": "preserved as distinct named alias",
+      "file": "dna-hd-compiler (1).zip",
+      "id": "dna-hd-compiler-secondary",
+      "extracted_to": "tools/lco/final-aliases/dna-hd-compiler-1.zip"
+    },
+    {
+      "role": "visual/module build UI source",
+      "status": "copied",
+      "file": "ModuleBuilder.jsx",
+      "id": "module-builder",
+      "extracted_to": "apps/synthia-module-builder.jsx"
+    },
+    {
+      "role": "Klein I-Ching ATO mesh source",
+      "status": "copied",
+      "file": "pasted-text.txt",
+      "id": "klein-iching-ato-mesh",
+      "extracted_to": "tools/lco/klein-final-engines/klein-iching-ato-mesh.ts"
+    },
+    {
+      "role": "generative ATO substrate source",
+      "status": "copied",
+      "file": "pasted-text.txt",
+      "id": "generative-ato-substrate",
+      "extracted_to": "tools/lco/klein-final-engines/generative-ato-substrate.ts"
+    }
+  ]
+}

@@ -1,0 +1,1439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MESSY Modern v1.0 — Universal Semantic Foundry</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://unpkg.com/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --bg: #0a0a0f;
+            --panel: rgba(10, 10, 20, 0.92);
+            --accent: #00d4ff;
+            --accent2: #ff6b6b;
+            --accent3: #51cf66;
+            --text: #e0e0e0;
+            --muted: #667788;
+            --warning: #ffd43b;
+        }
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            overflow: hidden;
+            height: 100vh;
+        }
+        #canvas-container {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: 1;
+        }
+        #ui-layer {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: 10;
+            pointer-events: none;
+            display: grid;
+            grid-template-columns: 340px 1fr 340px;
+            grid-template-rows: auto 1fr auto;
+            gap: 10px;
+            padding: 10px;
+        }
+        .panel {
+            background: var(--panel);
+            border: 1px solid rgba(0, 212, 255, 0.12);
+            border-radius: 10px;
+            padding: 14px;
+            pointer-events: auto;
+            backdrop-filter: blur(12px);
+            overflow-y: auto;
+            max-height: 92vh;
+        }
+        .panel-header {
+            color: var(--accent);
+            font-size: 0.75rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid rgba(0, 212, 255, 0.15);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .left-panel { grid-row: 1 / 4; }
+        .right-panel { grid-row: 1 / 4; grid-column: 3; }
+        .bottom-panel { grid-column: 2; grid-row: 3; max-height: 240px; }
+        .center-top {
+            grid-column: 2; grid-row: 1;
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            justify-content: center;
+            padding: 10px;
+            flex-wrap: wrap;
+        }
+        button {
+            background: linear-gradient(135deg, var(--accent), #0099cc);
+            border: none;
+            color: #fff;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 0.75rem;
+            transition: all 0.2s;
+            pointer-events: auto;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(0, 212, 255, 0.3);
+        }
+        button.secondary {
+            background: linear-gradient(135deg, var(--accent2), #cc5555);
+        }
+        button.tertiary {
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.12);
+        }
+        button.success {
+            background: linear-gradient(135deg, var(--accent3), #3aa34a);
+        }
+        button.warning {
+            background: linear-gradient(135deg, var(--warning), #cc9900);
+            color: #000;
+        }
+        .drop-zone {
+            border: 2px dashed rgba(0, 212, 255, 0.25);
+            border-radius: 10px;
+            padding: 24px;
+            text-align: center;
+            color: var(--muted);
+            font-size: 0.8rem;
+            transition: all 0.3s;
+            margin-bottom: 12px;
+            cursor: pointer;
+            background: rgba(0, 212, 255, 0.02);
+        }
+        .drop-zone.dragover {
+            border-color: var(--accent);
+            background: rgba(0, 212, 255, 0.06);
+            color: var(--accent);
+        }
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 5px 0;
+            font-size: 0.75rem;
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+        }
+        .stat-label { color: var(--muted); }
+        .stat-value { color: var(--accent); font-weight: bold; font-family: monospace; }
+        .triple-input {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 8px;
+        }
+        .triple-input input {
+            flex: 1;
+            background: rgba(0,0,0,0.3);
+            border: 1px solid rgba(0, 212, 255, 0.15);
+            border-radius: 4px;
+            padding: 6px 8px;
+            color: var(--text);
+            font-size: 0.8rem;
+            font-family: monospace;
+        }
+        .triple-input input:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+        .triple-list {
+            font-family: 'Courier New', monospace;
+            font-size: 0.72rem;
+            max-height: 180px;
+            overflow-y: auto;
+        }
+        .triple-item {
+            padding: 5px 7px;
+            margin-bottom: 3px;
+            background: rgba(0,0,0,0.2);
+            border-radius: 4px;
+            border-left: 2px solid var(--accent);
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .triple-item:hover { background: rgba(0, 212, 255, 0.08); }
+        .triple-item.flaw { border-left-color: var(--accent2); }
+        .triple-item.resolved { border-left-color: var(--accent3); }
+        .triple-subj { color: var(--accent2); }
+        .triple-rel { color: var(--accent3); }
+        .triple-obj { color: #ffd43b; }
+        .triple-meta { color: var(--muted); font-size: 0.6rem; }
+        .code-output {
+            font-family: 'Courier New', monospace;
+            font-size: 0.72rem;
+            background: rgba(0,0,0,0.35);
+            border-radius: 6px;
+            padding: 10px;
+            max-height: 160px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            color: #aaddff;
+            border: 1px solid rgba(0, 212, 255, 0.1);
+        }
+        .log-output {
+            font-family: 'Courier New', monospace;
+            font-size: 0.68rem;
+            max-height: 120px;
+            overflow-y: auto;
+        }
+        .log-entry {
+            padding: 2px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.03);
+        }
+        .log-time { color: var(--muted); }
+        .log-event { color: var(--accent); }
+        .log-error { color: var(--accent2); }
+        .log-warning { color: var(--warning); }
+        .slider-group { margin-bottom: 10px; }
+        .slider-group label {
+            display: block;
+            font-size: 0.72rem;
+            color: #8899aa;
+            margin-bottom: 4px;
+        }
+        .slider-group input[type="range"] {
+            width: 100%;
+            accent-color: var(--accent);
+        }
+        .file-tree {
+            font-size: 0.72rem;
+            max-height: 140px;
+            overflow-y: auto;
+        }
+        .file-item {
+            padding: 3px 6px;
+            border-radius: 3px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+        }
+        .file-item:hover { background: rgba(0, 212, 255, 0.05); }
+        .file-item .file-name { color: var(--accent); }
+        .file-item .file-type { color: var(--muted); font-size: 0.6rem; }
+        .runtime-host {
+            width: 100%;
+            height: 100%;
+            min-height: 200px;
+            border: 1px solid rgba(0, 212, 255, 0.2);
+            border-radius: 8px;
+            background: rgba(0,0,0,0.3);
+        }
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); }
+        ::-webkit-scrollbar-thumb { background: rgba(0, 212, 255, 0.25); border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(0, 212, 255, 0.4); }
+    </style>
+</head>
+<body>
+    <div id="canvas-container"></div>
+    <div id="ui-layer">
+        <div class="panel left-panel">
+            <div class="panel-header">🧬 Universal Ingestor</div>
+            <div class="drop-zone" id="drop-zone">
+                📁 Drop files, folders, or ZIPs here<br>
+                <span style="font-size:0.7rem; color:#667788;">JS • Python • HTML • CSS • JSON • TXT</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">Files</span>
+                <span class="stat-value" id="stat-files">0</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">Blocks</span>
+                <span class="stat-value" id="stat-blocks">0</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">Nodes</span>
+                <span class="stat-value" id="stat-nodes">0</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">Triples</span>
+                <span class="stat-value" id="stat-triples">0</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">Active</span>
+                <span class="stat-value" id="stat-active">0</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">STIME</span>
+                <span class="stat-value" id="stat-stime">0.00</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">Errors</span>
+                <span class="stat-value" id="stat-errors" style="color:var(--accent2)">0</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">Repairs</span>
+                <span class="stat-value" id="stat-repairs" style="color:var(--accent3)">0</span>
+            </div>
+
+            <div style="margin-top:15px;">
+                <div class="panel-header" style="font-size:0.7rem;">Assert Triple</div>
+                <div class="triple-input">
+                    <input type="text" id="input-subject" placeholder="Subject" value="JOHN">
+                    <input type="text" id="input-relation" placeholder="Relation" value="LOVES">
+                    <input type="text" id="input-object" placeholder="Object" value="MARY">
+                </div>
+                <button onclick="app.assertTriple()" style="width:100%">Assert</button>
+            </div>
+
+            <div style="margin-top:15px;">
+                <div class="panel-header" style="font-size:0.7rem;">Ingested Files</div>
+                <div class="file-tree" id="file-tree"></div>
+            </div>
+
+            <div style="margin-top:15px;">
+                <div class="panel-header" style="font-size:0.7rem;">Physics</div>
+                <div class="slider-group">
+                    <label>Repulsion</label>
+                    <input type="range" id="repulsion-slider" min="0" max="200" value="100">
+                </div>
+                <div class="slider-group">
+                    <label>Attraction</label>
+                    <input type="range" id="attraction-slider" min="0" max="100" value="10">
+                </div>
+                <div class="slider-group">
+                    <label>Damping</label>
+                    <input type="range" id="damping-slider" min="0" max="100" value="90">
+                </div>
+            </div>
+        </div>
+
+        <div class="center-top">
+            <button onclick="app.pipeline()">🔄 Full Pipeline</button>
+            <button onclick="app.generate()">✨ Generate</button>
+            <button onclick="app.step()">▶ Step</button>
+            <button class="secondary" onclick="app.toggleAuto()" id="auto-btn">⏵ Auto</button>
+            <button class="tertiary" onclick="app.reset()">↺ Reset</button>
+            <button class="tertiary" onclick="app.exportCode()">📤 Export</button>
+            <button class="success" onclick="app.exportMesh()">💾 Save</button>
+            <button class="warning" onclick="app.run()">🚀 Run</button>
+            <button class="secondary" onclick="app.kill()">💀 Kill</button>
+        </div>
+
+        <div class="panel bottom-panel">
+            <div class="panel-header">Generated Code</div>
+            <div class="code-output" id="code-output">// Click Full Pipeline or Generate to create code...</div>
+        </div>
+
+        <div class="panel right-panel">
+            <div class="panel-header">🧠 Generation & Runtime</div>
+
+            <div style="margin-bottom:15px;">
+                <div class="panel-header" style="font-size:0.7rem;">Target Domain</div>
+                <select id="target-domain" style="width:100%; padding:6px; background:rgba(0,0,0,0.3); border:1px solid rgba(0,212,255,0.15); color:#e0e0e0; border-radius:4px;">
+                    <option value="apps">Application</option>
+                    <option value="games">Game</option>
+                    <option value="photos">Image Processor</option>
+                </select>
+            </div>
+
+            <div style="margin-bottom:15px;">
+                <div class="panel-header" style="font-size:0.7rem;">Semantic Context</div>
+                <div class="triple-list" id="context-triples"></div>
+            </div>
+
+            <div style="margin-bottom:15px;">
+                <div class="panel-header" style="font-size:0.7rem;">Runtime Output</div>
+                <div id="runtime-container" class="runtime-host"></div>
+            </div>
+
+            <div style="margin-bottom:15px;">
+                <div class="panel-header" style="font-size:0.7rem;">Neural Parameters</div>
+                <div class="slider-group">
+                    <label>Temperature</label>
+                    <input type="range" id="temp-slider" min="1" max="100" value="50">
+                </div>
+                <div class="slider-group">
+                    <label>Max Length</label>
+                    <input type="range" id="length-slider" min="50" max="500" value="200">
+                </div>
+            </div>
+
+            <div>
+                <div class="panel-header" style="font-size:0.7rem;">System Log</div>
+                <div class="log-output" id="log-output"></div>
+            </div>
+        </div>
+    </div>
+
+<script>
+// ============================================================
+// MESSY MODERN v1.0 — UNIFIED ENGINE
+// Integrates: Schema, AlignedMessyLifecycle, Paper Kernel, Three.js
+// ============================================================
+
+// --- SCHEMA CONSTANTS ---
+const DEFAULTS = {
+    RV: 1.0, H: 1.0, STIME: 0.0, SCHEMA_VERSION: 1,
+    MASS: 1.5, CHARGE: 0.0, DAMPING: 0.9, DT: 0.016, REPULSION: 100.0
+};
+
+const VALID_ARCHETYPES = ['STRUCTURAL_GATE', 'FUNCTIONAL_VECTOR', 'ATOMIC_SIGNAL', 'META'];
+
+const RELATION_PHYSICS = {
+    "LOVES": { length: 2.0, stiffness: 0.5, transitive: false },
+    "HATES": { length: -5.0, stiffness: 0.3, transitive: false },
+    "MARRIED": { length: 1.0, stiffness: 2.0, transitive: false },
+    "AT": { length: 0.0, stiffness: 10.0, transitive: false },
+    "CONTAINS": { length: 1.5, stiffness: 0.4, transitive: true },
+    "DEPENDS_ON": { length: 3.5, stiffness: 0.25, transitive: true },
+    "IS_A": { length: 2.0, stiffness: 0.6, transitive: true },
+    "DEFINES": { length: 1.5, stiffness: 0.5, transitive: false },
+    "WRITTEN_IN": { length: 2.5, stiffness: 0.2, transitive: false },
+    "TRIGGERS": { length: 2.5, stiffness: 0.2, transitive: true },
+    "CONTAINS_FLAW": { length: 8.0, stiffness: 0.1, transitive: false },
+    "RESOLVED_STATE": { length: 1.0, stiffness: 1.0, transitive: false }
+};
+
+// --- SCHEMA VALIDATION ---
+function validateTriple(triple) {
+    const violations = [];
+    if (!triple.subject || triple.subject.trim() === '') violations.push('E1.1: missing_subject');
+    if (!triple.relation || triple.relation.trim() === '') violations.push('E1.2: missing_relation');
+    if (triple.rv === undefined || triple.rv < 0 || triple.rv > 1 || isNaN(triple.rv)) {
+        violations.push('E1.3: invalid_rv');
+        triple.rv = 1.0;
+    }
+    if (triple.h === undefined || triple.h < 0 || triple.h > 1 || isNaN(triple.h)) {
+        violations.push('E1.4: invalid_h');
+        triple.h = 1.0;
+    }
+    if (!VALID_ARCHETYPES.includes(triple.archetype)) {
+        violations.push('E1.7: invalid_archetype');
+        triple.archetype = 'ATOMIC_SIGNAL';
+    }
+    return { valid: violations.length === 0, violations, confidence: violations.length === 0 ? 1.0 : Math.max(0, 1.0 - violations.length * 0.2) };
+}
+
+function sanitizeIdentifier(name) {
+    const clean = name.toLowerCase().replace(/[^a-z0-9_]/g, '_').replace(/_+/g, '_').replace(/^_/, '');
+    return (clean && clean[0].match(/^\\d/)) ? 'node_' + clean : (clean || 'anonymous');
+}
+
+// --- UNIFIED MESH SYSTEM ---
+class UnifiedMesh {
+    constructor() {
+        this.nodes = new Map();
+        this.triples = [];
+        this.relations = new Map(Object.entries(RELATION_PHYSICS));
+        this.stime = 0.0;
+        this.errors = [];
+        this.repairs = [];
+        this.files = new Map();
+        this.version = 1;
+        this.callbacks = new Map();
+    }
+
+    assertTriple(subject, relation, object, options = {}) {
+        const triple = {
+            subject, relation, object,
+            rv: options.rv ?? DEFAULTS.RV,
+            h: options.h ?? DEFAULTS.H,
+            value: options.value ?? 0,
+            created: this.stime,
+            deleted: null,
+            position: options.position ?? [0, 0, 0],
+            velocity: options.velocity ?? [0, 0, 0],
+            archetype: options.archetype ?? 'ATOMIC_SIGNAL',
+            source: options.source ?? 'user',
+            version: DEFAULTS.SCHEMA_VERSION
+        };
+
+        const validation = validateTriple(triple);
+        if (!validation.valid) {
+            console.warn('Validation failed:', validation.violations, triple);
+            this.errors.push({ triple, violations: validation.violations, stime: this.stime });
+        }
+
+        // Ensure nodes exist
+        for (const id of [subject, object]) {
+            if (id && !this.nodes.has(id)) {
+                this.nodes.set(id, {
+                    id,
+                    pos: [(Math.random() - 0.5) * 20, (Math.random() - 0.5) * 20, (Math.random() - 0.5) * 20],
+                    vel: [0, 0, 0],
+                    mass: id.endsWith('.zip') ? 4.0 : DEFAULTS.MASS,
+                    archetype: triple.archetype
+                });
+            }
+        }
+
+        this.triples.push(triple);
+        this._notify('triple_asserted', triple);
+        return triple;
+    }
+
+    negate(tripleIndex) {
+        if (tripleIndex >= 0 && tripleIndex < this.triples.length) {
+            this.triples[tripleIndex].deleted = this.stime;
+            this._notify('triple_negated', this.triples[tripleIndex]);
+        }
+    }
+
+    query(pattern = {}) {
+        return this.triples.filter(t => {
+            if (t.deleted !== null) return false;
+            if (pattern.subject && t.subject !== pattern.subject) return false;
+            if (pattern.relation && t.relation !== pattern.relation) return false;
+            if (pattern.object && t.object !== pattern.object) return false;
+            return true;
+        });
+    }
+
+    step(dt = DEFAULTS.DT) {
+        this.stime += dt;
+        const nodes = Array.from(this.nodes.values());
+
+        // Repulsion
+        for (let i = 0; i < nodes.length; i++) {
+            for (let j = i + 1; j < nodes.length; j++) {
+                let dx = nodes[j].pos[0] - nodes[i].pos[0];
+                let dy = nodes[j].pos[1] - nodes[i].pos[1];
+                let dz = nodes[j].pos[2] - nodes[i].pos[2];
+                let dist = Math.sqrt(dx*dx + dy*dy + dz*dz) + 0.1;
+                let force = DEFAULTS.REPULSION / (dist * dist);
+                let nx = dx / dist, ny = dy / dist, nz = dz / dist;
+                nodes[i].vel[0] -= nx * force * dt;
+                nodes[i].vel[1] -= ny * force * dt;
+                nodes[i].vel[2] -= nz * force * dt;
+                nodes[j].vel[0] += nx * force * dt;
+                nodes[j].vel[1] += ny * force * dt;
+                nodes[j].vel[2] += nz * force * dt;
+            }
+        }
+
+        // Attraction with RV/h modifier
+        this.triples.forEach(t => {
+            if (t.deleted !== null || !t.object) return;
+            const s = this.nodes.get(t.subject);
+            const o = this.nodes.get(t.object);
+            if (!s || !o) return;
+            const rel = this.relations.get(t.relation) || { length: 3.0, stiffness: 0.1 };
+            let dx = o.pos[0] - s.pos[0];
+            let dy = o.pos[1] - s.pos[1];
+            let dz = o.pos[2] - s.pos[2];
+            let dist = Math.sqrt(dx*dx + dy*dy + dz*dz) + 0.1;
+            let mod = rel.stiffness * t.rv * t.h;
+            let force = (dist - Math.abs(rel.length)) * mod * (rel.length < 0 ? -1 : 1);
+            let nx = dx / dist, ny = dy / dist, nz = dz / dist;
+            s.vel[0] += nx * force * dt;
+            s.vel[1] += ny * force * dt;
+            s.vel[2] += nz * force * dt;
+            o.vel[0] -= nx * force * dt;
+            o.vel[1] -= ny * force * dt;
+            o.vel[2] -= nz * force * dt;
+        });
+
+        // Update positions
+        nodes.forEach(n => {
+            n.pos[0] += n.vel[0] * dt;
+            n.pos[1] += n.vel[1] * dt;
+            n.pos[2] += n.vel[2] * dt;
+            n.vel[0] *= DEFAULTS.DAMPING;
+            n.vel[1] *= DEFAULTS.DAMPING;
+            n.vel[2] *= DEFAULTS.DAMPING;
+        });
+
+        this._notify('physics_step', { stime: this.stime });
+    }
+
+    _notify(event, data) {
+        this.callbacks.forEach((handler, name) => {
+            try { handler(event, data); } catch (e) { console.error(e); }
+        });
+    }
+
+    registerCallback(name, handler) {
+        this.callbacks.set(name, handler);
+    }
+
+    getStats() {
+        const active = this.triples.filter(t => t.deleted === null);
+        return {
+            nodes: this.nodes.size,
+            triples: this.triples.length,
+            active: active.length,
+            stime: this.stime.toFixed(2),
+            errors: this.errors.length,
+            repairs: this.repairs.length,
+            files: this.files.size
+        };
+    }
+
+    exportMesh() {
+        return {
+            triples: this.triples.map(t => ({
+                subject: t.subject, relation: t.relation, object: t.object,
+                rv: t.rv, h: t.h, created: t.created, deleted: t.deleted,
+                archetype: t.archetype
+            })),
+            stime: this.stime,
+            version: this.version
+        };
+    }
+}
+
+// --- PAPER KERNEL (File Ingestor) ---
+class PaperKernel {
+    constructor(mesh) {
+        this.mesh = mesh;
+    }
+
+    ingest(fileMap) {
+        let blockCount = 0;
+        for (const [filename, content] of Object.entries(fileMap)) {
+            this.mesh.files.set(filename, { size: content.length });
+            this.mesh.assertTriple('PROJECT', 'CONTAINS', filename, { archetype: 'META', source: 'ingestor' });
+
+            const ext = filename.split('.').pop().toLowerCase();
+            if (['js', 'jsx', 'ts', 'tsx'].includes(ext)) {
+                this._parseJS(filename, content);
+            } else if (ext === 'py') {
+                this._parsePython(filename, content);
+            } else if (['html', 'htm'].includes(ext)) {
+                this._parseHTML(filename, content);
+            } else if (ext === 'css') {
+                this._parseCSS(filename, content);
+            }
+            blockCount++;
+        }
+        return blockCount;
+    }
+
+    _parseJS(filename, content) {
+        const importRegex = /import\s+(?:[\w\s{},*]+)\s+from\s+['"]([^'"]+)['"]/g;
+        let match;
+        while ((match = importRegex.exec(content)) !== null) {
+            this.mesh.assertTriple(filename, 'DEPENDS_ON', match[1], { h: 0.95, source: 'ingestor' });
+        }
+        const classRegex = /class\s+(\w+)/g;
+        while ((match = classRegex.exec(content)) !== null) {
+            this.mesh.assertTriple(filename, 'DEFINES', match[1], { archetype: 'STRUCTURAL_GATE', source: 'ingestor' });
+            this.mesh.assertTriple(match[1], 'IS_A', 'STRUCTURAL_GATE', { archetype: 'STRUCTURAL_GATE' });
+        }
+        const funcRegex = /(?:async\s+)?function\s+(\w+)|(?:const|let|var)\s+(\w+)\s*=\s*(?:async\s*)?\(/g;
+        while ((match = funcRegex.exec(content)) !== null) {
+            const name = match[1] || match[2];
+            if (name) this.mesh.assertTriple(filename, 'DEFINES', name, { archetype: 'FUNCTIONAL_VECTOR', source: 'ingestor' });
+        }
+        if (content.includes('thiz.')) {
+            this.mesh.assertTriple(filename, 'CONTAINS_FLAW', 'ReferenceError', { rv: 0.1, source: 'ingestor' });
+        }
+    }
+
+    _parsePython(filename, content) {
+        const importRegex = /(?:import\s+(\w+)|from\s+(\w+)\s+import)/g;
+        let match;
+        while ((match = importRegex.exec(content)) !== null) {
+            const dep = match[1] || match[2];
+            this.mesh.assertTriple(filename, 'DEPENDS_ON', dep, { h: 0.95, source: 'ingestor' });
+        }
+        const classRegex = /class\s+(\w+):/g;
+        while ((match = classRegex.exec(content)) !== null) {
+            this.mesh.assertTriple(filename, 'DEFINES', match[1], { archetype: 'STRUCTURAL_GATE', source: 'ingestor' });
+        }
+        const funcRegex = /def\s+(\w+)\s*\(/g;
+        while ((match = funcRegex.exec(content)) !== null) {
+            this.mesh.assertTriple(filename, 'DEFINES', match[1], { archetype: 'FUNCTIONAL_VECTOR', source: 'ingestor' });
+        }
+    }
+
+    _parseHTML(filename, content) {
+        const tagRegex = /<(\w+)[^>]*>/g;
+        let match;
+        while ((match = tagRegex.exec(content)) !== null) {
+            this.mesh.assertTriple(filename, 'CONTAINS', match[1], { archetype: 'ATOMIC_SIGNAL', source: 'ingestor' });
+        }
+    }
+
+    _parseCSS(filename, content) {
+        const ruleRegex = /(\.[a-zA-Z_-][\w-]*|#[\w-]+)\s*\{/g;
+        let match;
+        while ((match = ruleRegex.exec(content)) !== null) {
+            this.mesh.assertTriple(filename, 'DEFINES', match[1], { archetype: 'ATOMIC_SIGNAL', source: 'ingestor' });
+        }
+    }
+}
+
+// --- DETERMINISTIC GENERATOR ---
+class DeterministicGenerator {
+    constructor(mesh) {
+        this.mesh = mesh;
+    }
+
+    generate(domain = 'apps') {
+        const triples = this.mesh.query();
+        if (domain === 'games') return this._generateGame(triples);
+        if (domain === 'photos') return this._generatePhoto(triples);
+        return this._generateApp(triples);
+    }
+
+    _generateApp(triples) {
+        const entities = [...new Set(triples.flatMap(t => [t.subject, t.object].filter(Boolean)))];
+        const rels = [...new Set(triples.map(t => t.relation))];
+
+        let code = '// Generated by MESSY Modern v1.0\n';
+        code += `// Entities: ${entities.length}, Relations: ${rels.length}, Triples: ${triples.length}\n\n`;
+        code += 'class GeneratedApp {\n';
+        code += '  constructor() {\n';
+        code += '    this.state = new Map();\n';
+        code += '    this.triples = ' + JSON.stringify(triples.map(t => ({s: t.subject, r: t.relation, o: t.object}))) + ';\n';
+        code += '  }\n\n';
+
+        rels.forEach(rel => {
+            const safe = sanitizeIdentifier(rel);
+            code += `  ${safe}(s, o) {\n`;
+            code += `    console.log(s + ' ${rel} ' + o);\n`;
+            code += `    this.state.set(s + ':${rel}:' + o, true);\n`;
+            code += '  }\n\n';
+        });
+
+        code += '  init() {\n';
+        triples.forEach(t => {
+            code += `    this.${sanitizeIdentifier(t.relation)}('${t.subject}', '${t.object || ''}');\n`;
+        });
+        code += '  }\n}\n';
+        code += 'const app = new GeneratedApp();\n';
+        code += 'app.init();\n';
+
+        return { html: '<div id="app-output"></div>', js: code };
+    }
+
+    _generateGame(triples) {
+        return {
+            html: '<div style="text-align:center;"><canvas id="gameCanvas" width="400" height="300" style="border:1px solid #7a22ff; background:#080410;"></canvas></div>',
+            js: `
+                const c = shadowRoot.getElementById('gameCanvas');
+                const ctx = c.getContext('2d');
+                let px = 180, py = 250, score = 0;
+                const enemies = [];
+                for (let i = 0; i < 5; i++) enemies.push({x: Math.random() * 360, y: Math.random() * 100, speed: 1 + Math.random() * 2});
+
+                c.addEventListener('mousemove', (e) => {
+                    const b = c.getBoundingClientRect();
+                    px = e.clientX - b.left - 20;
+                });
+
+                function tick() {
+                    ctx.clearRect(0, 0, c.width, c.height);
+                    ctx.fillStyle = '#ff00ff';
+                    ctx.fillRect(px, py, 40, 15);
+                    ctx.fillStyle = '#00ffff';
+                    ctx.font = '14px monospace';
+                    ctx.fillText('MESSY Game v1.0 | Score: ' + score, 15, 30);
+
+                    ctx.fillStyle = '#ff4444';
+                    enemies.forEach(en => {
+                        en.y += en.speed;
+                        if (en.y > 300) { en.y = 0; en.x = Math.random() * 360; score++; }
+                        ctx.fillRect(en.x, en.y, 20, 20);
+                    });
+
+                    requestAnimationFrame(tick);
+                }
+                tick();
+            `
+        };
+    }
+
+    _generatePhoto(triples) {
+        return {
+            html: '<div style="padding:20px; background:#120c1f; color:#00ffff; border-radius:8px; border:1px solid #00ffff; font-family:monospace;"><h4>MESSY Image Processor</h4><input type="file" id="imgInput" accept="image/*"><canvas id="imgCanvas" style="max-width:100%; margin-top:10px; border:1px solid #333;"></canvas></div>',
+            js: `
+                const input = shadowRoot.getElementById('imgInput');
+                const canvas = shadowRoot.getElementById('imgCanvas');
+                const ctx = canvas.getContext('2d');
+                input.addEventListener('change', (e) => {
+                    const file = e.target.files[0];
+                    if (!file) return;
+                    const img = new Image();
+                    img.onload = () => {
+                        canvas.width = img.width;
+                        canvas.height = img.height;
+                        ctx.drawImage(img, 0, 0);
+                        const data = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                        for (let i = 0; i < data.data.length; i += 4) {
+                            data.data[i] = 255 - data.data[i];
+                            data.data[i+1] = 255 - data.data[i+1];
+                            data.data[i+2] = 255 - data.data[i+2];
+                        }
+                        ctx.putImageData(data, 0, 0);
+                    };
+                    img.src = URL.createObjectURL(file);
+                });
+            `
+        };
+    }
+}
+
+// --- SHADOW DOM RUNTIME (CSP-safe) ---
+class ShadowRuntime {
+    constructor(containerId) {
+        this.container = document.getElementById(containerId);
+        this.host = document.createElement('div');
+        this.host.style.cssText = 'width:100%; height:100%; min-height:200px;';
+        this.container.appendChild(this.host);
+        this.shadow = this.host.attachShadow({ mode: 'closed' });
+    }
+
+    run(bundle) {
+        // Clear previous
+        this.shadow.innerHTML = '';
+
+        // Inject HTML
+        const wrapper = document.createElement('div');
+        wrapper.innerHTML = bundle.html;
+        this.shadow.appendChild(wrapper);
+
+        // Inject script as IIFE (CSP-safe: no blob URLs, no inline eval)
+        const script = document.createElement('script');
+        script.textContent = `
+            (function(shadowRoot) {
+                "use strict";
+                try {
+                    ${bundle.js}
+                } catch(err) {
+                    console.error("MESSY Runtime Error:", err);
+                    const el = document.createElement('div');
+                    el.style.cssText = 'color:#ff6b6b; padding:10px; font-family:monospace; font-size:12px; border:1px solid #ff6b6b; border-radius:4px; margin:10px;';
+                    el.textContent = 'Runtime Error: ' + err.message;
+                    shadowRoot.appendChild(el);
+                }
+            })(document.querySelector('#${this.container.id} > div').shadowRoot);
+        `;
+        this.shadow.appendChild(script);
+    }
+
+    clear() {
+        this.shadow.innerHTML = '';
+    }
+}
+
+// --- THREE.JS VISUALIZER ---
+class MeshVisualizer {
+    constructor(container, mesh) {
+        this.mesh = mesh;
+        this.scene = new THREE.Scene();
+        this.camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
+        this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        this.renderer.setSize(container.clientWidth, container.clientHeight);
+        this.renderer.setClearColor(0x0a0a0f, 1);
+        container.appendChild(this.renderer.domElement);
+
+        this.camera.position.z = 30;
+        this.camera.position.y = 10;
+
+        this.controls = new THREE.OrbitControls(this.camera, this.renderer.domElement);
+        this.controls.enableDamping = true;
+
+        const ambient = new THREE.AmbientLight(0x404040, 2);
+        this.scene.add(ambient);
+        const dir = new THREE.DirectionalLight(0xffffff, 1);
+        dir.position.set(10, 10, 10);
+        this.scene.add(dir);
+
+        this.nodeGeo = new THREE.SphereGeometry(0.4, 16, 16);
+        this.lineMat = new THREE.LineBasicMaterial({ color: 0x00d4ff, transparent: true, opacity: 0.25 });
+        this.objects = new Map();
+
+        this.animate = this.animate.bind(this);
+        requestAnimationFrame(this.animate);
+    }
+
+    getNodeColor(archetype) {
+        if (archetype === 'STRUCTURAL_GATE') return 0xff6b6b;
+        if (archetype === 'FUNCTIONAL_VECTOR') return 0x51cf66;
+        if (archetype === 'META') return 0xffd43b;
+        return 0x00d4ff;
+    }
+
+    update() {
+        // Update nodes
+        this.mesh.nodes.forEach((node, id) => {
+            if (!this.objects.has(id)) {
+                const mat = new THREE.MeshPhongMaterial({
+                    color: this.getNodeColor(node.archetype),
+                    emissive: this.getNodeColor(node.archetype),
+                    emissiveIntensity: 0.3
+                });
+                const mesh = new THREE.Mesh(this.nodeGeo, mat);
+                this.scene.add(mesh);
+                this.objects.set(id, mesh);
+            }
+            const obj = this.objects.get(id);
+            obj.position.set(node.pos[0], node.pos[1], node.pos[2]);
+        });
+
+        // Update lines (simplified: only draw first 50 active triples for performance)
+        const active = this.mesh.triples.filter(t => t.deleted === null && t.object).slice(0, 50);
+        active.forEach((t, i) => {
+            const lineId = 'line_' + i;
+            const s = this.mesh.nodes.get(t.subject);
+            const o = this.mesh.nodes.get(t.object);
+            if (!s || !o) return;
+
+            if (!this.objects.has(lineId)) {
+                const geo = new THREE.BufferGeometry();
+                const pts = [new THREE.Vector3(s.pos[0], s.pos[1], s.pos[2]), new THREE.Vector3(o.pos[0], o.pos[1], o.pos[2])];
+                geo.setFromPoints(pts);
+                const line = new THREE.Line(geo, this.lineMat);
+                this.scene.add(line);
+                this.objects.set(lineId, line);
+            } else {
+                const line = this.objects.get(lineId);
+                const pos = line.geometry.attributes.position.array;
+                pos[0] = s.pos[0]; pos[1] = s.pos[1]; pos[2] = s.pos[2];
+                pos[3] = o.pos[0]; pos[4] = o.pos[1]; pos[5] = o.pos[2];
+                line.geometry.attributes.position.needsUpdate = true;
+            }
+        });
+    }
+
+    animate() {
+        requestAnimationFrame(this.animate);
+        this.controls.update();
+        this.update();
+        this.renderer.render(this.scene, this.camera);
+    }
+}
+
+// --- UNIVERSAL INGESTOR (Drag & Drop) ---
+class UniversalIngestor {
+    constructor(mesh, dropZoneId) {
+        this.mesh = mesh;
+        this.dropZone = document.getElementById(dropZoneId);
+        this.setupDragDrop();
+    }
+
+    setupDragDrop() {
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(e => {
+            this.dropZone.addEventListener(e, (ev) => { ev.preventDefault(); ev.stopPropagation(); }, false);
+        });
+        ['dragenter', 'dragover'].forEach(e => {
+            this.dropZone.addEventListener(e, () => this.dropZone.classList.add('dragover'), false);
+        });
+        ['dragleave', 'drop'].forEach(e => {
+            this.dropZone.addEventListener(e, () => this.dropZone.classList.remove('dragover'), false);
+        });
+        this.dropZone.addEventListener('drop', (e) => this.handleDrop(e.dataTransfer.items), false);
+        this.dropZone.addEventListener('click', () => {
+            const input = document.createElement('input');
+            input.type = 'file'; input.webkitdirectory = true; input.directory = true; input.multiple = true;
+            input.onchange = (e) => this.handleFiles(e.target.files);
+            input.click();
+        });
+    }
+
+    async handleDrop(items) {
+        const files = {};
+        for (let i = 0; i < items.length; i++) {
+            const item = items[i].webkitGetAsEntry();
+            if (item) await this.traverse(item, '', files);
+        }
+        this.ingest(files);
+    }
+
+    async handleFiles(fileList) {
+        const files = {};
+        for (const file of fileList) {
+            files[file.name] = await file.text();
+        }
+        this.ingest(files);
+    }
+
+    async traverse(item, path, files) {
+        if (item.isFile) {
+            return new Promise(r => item.file(async (f) => { files[path + f.name] = await f.text(); r(); }));
+        } else if (item.isDirectory) {
+            const reader = item.createReader();
+            const entries = await new Promise(r => reader.readEntries(r));
+            for (const entry of entries) await this.traverse(entry, path + item.name + '/', files);
+        }
+    }
+
+    ingest(files) {
+        const kernel = new PaperKernel(this.mesh);
+        const count = kernel.ingest(files);
+        app.log('ingest', { files: Object.keys(files).length, blocks: count });
+        app.updateUI();
+    }
+}
+
+// --- MAIN APPLICATION ---
+class MessyApp {
+    constructor() {
+        this.mesh = new UnifiedMesh();
+        this.visualizer = new MeshVisualizer(document.getElementById('canvas-container'), this.mesh);
+        this.ingestor = new UniversalIngestor(this.mesh, 'drop-zone');
+        this.generator = new DeterministicGenerator(this.mesh);
+        this.runtime = new HybridMessyRuntime('canvas-container', 'runtime-container', this.mesh);
+        this.autoInterval = null;
+
+        this.mesh.registerCallback('ui', (event, data) => this.log(event, data));
+
+        // Demo data
+        this.mesh.assertTriple('JOHN', 'LOVES', 'MARY', { value: 3 });
+        this.mesh.assertTriple('MARY', 'LOVES', 'JOHN', { value: 2 });
+        this.mesh.assertTriple('JOHN', 'MARRIED', 'MARY');
+        this.mesh.assertTriple('JAMES', 'HATES', 'JOHN', { value: -2 });
+        this.mesh.assertTriple('JAMES', 'WANTS', 'MARY', { value: 1 });
+
+        // Sliders
+        document.getElementById('repulsion-slider').addEventListener('input', (e) => { DEFAULTS.REPULSION = parseInt(e.target.value); });
+        document.getElementById('attraction-slider').addEventListener('input', (e) => { DEFAULTS.ATTRACTION = parseInt(e.target.value) / 1000; });
+        document.getElementById('damping-slider').addEventListener('input', (e) => { DEFAULTS.DAMPING = parseInt(e.target.value) / 100; });
+
+        setInterval(() => this.updateUI(), 100);
+    }
+
+    assertTriple() {
+        const s = document.getElementById('input-subject').value;
+        const r = document.getElementById('input-relation').value;
+        const o = document.getElementById('input-object').value;
+        if (s && r) {
+            this.mesh.assertTriple(s, r, o || null);
+            this.log('assert', { s, r, o });
+        }
+    }
+
+    pipeline() {
+        // Full 6-stage pipeline
+        this.log('pipeline', { stage: 'UNDERSTAND' });
+        const files = this.mesh.files.size > 0 ? Object.fromEntries(this.mesh.files) : {};
+        if (Object.keys(files).length === 0) {
+            this.log('pipeline', { stage: 'UNDERSTAND', note: 'No files ingested. Use demo data.' });
+        }
+
+        this.log('pipeline', { stage: 'PLACE' });
+        for (let i = 0; i < 80; i++) this.mesh.step();
+
+        this.log('pipeline', { stage: 'EXPLAIN' });
+        const active = this.mesh.query();
+
+        this.log('pipeline', { stage: 'REPAIR' });
+        this.mesh.triples = this.mesh.triples.map(t => {
+            if (t.relation === 'CONTAINS_FLAW') {
+                this.mesh.repairs.push({ original: t, action: 'RESOLVED' });
+                return { ...t, relation: 'RESOLVED_STATE', object: 'fixed', rv: 1.0, h: 1.0 };
+            }
+            return t;
+        });
+
+        this.log('pipeline', { stage: 'REGENERATE' });
+        this.generate();
+
+        this.log('pipeline', { stage: 'RUN' });
+        this.run();
+
+        this.log('pipeline', { status: 'complete' });
+    }
+
+    generate() {
+        const domain = document.getElementById('target-domain').value;
+        const bundle = this.generator.generate(domain);
+        document.getElementById('code-output').textContent = bundle.js;
+        this.log('generate', { domain, length: bundle.js.length });
+        return bundle;
+    }
+
+    run() {
+        const domain = document.getElementById('target-domain').value;
+        const bundle = this.generator.generate(domain);
+        this.runtime.run(bundle);
+        this.log('run', { domain });
+    }
+
+    kill() {
+        this.runtime.kill();
+        this.log('kill', { stime: this.mesh.stime });
+    }
+
+    step() {
+        this.mesh.step();
+    }
+
+    toggleAuto() {
+        const btn = document.getElementById('auto-btn');
+        if (this.autoInterval) {
+            clearInterval(this.autoInterval);
+            this.autoInterval = null;
+            btn.textContent = '⏵ Auto';
+        } else {
+            this.autoInterval = setInterval(() => this.step(), 50);
+            btn.textContent = '⏸ Pause';
+        }
+    }
+
+    reset() {
+        if (this.autoInterval) { clearInterval(this.autoInterval); this.autoInterval = null; document.getElementById('auto-btn').textContent = '⏵ Auto'; }
+        this.mesh = new UnifiedMesh();
+        this.visualizer.mesh = this.mesh;
+        this.ingestor.mesh = this.mesh;
+        this.generator = new DeterministicGenerator(this.mesh);
+        this.runtime.clear();
+        // Re-add demo
+        this.mesh.assertTriple('JOHN', 'LOVES', 'MARY', { value: 3 });
+        this.mesh.assertTriple('MARY', 'LOVES', 'JOHN', { value: 2 });
+        this.mesh.assertTriple('JOHN', 'MARRIED', 'MARY');
+        this.mesh.assertTriple('JAMES', 'HATES', 'JOHN', { value: -2 });
+        this.mesh.assertTriple('JAMES', 'WANTS', 'MARY', { value: 1 });
+        this.log('reset', {});
+    }
+
+    exportCode() {
+        const code = document.getElementById('code-output').textContent;
+        if (!code || code.includes('Click Full Pipeline')) { alert('Generate code first!'); return; }
+        const blob = new Blob([code], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url; a.download = 'generated.js'; a.click();
+        URL.revokeObjectURL(url);
+    }
+
+    exportMesh() {
+        const data = JSON.stringify(this.mesh.exportMesh(), null, 2);
+        const blob = new Blob([data], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url; a.download = 'mesh_state.json'; a.click();
+        URL.revokeObjectURL(url);
+        this.log('export', { size: data.length });
+    }
+
+    updateUI() {
+        const stats = this.mesh.getStats();
+        document.getElementById('stat-nodes').textContent = stats.nodes;
+        document.getElementById('stat-triples').textContent = stats.triples;
+        document.getElementById('stat-active').textContent = stats.active;
+        document.getElementById('stat-stime').textContent = stats.stime;
+        document.getElementById('stat-errors').textContent = stats.errors;
+        document.getElementById('stat-repairs').textContent = stats.repairs;
+        document.getElementById('stat-files').textContent = stats.files;
+
+        const list = document.getElementById('context-triples');
+        if (list) {
+            const active = this.mesh.query();
+            list.innerHTML = active.slice(-10).map(t => {
+                let cls = 'triple-item';
+                if (t.relation === 'CONTAINS_FLAW') cls += ' flaw';
+                if (t.relation === 'RESOLVED_STATE') cls += ' resolved';
+                return `<div class="${cls}"><span><span class="triple-subj">${t.subject}</span> <span class="triple-rel">${t.relation}</span> <span class="triple-obj">${t.object || ''}</span></span><span class="triple-meta">RV:${t.rv.toFixed(1)} h:${t.h.toFixed(1)}</span></div>`;
+            }).join('');
+        }
+
+        const tree = document.getElementById('file-tree');
+        if (tree) {
+            const files = Array.from(this.mesh.files.keys());
+            tree.innerHTML = files.map(f => `<div class="file-item"><span class="file-name">${f}</span> <span class="file-type">${f.split('.').pop()}</span></div>`).join('');
+        }
+    }
+
+    log(event, data) {
+        const output = document.getElementById('log-output');
+        const entry = document.createElement('div');
+        entry.className = 'log-entry';
+        const time = this.mesh.stime.toFixed(1);
+        const color = event.includes('error') ? 'log-error' : (event.includes('warning') ? 'log-warning' : 'log-event');
+        entry.innerHTML = `<span class="log-time">[${time}]</span> <span class="${color}">${event}</span> ${JSON.stringify(data).slice(0, 80)}`;
+        output.appendChild(entry);
+        output.scrollTop = output.scrollHeight;
+        while (output.children.length > 50) output.removeChild(output.firstChild);
+    }
+}
+
+// Initialize
+const app = new MessyApp();
+
+
+// ============================================================
+// OPEN MORPHIC FOUNDRY — Live Execution Bridge
+// Maps node IDs to live functions. Same-memory execution.
+// ============================================================
+
+class HybridMessyRuntime {
+    constructor(visualContainerId, runnerContainerId, meshInstance) {
+        this.visualContainer = document.getElementById(visualContainerId);
+        this.runnerContainer = document.getElementById(runnerContainerId);
+        this.mesh = meshInstance;
+        this.iframe = null;
+        this.host = null;
+        this.shadow = null;
+        this.initSurfaces();
+    }
+
+    initSurfaces() {
+        if (this.visualContainer) {
+            this.visualContainer.innerHTML = '';
+            this.host = document.createElement('div');
+            this.host.id = 'messy-ui-viewport';
+            this.host.style.cssText = 'width:100%; height:100%; position:relative;';
+            this.visualContainer.appendChild(this.host);
+            this.shadow = this.host.attachShadow({ mode: 'open' });
+            this.shadow.innerHTML = `
+                <style>
+                    :host { display: block; font-family: monospace; color: #00d4ff; }
+                    #canvas3d { width: 100%; height: 100%; display: block; }
+                    .ui-overlay { 
+                        position: absolute; top: 10px; left: 10px; 
+                        background: rgba(10,10,20,0.85); padding: 10px; 
+                        border: 1px solid #52159c; border-radius: 4px;
+                        font-size: 11px; pointer-events: none;
+                    }
+                </style>
+                <div id="canvas3d"></div>
+                <div class="ui-overlay">MESSY Core [STIME: <span id="stime-display">0.00</span>]</div>
+            `;
+        }
+
+        if (this.runnerContainer) {
+            this.runnerContainer.innerHTML = '';
+            this.iframe = document.createElement('iframe');
+            this.iframe.sandbox = 'allow-scripts';
+            this.iframe.style.cssText = 'width:100%; height:100%; border:none; background:#000000;';
+            this.runnerContainer.appendChild(this.iframe);
+            this.setupTelemetryBridge();
+        }
+    }
+
+    setupTelemetryBridge() {
+        window.addEventListener('message', (e) => {
+            if (!this.iframe || e.source !== this.iframe.contentWindow) return;
+            const payload = e.data;
+            if (payload && payload.surface === 'MESSY_RUNTIME') {
+                this.routeTelemetryToMesh(payload);
+            }
+        });
+    }
+
+    routeTelemetryToMesh(data) {
+        console.warn(`[MESSY RUNTIME EXCEPTION] ${data.errorClass}: ${data.message}`);
+        if (this.mesh && typeof this.mesh.assertTriple === 'function') {
+            const sanitized = (data.sanitizedIdent || 'runtime_error').substring(0, 30);
+            this.mesh.assertTriple(
+                'SYNTHESIZED_RUNTIME',
+                'CONTAINS_FLAW',
+                sanitized,
+                { rv: 0.1, h: 1.0, archetype: 'META', source: 'selfmod' }
+            );
+            if (this.mesh.errors) {
+                this.mesh.errors.push({
+                    type: data.errorClass,
+                    message: data.message,
+                    line: data.line,
+                    stime: this.mesh.stime || 0
+                });
+            }
+        }
+        if (typeof this.mesh.onRuntimeError === 'function') {
+            this.mesh.onRuntimeError(data);
+        }
+    }
+
+    run(bundle) {
+        if (!this.iframe) {
+            console.error('Execution iframe not initialized');
+            return;
+        }
+        const doc = this.iframe.contentDocument || this.iframe.contentWindow.document;
+        if (!doc) {
+            console.error('Cannot access sandboxed document');
+            return;
+        }
+
+        const crashTrap = `
+            window.onerror = function(msg, url, line, col, error) {
+                const ident = (msg || 'runtime_panic').toLowerCase().replace(/[^a-z0-9_]/g, '_').substring(0, 30);
+                window.parent.postMessage({
+                    surface: 'MESSY_RUNTIME',
+                    type: 'CRASH',
+                    errorClass: 'E6_EXECUTE',
+                    message: msg,
+                    sanitizedIdent: ident,
+                    line: line
+                }, '*');
+                return true;
+            };
+            console.error = (function(orig) {
+                return function(msg) {
+                    window.parent.postMessage({
+                        surface: 'MESSY_RUNTIME',
+                        type: 'LOG_ERROR',
+                        errorClass: 'E6_EXECUTE',
+                        message: String(msg),
+                        sanitizedIdent: String(msg).toLowerCase().replace(/[^a-z0-9_]/g, '_').substring(0, 30)
+                    }, '*');
+                    orig.apply(console, arguments);
+                };
+            })(console.error);
+        `;
+
+        doc.open();
+        doc.write(`
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; canvas-src 'self';">
+    <style>
+        body { margin: 0; background: #0a0a0f; color: #e0e0e0; font-family: system-ui, sans-serif; overflow: auto; }
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-thumb { background: #52159c; }
+    </style>
+    <script>${crashTrap}</script>
+</head>
+<body>
+    ${bundle.html}
+    <script>
+        (function() {
+            "use strict";
+            try {
+                ${bundle.js}
+            } catch(err) {
+                const ident = err.name.toLowerCase() + '_' + err.message.toLowerCase().replace(/[^a-z0-9_]/g, '_').substring(0, 20);
+                window.parent.postMessage({
+                    surface: 'MESSY_RUNTIME',
+                    type: 'CRASH',
+                    errorClass: 'E5_GENERATE',
+                    message: err.name + ': ' + err.message,
+                    sanitizedIdent: ident
+                }, '*');
+            }
+        })();
+    </script>
+</body>
+</html>
+        `);
+        doc.close();
+    }
+
+    kill() {
+        if (this.iframe) {
+            console.log('Execution kill switch triggered');
+            this.iframe.src = 'about:blank';
+        }
+    }
+
+    updateSTIME(stime) {
+        const display = this.shadow?.getElementById('stime-display');
+        if (display) display.textContent = stime.toFixed(2);
+    }
+}
+
+class OpenMorphicFoundry {
+    constructor(meshUIContext) {
+        this.ui = meshUIContext;
+        this.executableRegistry = new Map(); // nodeId -> Live Function
+        this.initializeMorphicGateway();
+    }
+
+    async processDroppedAsset(fileHandle) {
+        try {
+            const rawContent = await fileHandle.text();
+            const nodeName = "FILE:" + fileHandle.name;
+            console.log(`📂 [Ingestor]: Deconstructing ${fileHandle.name}...`);
+
+            // 1. Project file structure into mesh
+            window.MESSY_SIGNAL(nodeName, "DEFINES_STRUCTURE", "APPLICATION_NODE");
+
+            // Classify behavioral vectors
+            if (rawContent.includes("function") || rawContent.includes("=>") || rawContent.includes("class")) {
+                window.MESSY_SIGNAL(nodeName, "CONTAINS_LOGIC", "FUNCTIONAL_VECTOR");
+            }
+            if (rawContent.includes("import") || rawContent.includes("require")) {
+                window.MESSY_SIGNAL(nodeName, "DEPENDS_ON", "EXTERNAL_MODULE");
+            }
+            if (rawContent.includes("thiz.")) {
+                window.MESSY_SIGNAL(nodeName, "CONTAINS_FLAW", "ReferenceError");
+            }
+
+            // 2. MOUNT EXECUTABLE MIRROR: Bind handler to node
+            this.morphNodeBehavior(nodeName, `
+                console.log("-> Mirror active for ${fileHandle.name}");
+                if (payload.actionTrigger === 'UI_INTERACTION') {
+                    window.MESSY_SIGNAL('${nodeName}', 'PROPAGATES_SIGNAL', 'VISUAL_MESH');
+                }
+            `);
+
+        } catch (err) {
+            console.error("Ingestion stalled:", err);
+        }
+    }
+
+    initializeMorphicGateway() {
+        window.MESSY_SIGNAL = (sender, action, receiver, payload = {}) => {
+            console.log(`🧬 [Morphic Wave]: ${sender} ──[${action}]──> ${receiver}`);
+
+            // LOCAL HEAP INVOCATION: Fire handler if registered
+            const handler = this.executableRegistry.get(sender);
+            if (handler) {
+                handler(payload, this.ui.mesh ? this.ui.mesh.stime : 0);
+            }
+
+            // Sync to mesh
+            if (this.ui && this.ui.mesh) {
+                this.ui.mesh.assertTriple(sender, action, receiver, {
+                    rv: 1.0, h: 1.0, source: 'morphic'
+                });
+            }
+
+            // Sync to WebSocket backend
+            if (this.ui && this.ui.socket && this.ui.socket.readyState === WebSocket.OPEN) {
+                this.ui.socket.send(JSON.stringify({
+                    action: "assert",
+                    subject: sender,
+                    relation: action,
+                    object: receiver,
+                    meta: { source: "morphic_process", payload: payload }
+                }));
+            }
+        };
+    }
+
+    morphNodeBehavior(nodeId, compiledBody) {
+        try {
+            // Compile text into live function, bind to node
+            const fn = new Function('payload', 'stime', `"use strict"; ${compiledBody}`);
+            this.executableRegistry.set(nodeId, fn);
+
+            if (this.ui && typeof this.ui.log === 'function') {
+                this.ui.log("MORPHED", { id: nodeId, registrySize: this.executableRegistry.size });
+            }
+        } catch (err) {
+            window.MESSY_SIGNAL(nodeId, "CONTAINS_FLAW", "SYNTAX_EXCEPTION", { details: err.message });
+        }
+    }
+
+    injectCapability(matrixName, algorithmicBody) {
+        console.log(`🚀 [Extension]: CAPABILITY:${matrixName}`);
+        this.morphNodeBehavior("CAPABILITY:" + matrixName, algorithmicBody);
+        window.MESSY_SIGNAL("SYSTEM", "EXTENDS_CAPABILITY", "CAPABILITY:" + matrixName);
+    }
+}
+
+// Initialize OpenMorphicFoundry after MessyApp
+// (This runs after the existing MessyApp initialization)
+</script>
+</body>
+</html>

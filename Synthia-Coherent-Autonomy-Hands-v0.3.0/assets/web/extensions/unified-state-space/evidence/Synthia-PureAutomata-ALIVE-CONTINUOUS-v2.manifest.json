@@ -1,0 +1,21 @@
+{
+  "artifact": "Synthia-PureAutomata-ALIVE-CONTINUOUS-v2.zip",
+  "sha256": "977323b7e065188f7daec61b164d87001e1626d0b8503c4263dee94d6d34829c",
+  "source_donor": "852f92984070dd243b114f2548dfb06a.zip",
+  "status": "alive-continuous-structurally-hardened",
+  "changes": [
+    "persistent organism continuity bridge",
+    "canonical house 1..12 separated from trigramHouse 1..8",
+    "address geometry validator/resolver",
+    "ToolFactory preserves fine address context",
+    "all 8 ToolFactory levels execution-tested",
+    "64-gate 360-degree morphology integrity test"
+  ],
+  "verification": {
+    "core": 866,
+    "merged_smoke": 42,
+    "continuous_life": "PASS",
+    "organism_integrity": 12,
+    "total_named_assertion_groups": 921
+  }
+}

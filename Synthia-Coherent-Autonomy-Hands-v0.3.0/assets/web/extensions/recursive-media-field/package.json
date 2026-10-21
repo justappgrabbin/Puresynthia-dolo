@@ -1,0 +1,10 @@
+{
+  "name": "synthia-recursive-media-field-v1-1",
+  "version": "0.2.0",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "check": "node --check src/synthia-recursive-media-field.js && node --check src/srmf-growth-and-rig.mjs",
+    "test": "node test/core.test.mjs"
+  }
+}

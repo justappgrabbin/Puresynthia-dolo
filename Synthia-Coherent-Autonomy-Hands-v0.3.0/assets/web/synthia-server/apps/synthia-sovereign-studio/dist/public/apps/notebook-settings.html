@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <title>Notebook - Extended Intelligence</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        
+        :root {
+            --bg: #2a2a2e;
+            --surface: #36363a;
+            --accent: #8B5CF6;
+            --text: #f5f5f5;
+            --dim: #999;
+        }
+        
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        #app { display: flex; flex-direction: column; height: 100vh; }
+        
+        header {
+            padding: 16px 20px;
+            background: var(--bg);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        }
+        
+        .logo { font-size: 0.9rem; color: var(--dim); }
+        .header-actions { display: flex; gap: 8px; }
+        
+        .icon-btn {
+            width: 36px; height: 36px;
+            background: transparent;
+            border: none;
+            color: var(--dim);
+            cursor: pointer;
+            font-size: 1.1rem;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0.4;
+        }
+        
+        .icon-btn:active { transform: scale(0.9); opacity: 1; color: var(--accent); }
+        
+        main { flex: 1; overflow-y: auto; padding: 20px; }
+        
+        /* Settings Panel */
+        .settings-panel {
+            position: fixed;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            width: 100%;
+            max-width: 400px;
+            background: var(--surface);
+            border-left: 1px solid rgba(255, 255, 255, 0.1);
+            transform: translateX(100%);
+            transition: transform 0.3s;
+            z-index: 100;
+            overflow-y: auto;
+            padding: 20px;
+        }
+        
+        .settings-panel.open { transform: translateX(0); }
+        
+        .settings-section {
+            background: rgba(139, 92, 246, 0.05);
+            border: 1px solid rgba(139, 92, 246, 0.2);
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+        
+        .settings-section h3 {
+            color: var(--accent);
+            font-size: 0.9rem;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .json-upload-area {
+            border: 2px dashed rgba(139, 92, 246, 0.3);
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin: 8px 0;
+        }
+        
+        .json-upload-area:hover {
+            border-color: var(--accent);
+            background: rgba(139, 92, 246, 0.05);
+        }
+        
+        .json-upload-area.active {
+            border-color: var(--accent);
+            background: rgba(139, 92, 246, 0.1);
+        }
+        
+        .loaded-json-list {
+            margin-top: 12px;
+        }
+        
+        .loaded-json-item {
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(139, 92, 246, 0.3);
+            border-radius: 4px;
+            padding: 8px 12px;
+            margin: 4px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.85rem;
+        }
+        
+        .loaded-json-item .name {
+            color: var(--accent);
+            font-weight: 500;
+        }
+        
+        .loaded-json-item .size {
+            color: var(--dim);
+            font-size: 0.75rem;
+        }
+        
+        .remove-json {
+            background: rgba(255, 0, 0, 0.1);
+            border: 1px solid rgba(255, 0, 0, 0.3);
+            color: #ff6b6b;
+            padding: 4px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.75rem;
+        }
+        
+        input[type="file"] { display: none; }
+        
+        .mode-toggle {
+            position: fixed;
+            bottom: 90px;
+            right: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            z-index: 50;
+        }
+        
+        .mode-btn {
+            width: 52px; height: 52px;
+            background: var(--surface);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            color: var(--dim);
+            font-size: 1.2rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+        
+        .mode-btn.active {
+            background: var(--accent);
+            color: #fff;
+            border-color: var(--accent);
+        }
+        
+        .fab {
+            position: fixed;
+            right: 20px;
+            bottom: 20px;
+            width: 56px; height: 56px;
+            background: var(--accent);
+            border: none;
+            border-radius: 50%;
+            color: #fff;
+            font-size: 1.5rem;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 50;
+        }
+        
+        .toast {
+            position: fixed;
+            bottom: 280px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: var(--surface);
+            padding: 12px 20px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            opacity: 0;
+            transition: all 0.3s;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            z-index: 200;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+        
+        .overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+            z-index: 99;
+        }
+        
+        .overlay.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <div class="overlay" id="overlay" onclick="closeAll()"></div>
+        
+        <header>
+            <div class="logo">◦ Intelligence Extended</div>
+            <div class="header-actions">
+                <button class="icon-btn" onclick="toggleSettings()" title="Settings">⚙</button>
+            </div>
+        </header>
+        
+        <main>
+            <h2 style="margin-bottom: 20px;">Extended Intelligence Notebook</h2>
+            <p style="color: var(--dim); line-height: 1.6;">
+                Upload JSON knowledge bases to extend the notebook's intelligence.
+                Supported types: Gate data, Causality rules, Transformation matrices, 
+                Code templates, Sentence generators, and more.
+            </p>
+            
+            <div id="stats" style="margin-top: 20px; padding: 16px; background: rgba(139, 92, 246, 0.05); border-radius: 8px;">
+                <div style="font-size: 0.85rem; color: var(--dim);">Loaded Knowledge Bases:</div>
+                <div style="font-size: 1.5rem; color: var(--accent); margin-top: 8px;" id="knowledge-count">0</div>
+            </div>
+        </main>
+        
+        <!-- Settings Panel -->
+        <div class="settings-panel" id="settings-panel">
+            <h2 style="margin-bottom: 20px;">Settings & Knowledge</h2>
+            
+            <!-- Gate & Line Database -->
+            <div class="settings-section">
+                <h3>📖 Gate & Line Database</h3>
+                <p style="font-size: 0.85rem; color: var(--dim); margin-bottom: 12px;">
+                    Upload 384-line database (64 gates × 6 lines)
+                </p>
+                <div class="json-upload-area" onclick="document.getElementById('gate-upload').click()">
+                    <div style="font-size: 2rem; margin-bottom: 8px;">📚</div>
+                    <div style="font-size: 0.9rem;">Click to upload gates.json</div>
+                </div>
+                <input type="file" id="gate-upload" accept=".json" onchange="loadJSON(this, 'gates')">
+                <div class="loaded-json-list" id="gates-list"></div>
+            </div>
+            
+            <!-- Causality Rules -->
+            <div class="settings-section">
+                <h3>🔗 Causality Rules</h3>
+                <p style="font-size: 0.85rem; color: var(--dim); margin-bottom: 12px;">
+                    Define how gates/lines cause, enable, or constrain each other
+                </p>
+                <div class="json-upload-area" onclick="document.getElementById('causality-upload').click()">
+                    <div style="font-size: 2rem; margin-bottom: 8px;">⚛️</div>
+                    <div style="font-size: 0.9rem;">Click to upload causality.json</div>
+                </div>
+                <input type="file" id="causality-upload" accept=".json" onchange="loadJSON(this, 'causality')">
+                <div class="loaded-json-list" id="causality-list"></div>
+            </div>
+            
+            <!-- Transformation Matrix -->
+            <div class="settings-section">
+                <h3>⚡ Transformation Matrix</h3>
+                <p style="font-size: 0.85rem; color: var(--dim); margin-bottom: 12px;">
+                    How to transform between states (text→code, code→visual, etc.)
+                </p>
+                <div class="json-upload-area" onclick="document.getElementById('transform-upload').click()">
+                    <div style="font-size: 2rem; margin-bottom: 8px;">🔄</div>
+                    <div style="font-size: 0.9rem;">Click to upload transforms.json</div>
+                </div>
+                <input type="file" id="transform-upload" accept=".json" onchange="loadJSON(this, 'transforms')">
+                <div class="loaded-json-list" id="transforms-list"></div>
+            </div>
+            
+            <!-- Code Templates -->
+            <div class="settings-section">
+                <h3>💻 Code Templates</h3>
+                <p style="font-size: 0.85rem; color: var(--dim); margin-bottom: 12px;">
+                    Code generation templates by gate/dimension
+                </p>
+                <div class="json-upload-area" onclick="document.getElementById('code-upload').click()">
+                    <div style="font-size: 2rem; margin-bottom: 8px;">🧬</div>
+                    <div style="font-size: 0.9rem;">Click to upload code-templates.json</div>
+                </div>
+                <input type="file" id="code-upload" accept=".json" onchange="loadJSON(this, 'code')">
+                <div class="loaded-json-list" id="code-list"></div>
+            </div>
+            
+            <!-- Sentence Generators -->
+            <div class="settings-section">
+                <h3>📝 Sentence Generators</h3>
+                <p style="font-size: 0.85rem; color: var(--dim); margin-bottom: 12px;">
+                    Base/Tone/Color/Line keyword banks for sentence generation
+                </p>
+                <div class="json-upload-area" onclick="document.getElementById('sentence-upload').click()">
+                    <div style="font-size: 2rem; margin-bottom: 8px;">✨</div>
+                    <div style="font-size: 0.9rem;">Click to upload sentences.json</div>
+                </div>
+                <input type="file" id="sentence-upload" accept=".json" onchange="loadJSON(this, 'sentences')">
+                <div class="loaded-json-list" id="sentences-list"></div>
+            </div>
+            
+            <!-- Custom Knowledge -->
+            <div class="settings-section">
+                <h3>🎯 Custom Knowledge</h3>
+                <p style="font-size: 0.85rem; color: var(--dim); margin-bottom: 12px;">
+                    Any other JSON knowledge you want to add
+                </p>
+                <div class="json-upload-area" onclick="document.getElementById('custom-upload').click()">
+                    <div style="font-size: 2rem; margin-bottom: 8px;">🌌</div>
+                    <div style="font-size: 0.9rem;">Click to upload custom.json</div>
+                </div>
+                <input type="file" id="custom-upload" accept=".json" onchange="loadJSON(this, 'custom')">
+                <div class="loaded-json-list" id="custom-list"></div>
+            </div>
+        </div>
+        
+        <!-- Mode Buttons -->
+        <div class="mode-toggle">
+            <button class="mode-btn active" title="Text">Aa</button>
+            <button class="mode-btn" title="Draw">✎</button>
+            <button class="mode-btn" title="Predict">◉</button>
+            <button class="mode-btn" title="Transform">⚡</button>
+        </div>
+        
+        <button class="fab" onclick="showToast('New Page')" title="New page">+</button>
+        <div class="toast" id="toast"></div>
+    </div>
+
+    <script>
+        // Knowledge storage
+        const knowledge = {
+            gates: [],
+            causality: [],
+            transforms: [],
+            code: [],
+            sentences: [],
+            custom: []
+        };
+        
+        function toggleSettings() {
+            const panel = document.getElementById('settings-panel');
+            const overlay = document.getElementById('overlay');
+            panel.classList.toggle('open');
+            overlay.classList.toggle('active');
+        }
+        
+        function closeAll() {
+            document.getElementById('settings-panel').classList.remove('open');
+            document.getElementById('overlay').classList.remove('active');
+        }
+        
+        function loadJSON(input, type) {
+            const file = input.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    knowledge[type].push({
+                        name: file.name,
+                        size: formatBytes(file.size),
+                        data: data,
+                        loaded: new Date().toISOString()
+                    });
+                    
+                    updateKnowledgeLists();
+                    updateStats();
+                    showToast(`✅ Loaded ${file.name}`);
+                    
+                    // Save to localStorage
+                    localStorage.setItem('notebook-knowledge', JSON.stringify(knowledge));
+                } catch (err) {
+                    showToast(`❌ Error loading ${file.name}: ${err.message}`);
+                }
+            };
+            reader.readAsText(file);
+        }
+        
+        function removeJSON(type, index) {
+            knowledge[type].splice(index, 1);
+            updateKnowledgeLists();
+            updateStats();
+            localStorage.setItem('notebook-knowledge', JSON.stringify(knowledge));
+            showToast('Removed knowledge base');
+        }
+        
+        function updateKnowledgeLists() {
+            for (const type in knowledge) {
+                const list = document.getElementById(`${type}-list`);
+                if (!list) continue;
+                
+                list.innerHTML = '';
+                knowledge[type].forEach((item, index) => {
+                    const div = document.createElement('div');
+                    div.className = 'loaded-json-item';
+                    div.innerHTML = `
+                        <div>
+                            <div class="name">${item.name}</div>
+                            <div class="size">${item.size} • ${new Date(item.loaded).toLocaleString()}</div>
+                        </div>
+                        <button class="remove-json" onclick="removeJSON('${type}', ${index})">Remove</button>
+                    `;
+                    list.appendChild(div);
+                });
+            }
+        }
+        
+        function updateStats() {
+            const total = Object.values(knowledge).reduce((sum, arr) => sum + arr.length, 0);
+            document.getElementById('knowledge-count').textContent = total;
+        }
+        
+        function formatBytes(bytes) {
+            if (bytes === 0) return '0 B';
+            const k = 1024;
+            const sizes = ['B', 'KB', 'MB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+        
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 2000);
+        }
+        
+        // Load saved knowledge on startup
+        window.onload = function() {
+            const saved = localStorage.getItem('notebook-knowledge');
+            if (saved) {
+                try {
+                    const loaded = JSON.parse(saved);
+                    Object.assign(knowledge, loaded);
+                    updateKnowledgeLists();
+                    updateStats();
+                } catch (err) {
+                    console.error('Error loading saved knowledge:', err);
+                }
+            }
+        };
+        
+        // Expose knowledge for other scripts to use
+        window.getKnowledge = function(type) {
+            return knowledge[type] || [];
+        };
+        
+        window.getAllKnowledge = function() {
+            return knowledge;
+        };
+    </script>
+</body>
+</html>

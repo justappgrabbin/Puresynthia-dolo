@@ -1,0 +1,1413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#2a2a2e">
+    <title>Notebook</title>
+    <style>
+        * { 
+            margin: 0; 
+            padding: 0; 
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        :root {
+            --bg: #2a2a2e;
+            --surface: #36363a;
+            --accent: #8B5CF6;
+            --text: #f5f5f5;
+            --dim: #999;
+            --safe-top: env(safe-area-inset-top);
+            --safe-bottom: env(safe-area-inset-bottom);
+        }
+        
+        /* Subtle themes - barely noticeable until you look closely */
+        [data-theme="echo"] { --accent: #8B5CF6; }
+        [data-theme="prime"] { --accent: #fbbf24; }
+        [data-theme="cosmic"] { --accent: #06b6d4; }
+        [data-theme="mermaid"] { --accent: #14b8a6; }
+        [data-theme="venom"] { --accent: #84cc16; }
+        [data-theme="void"] { --accent: #666; }
+        
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            height: 100vh;
+            overflow: hidden;
+            position: fixed;
+            width: 100%;
+            padding-top: var(--safe-top);
+            padding-bottom: var(--safe-bottom);
+            touch-action: manipulation;
+        }
+        
+        #app { 
+            display: flex; 
+            flex-direction: column; 
+            height: 100vh; 
+            width: 100%; 
+        }
+        
+        /* Minimal header - just a hint of accent */
+        header {
+            padding: 16px 20px;
+            padding-top: calc(16px + var(--safe-top));
+            background: var(--bg);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        }
+        
+        .logo {
+            font-size: 0.9rem;
+            color: var(--dim);
+            letter-spacing: 3px;
+            font-weight: 300;
+        }
+        
+        .header-actions {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .icon-btn {
+            width: 36px;
+            height: 36px;
+            background: transparent;
+            border: none;
+            color: var(--dim);
+            cursor: pointer;
+            font-size: 1.1rem;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            opacity: 0.4;
+        }
+        
+        .icon-btn:active {
+            transform: scale(0.9);
+            opacity: 1;
+            color: var(--accent);
+        }
+        
+        /* Main editor - full focus, no distractions */
+        main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 0;
+            overflow: hidden;
+        }
+        
+        #editor {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        #page-title {
+            font-size: 1.5rem;
+            font-weight: 300;
+            color: var(--text);
+            border: none;
+            background: transparent;
+            outline: none;
+            margin-bottom: 24px;
+            font-family: inherit;
+            width: 100%;
+            padding: 0;
+        }
+        
+        #page-title::placeholder {
+            color: var(--dim);
+            opacity: 0.3;
+        }
+        
+        #page-content {
+            flex: 1;
+            background: transparent;
+            border: none;
+            outline: none;
+            color: var(--text);
+            font-family: inherit;
+            font-size: 1rem;
+            line-height: 1.8;
+            resize: none;
+            white-space: pre-wrap;
+            min-height: 300px;
+            font-weight: 300;
+        }
+        
+        #page-content::placeholder {
+            color: var(--dim);
+            opacity: 0.2;
+        }
+        
+        /* Hidden until needed - pages drawer */
+        #pages-drawer {
+            position: fixed;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 85vw;
+            max-width: 320px;
+            background: var(--surface);
+            transform: translateX(-100%);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 100;
+            padding-top: var(--safe-top);
+            display: flex;
+            flex-direction: column;
+        }
+        
+        #pages-drawer.open {
+            transform: translateX(0);
+        }
+        
+        .drawer-header {
+            padding: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        
+        .drawer-title {
+            font-size: 0.8rem;
+            color: var(--dim);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            font-weight: 400;
+        }
+        
+        .pages-list {
+            flex: 1;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            padding: 10px;
+        }
+        
+        .page-item {
+            padding: 16px;
+            margin-bottom: 4px;
+            background: rgba(255, 255, 255, 0.04);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border-left: 2px solid transparent;
+        }
+        
+        .page-item:active {
+            transform: scale(0.98);
+            background: rgba(255, 255, 255, 0.08);
+        }
+        
+        .page-item.active {
+            background: rgba(255, 255, 255, 0.08);
+            border-left-color: var(--accent);
+        }
+        
+        .page-item-title {
+            font-size: 0.95rem;
+            margin-bottom: 4px;
+            color: var(--text);
+            font-weight: 300;
+        }
+        
+        .page-item-meta {
+            font-size: 0.7rem;
+            color: var(--dim);
+            opacity: 0.5;
+        }
+        
+        /* Subtle indicator - only shows when there are connections */
+        .connection-hint {
+            width: 4px;
+            height: 4px;
+            background: var(--accent);
+            border-radius: 50%;
+            display: inline-block;
+            margin-left: 6px;
+            opacity: 0.3;
+        }
+        
+        /* Hidden insight panel - slides up from bottom */
+        #insight-panel {
+            position: fixed;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--surface);
+            transform: translateY(100%);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 100;
+            padding-bottom: var(--safe-bottom);
+            max-height: 60vh;
+            border-radius: 20px 20px 0 0;
+            box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.5);
+        }
+        
+        #insight-panel.open {
+            transform: translateY(0);
+        }
+        
+        .insight-handle {
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+        
+        .insight-handle::before {
+            content: '';
+            width: 40px;
+            height: 4px;
+            background: var(--dim);
+            border-radius: 2px;
+            opacity: 0.3;
+        }
+        
+        .insight-content {
+            padding: 20px;
+            overflow-y: auto;
+            max-height: calc(60vh - 40px);
+        }
+        
+        .insight-section {
+            margin-bottom: 20px;
+        }
+        
+        .insight-label {
+            font-size: 0.7rem;
+            color: var(--dim);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 8px;
+        }
+        
+        .insight-text {
+            font-size: 0.9rem;
+            color: var(--text);
+            line-height: 1.6;
+            font-weight: 300;
+        }
+        
+        .connection-item {
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.04);
+            border-radius: 8px;
+            margin-bottom: 8px;
+            font-size: 0.85rem;
+            color: var(--text);
+            border-left: 2px solid var(--accent);
+            opacity: 0.7;
+        }
+        
+        /* Floating action button - minimal */
+        .fab {
+            position: fixed;
+            right: 20px;
+            bottom: calc(20px + var(--safe-bottom));
+            width: 56px;
+            height: 56px;
+            background: var(--accent);
+            border: none;
+            border-radius: 50%;
+            color: #fff;
+            font-size: 1.5rem;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            z-index: 50;
+        }
+        
+        .fab:active {
+            transform: scale(0.9);
+        }
+        
+        /* Overlay for drawers */
+        .overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 90;
+            backdrop-filter: blur(2px);
+        }
+        
+        .overlay.active {
+            display: block;
+        }
+        
+        /* Subtle pen indicator in corner */
+        .pen-indicator {
+            position: fixed;
+            top: calc(80px + var(--safe-top));
+            right: 20px;
+            font-size: 1.2rem;
+            opacity: 0.2;
+            transition: all 0.3s;
+            z-index: 40;
+        }
+        
+        /* Hidden settings panel */
+        #settings-panel {
+            position: fixed;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            width: 85vw;
+            max-width: 300px;
+            background: var(--surface);
+            transform: translateX(100%);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 100;
+            padding-top: var(--safe-top);
+            overflow-y: auto;
+        }
+        
+        #settings-panel.open {
+            transform: translateX(0);
+        }
+        
+        .settings-section {
+            padding: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        
+        .settings-title {
+            font-size: 0.7rem;
+            color: var(--dim);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 16px;
+        }
+        
+        .pen-option {
+            padding: 14px;
+            background: rgba(255, 255, 255, 0.04);
+            border-radius: 8px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border-left: 3px solid transparent;
+        }
+        
+        .pen-option:active {
+            transform: scale(0.98);
+        }
+        
+        .pen-option.active {
+            background: rgba(255, 255, 255, 0.08);
+            border-left-color: var(--accent);
+        }
+        
+        .pen-name {
+            font-size: 0.9rem;
+            margin-bottom: 4px;
+        }
+        
+        .pen-desc {
+            font-size: 0.7rem;
+            color: var(--dim);
+            opacity: 0.5;
+        }
+        
+        .theme-dots {
+            display: flex;
+            gap: 12px;
+            margin-top: 16px;
+        }
+        
+        .theme-dot {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 2px solid transparent;
+        }
+        
+        .theme-dot:active {
+            transform: scale(0.9);
+        }
+        
+        .theme-dot.active {
+            border-color: rgba(255, 255, 255, 0.3);
+            transform: scale(1.1);
+        }
+        
+        .theme-dot[data-theme="echo"] { background: #8B5CF6; }
+        .theme-dot[data-theme="prime"] { background: #fbbf24; }
+        .theme-dot[data-theme="cosmic"] { background: #06b6d4; }
+        .theme-dot[data-theme="mermaid"] { background: #14b8a6; }
+        .theme-dot[data-theme="venom"] { background: #84cc16; }
+        .theme-dot[data-theme="void"] { background: #666; }
+        
+        /* Easter egg - double tap page item to see glyph */
+        .glyph-reveal {
+            font-size: 0.65rem;
+            color: var(--accent);
+            font-family: monospace;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        
+        .page-item.reveal-glyph .glyph-reveal {
+            opacity: 0.5;
+        }
+        
+        /* Subtle toast notifications */
+        .toast {
+            position: fixed;
+            bottom: calc(90px + var(--safe-bottom));
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: var(--surface);
+            padding: 12px 20px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            opacity: 0;
+            transition: all 0.3s;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            z-index: 200;
+        }
+        
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+        
+        /* Desktop adjustments */
+        @media (min-width: 768px) {
+            #editor {
+                max-width: 680px;
+                margin: 0 auto;
+                padding: 40px 20px;
+            }
+            
+            #page-title {
+                font-size: 2rem;
+            }
+            
+            .fab {
+                right: 40px;
+                bottom: 40px;
+            }
+        }
+        
+        /* Subtle animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .page-item {
+            animation: fadeIn 0.3s ease;
+        }
+        
+        /* Hidden status indicators - only for nerds who inspect */
+        .hidden-status {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <!-- Overlay for drawers -->
+        <div class="overlay" id="overlay" onclick="closeAll()"></div>
+        
+        <!-- Minimal header -->
+        <header>
+            <div class="logo">◦</div>
+            <div class="header-actions">
+                <button class="icon-btn" onclick="togglePages()" title="Pages">☰</button>
+                <button class="icon-btn" onclick="toggleSettings()" title="Settings">⋮</button>
+            </div>
+        </header>
+        
+        <!-- Main editor - clean and focused -->
+        <main>
+            <div id="editor">
+                <input 
+                    type="text" 
+                    id="page-title" 
+                    placeholder="Untitled"
+                    oninput="updatePage()"
+                    autocomplete="off"
+                >
+                <textarea 
+                    id="page-content" 
+                    placeholder="Start writing..."
+                    oninput="updatePage()"
+                ></textarea>
+            </div>
+        </main>
+        
+        <!-- Pages drawer -->
+        <div id="pages-drawer">
+            <div class="drawer-header">
+                <div class="drawer-title">Pages</div>
+            </div>
+            <div class="pages-list" id="pages-list"></div>
+        </div>
+        
+        <!-- Settings drawer -->
+        <div id="settings-panel">
+            <div class="settings-section">
+                <div class="settings-title">Writing Mode</div>
+                <div class="pen-option active" data-pen="pen" onclick="setPen('pen')">
+                    <div class="pen-name">✒ Regular</div>
+                    <div class="pen-desc">Normal writing</div>
+                </div>
+                <div class="pen-option" data-pen="pencil" onclick="setPen('pencil')">
+                    <div class="pen-name">✎ Sketch</div>
+                    <div class="pen-desc">Temporary thoughts</div>
+                </div>
+                <div class="pen-option" data-pen="marker" onclick="setPen('marker')">
+                    <div class="pen-name">▮ Permanent</div>
+                    <div class="pen-desc">Important insights</div>
+                </div>
+            </div>
+            
+            <div class="settings-section">
+                <div class="settings-title">Theme</div>
+                <div class="theme-dots">
+                    <div class="theme-dot active" data-theme="echo" onclick="setTheme('echo')"></div>
+                    <div class="theme-dot" data-theme="prime" onclick="setTheme('prime')"></div>
+                    <div class="theme-dot" data-theme="cosmic" onclick="setTheme('cosmic')"></div>
+                    <div class="theme-dot" data-theme="mermaid" onclick="setTheme('mermaid')"></div>
+                    <div class="theme-dot" data-theme="venom" onclick="setTheme('venom')"></div>
+                    <div class="theme-dot" data-theme="void" onclick="setTheme('void')"></div>
+                </div>
+            </div>
+            
+            <div class="settings-section">
+                <div class="settings-title">About</div>
+                <div style="font-size: 0.8rem; color: var(--dim); line-height: 1.6;">
+                    A consciousness-native notebook with a constitutional causal graph engine.
+                    <br><br>
+                    <span style="opacity: 0.5;">Double-tap pages to reveal their glyphs.</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Hidden insight panel - swipe up to reveal -->
+        <div id="insight-panel">
+            <div class="insight-handle" onclick="toggleInsights()"></div>
+            <div class="insight-content">
+                <div class="insight-section">
+                    <div class="insight-label">Connections</div>
+                    <div id="connections-list">
+                        <div class="insight-text" style="opacity: 0.5;">Write to discover connections</div>
+                    </div>
+                </div>
+                
+                <div class="insight-section hidden-status">
+                    <div class="insight-label">Graph Status</div>
+                    <div id="graph-status" class="insight-text"></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Subtle pen indicator -->
+        <div class="pen-indicator" id="pen-indicator">✒</div>
+        
+        <!-- New page button -->
+        <button class="fab" onclick="createPage()" title="New page">+</button>
+        
+        <!-- Toast notifications -->
+        <div class="toast" id="toast"></div>
+    </div>
+
+    <script type="module">
+        // ============================================================================
+        // CONSTITUTIONAL CAUSAL GRAPH ENGINE (from Paper v2.0)
+        // ============================================================================
+        
+        function generateGlyph(content) {
+            let hash = 0;
+            const str = JSON.stringify(content);
+            for (let i = 0; i < str.length; i++) {
+                hash = ((hash << 5) - hash) + str.charCodeAt(i);
+                hash = hash & hash;
+            }
+            return Math.abs(hash).toString(36).substring(0, 8);
+        }
+        
+        // ============================================================================
+        // GAME GAN - Behavioral Prediction Engine
+        // ============================================================================
+        
+        class GameGAN {
+            constructor() {
+                this.patterns = new Map();
+                this.predictions = [];
+            }
+            
+            // Analyze content for patterns
+            analyzeContent(content) {
+                const words = content.toLowerCase().split(/\s+/);
+                const wordCount = words.length;
+                const uniqueWords = new Set(words).size;
+                const diversity = uniqueWords / Math.max(wordCount, 1);
+                
+                // Detect emotional tone
+                const emotionalWords = {
+                    positive: ['love', 'joy', 'happy', 'hope', 'beautiful', 'amazing', 'wonderful'],
+                    negative: ['fear', 'sad', 'angry', 'hate', 'terrible', 'awful', 'pain'],
+                    analytical: ['think', 'analyze', 'consider', 'understand', 'logic', 'reason'],
+                    creative: ['create', 'imagine', 'dream', 'vision', 'art', 'design', 'inspire']
+                };
+                
+                let tone = { positive: 0, negative: 0, analytical: 0, creative: 0 };
+                
+                words.forEach(word => {
+                    for (let [key, keywords] of Object.entries(emotionalWords)) {
+                        if (keywords.includes(word)) tone[key]++;
+                    }
+                });
+                
+                const dominantTone = Object.keys(tone).reduce((a, b) => 
+                    tone[a] > tone[b] ? a : b
+                );
+                
+                return {
+                    wordCount,
+                    diversity: diversity.toFixed(2),
+                    tone: dominantTone,
+                    toneScores: tone,
+                    containsQuestion: content.includes('?'),
+                    containsAction: /\b(do|make|create|build|write|design)\b/i.test(content)
+                };
+            }
+            
+            // Predict next likely content based on patterns
+            predictNext(currentContent, allPages) {
+                const analysis = this.analyzeContent(currentContent);
+                const predictions = [];
+                
+                // Pattern 1: Question → Answer pattern
+                if (analysis.containsQuestion) {
+                    predictions.push({
+                        type: 'answer',
+                        confidence: 0.8,
+                        suggestion: 'This looks like a question. Consider creating an answer page.'
+                    });
+                }
+                
+                // Pattern 2: Action → Implementation pattern
+                if (analysis.containsAction) {
+                    predictions.push({
+                        type: 'implementation',
+                        confidence: 0.7,
+                        suggestion: 'Action detected. You might want to create an implementation plan.'
+                    });
+                }
+                
+                // Pattern 3: Emotional → Reflection pattern
+                if (analysis.tone === 'positive' || analysis.tone === 'negative') {
+                    predictions.push({
+                        type: 'reflection',
+                        confidence: 0.6,
+                        suggestion: `${analysis.tone} tone detected. A reflection page could add depth.`
+                    });
+                }
+                
+                // Pattern 4: Analytical → Creative balance
+                if (analysis.tone === 'analytical' && analysis.wordCount > 50) {
+                    predictions.push({
+                        type: 'creative',
+                        confidence: 0.65,
+                        suggestion: 'Analytical content detected. Balance with creative exploration?'
+                    });
+                }
+                
+                // Pattern 5: Similar pages
+                const similarPages = this.findSimilarPages(currentContent, allPages);
+                if (similarPages.length > 0) {
+                    predictions.push({
+                        type: 'similar',
+                        confidence: 0.75,
+                        suggestion: `Found ${similarPages.length} related page(s). Consider connecting them.`,
+                        pages: similarPages
+                    });
+                }
+                
+                return predictions;
+            }
+            
+            // Find pages with similar content patterns
+            findSimilarPages(content, allPages) {
+                const currentWords = new Set(content.toLowerCase().split(/\s+/));
+                const similar = [];
+                
+                for (let page of allPages) {
+                    if (!page.content || page.content === content) continue;
+                    
+                    const pageWords = new Set(page.content.toLowerCase().split(/\s+/));
+                    const intersection = new Set([...currentWords].filter(w => pageWords.has(w)));
+                    const similarity = intersection.size / Math.max(currentWords.size, pageWords.size);
+                    
+                    if (similarity > 0.2) {
+                        similar.push({
+                            page: page,
+                            similarity: (similarity * 100).toFixed(0) + '%'
+                        });
+                    }
+                }
+                
+                return similar.sort((a, b) => 
+                    parseFloat(b.similarity) - parseFloat(a.similarity)
+                ).slice(0, 3);
+            }
+            
+            // Generate page transformation suggestions
+            suggestTransformation(sourcePage, targetType) {
+                const transformations = {
+                    'expand': {
+                        prompt: 'Expand this into a detailed exploration',
+                        template: `# Expanded: ${sourcePage.title}\n\n${sourcePage.content}\n\n## Deep Dive\n\n[Add detailed analysis here]\n\n## Connections\n\n[Link to related concepts]`
+                    },
+                    'summarize': {
+                        prompt: 'Condense this into key points',
+                        template: `# Summary: ${sourcePage.title}\n\nKey Points:\n- [Extract main ideas]\n- [Identify patterns]\n- [Note conclusions]`
+                    },
+                    'question': {
+                        prompt: 'Transform into questions to explore',
+                        template: `# Questions from: ${sourcePage.title}\n\n? [What questions does this raise?]\n? [What's unexplored?]\n? [What needs clarification?]`
+                    },
+                    'action': {
+                        prompt: 'Convert into actionable steps',
+                        template: `# Action Plan: ${sourcePage.title}\n\n[] Step 1: [First action]\n[] Step 2: [Next action]\n[] Step 3: [Final step]`
+                    },
+                    'visual': {
+                        prompt: 'Create visual representation',
+                        template: `# Visual: ${sourcePage.title}\n\n[SVG diagram will appear here]\n\nNotes:\n${sourcePage.content.substring(0, 100)}...`
+                    }
+                };
+                
+                return transformations[targetType] || transformations.expand;
+            }
+        }
+        
+        // ============================================================================
+        // SVG RENDERER - Generate visual diagrams from content
+        // ============================================================================
+        
+        class SVGRenderer {
+            constructor() {
+                this.width = 800;
+                this.height = 600;
+                this.padding = 40;
+            }
+            
+            // Generate mind map SVG from page connections
+            generateMindMap(centerPage, connectedPages) {
+                const cx = this.width / 2;
+                const cy = this.height / 2;
+                const radius = 150;
+                
+                let svg = `<svg width="${this.width}" height="${this.height}" xmlns="http://www.w3.org/2000/svg">`;
+                svg += `<style>
+                    .node-circle { fill: var(--accent); stroke: var(--text); stroke-width: 2; }
+                    .node-text { fill: var(--text); font-family: inherit; font-size: 14px; text-anchor: middle; }
+                    .connection-line { stroke: var(--dim); stroke-width: 1.5; stroke-dasharray: 5,5; opacity: 0.5; }
+                </style>`;
+                
+                // Draw connections first (behind nodes)
+                connectedPages.forEach((page, i) => {
+                    const angle = (i / connectedPages.length) * 2 * Math.PI;
+                    const x = cx + radius * Math.cos(angle);
+                    const y = cy + radius * Math.sin(angle);
+                    
+                    svg += `<line x1="${cx}" y1="${cy}" x2="${x}" y2="${y}" class="connection-line"/>`;
+                });
+                
+                // Draw center node
+                svg += `<circle cx="${cx}" cy="${cy}" r="40" class="node-circle"/>`;
+                svg += `<text x="${cx}" y="${cy + 5}" class="node-text">${centerPage.title || 'Center'}</text>`;
+                
+                // Draw connected nodes
+                connectedPages.forEach((page, i) => {
+                    const angle = (i / connectedPages.length) * 2 * Math.PI;
+                    const x = cx + radius * Math.cos(angle);
+                    const y = cy + radius * Math.sin(angle);
+                    
+                    svg += `<circle cx="${x}" cy="${y}" r="30" class="node-circle" opacity="0.7"/>`;
+                    svg += `<text x="${x}" y="${y + 5}" class="node-text" font-size="12">${(page.title || 'Node').substring(0, 10)}</text>`;
+                });
+                
+                svg += `</svg>`;
+                return svg;
+            }
+            
+            // Generate flow diagram
+            generateFlowDiagram(steps) {
+                const boxWidth = 160;
+                const boxHeight = 60;
+                const spacing = 80;
+                const startY = 50;
+                
+                let svg = `<svg width="${this.width}" height="${steps.length * (boxHeight + spacing)}" xmlns="http://www.w3.org/2000/svg">`;
+                svg += `<style>
+                    .flow-box { fill: var(--surface); stroke: var(--accent); stroke-width: 2; rx: 8; }
+                    .flow-text { fill: var(--text); font-family: inherit; font-size: 13px; text-anchor: middle; }
+                    .flow-arrow { stroke: var(--accent); stroke-width: 2; fill: none; marker-end: url(#arrowhead); }
+                </style>`;
+                
+                // Arrow marker
+                svg += `<defs>
+                    <marker id="arrowhead" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+                        <polygon points="0 0, 10 3, 0 6" fill="var(--accent)"/>
+                    </marker>
+                </defs>`;
+                
+                steps.forEach((step, i) => {
+                    const y = startY + i * (boxHeight + spacing);
+                    const cx = this.width / 2;
+                    
+                    // Draw box
+                    svg += `<rect x="${cx - boxWidth/2}" y="${y}" width="${boxWidth}" height="${boxHeight}" class="flow-box"/>`;
+                    svg += `<text x="${cx}" y="${y + boxHeight/2 + 5}" class="flow-text">${step}</text>`;
+                    
+                    // Draw arrow to next
+                    if (i < steps.length - 1) {
+                        svg += `<line x1="${cx}" y1="${y + boxHeight}" x2="${cx}" y2="${y + boxHeight + spacing - 10}" class="flow-arrow"/>`;
+                    }
+                });
+                
+                svg += `</svg>`;
+                return svg;
+            }
+            
+            // Generate simple graph visualization
+            generateGraph(nodes, edges) {
+                let svg = `<svg width="${this.width}" height="${this.height}" xmlns="http://www.w3.org/2000/svg">`;
+                svg += `<style>
+                    .graph-node { fill: var(--accent); stroke: var(--text); stroke-width: 2; }
+                    .graph-edge { stroke: var(--dim); stroke-width: 1.5; }
+                    .graph-label { fill: var(--text); font-size: 11px; text-anchor: middle; }
+                </style>`;
+                
+                // Position nodes in a circle
+                const centerX = this.width / 2;
+                const centerY = this.height / 2;
+                const radius = Math.min(this.width, this.height) / 2 - 60;
+                
+                const positions = nodes.map((node, i) => {
+                    const angle = (i / nodes.length) * 2 * Math.PI - Math.PI / 2;
+                    return {
+                        x: centerX + radius * Math.cos(angle),
+                        y: centerY + radius * Math.sin(angle),
+                        id: node.id,
+                        label: node.label
+                    };
+                });
+                
+                // Draw edges
+                edges.forEach(edge => {
+                    const from = positions.find(p => p.id === edge.from);
+                    const to = positions.find(p => p.id === edge.to);
+                    if (from && to) {
+                        svg += `<line x1="${from.x}" y1="${from.y}" x2="${to.x}" y2="${to.y}" class="graph-edge"/>`;
+                    }
+                });
+                
+                // Draw nodes
+                positions.forEach(pos => {
+                    svg += `<circle cx="${pos.x}" cy="${pos.y}" r="25" class="graph-node"/>`;
+                    svg += `<text x="${pos.x}" y="${pos.y + 4}" class="graph-label">${pos.label}</text>`;
+                });
+                
+                svg += `</svg>`;
+                return svg;
+            }
+        }
+        
+        class ReceiptStore {
+            constructor() { this.receipts = []; }
+            createReceipt(data) {
+                return {
+                    id: `r_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+                    timestamp: Date.now(),
+                    ...data
+                };
+            }
+            persist(receipt) { this.receipts.push(receipt); }
+        }
+        
+        class CausalityGuardian {
+            constructor(graph, receiptStore) {
+                this.graph = graph;
+                this.receiptStore = receiptStore;
+                this.isAlive = true;
+            }
+            validateNodeCreation(node) {
+                const expected = generateGlyph(node.content);
+                if (node.glyph && node.glyph !== expected) {
+                    throw new Error("Glyph mismatch");
+                }
+                return true;
+            }
+        }
+        
+        class ComputationPipeline {
+            constructor(guardian, receiptStore) {
+                this.nodes = new Map();
+                this.edges = [];
+                this.adjacencyList = new Map();
+                this.guardian = guardian;
+                this.receiptStore = receiptStore;
+            }
+            
+            addNode(nodeId, nodeType, content, metadata = {}) {
+                const node = {
+                    id: nodeId,
+                    type: nodeType,
+                    glyph: generateGlyph(content),
+                    content: content,
+                    metadata: metadata,
+                    timestamp: Date.now()
+                };
+                
+                this.guardian.validateNodeCreation(node);
+                this.nodes.set(nodeId, node);
+                
+                if (!this.adjacencyList.has(nodeId)) {
+                    this.adjacencyList.set(nodeId, []);
+                }
+                
+                const receipt = this.receiptStore.createReceipt({
+                    action: 'NODE_CREATED',
+                    node: nodeId,
+                    type: nodeType
+                });
+                this.receiptStore.persist(receipt);
+                
+                return node;
+            }
+            
+            addEdge(fromId, toId, edgeType, strength = 1.0) {
+                const edge = {
+                    id: `e_${fromId}_${toId}`,
+                    from: fromId,
+                    to: toId,
+                    type: edgeType,
+                    strength: strength
+                };
+                
+                this.edges.push(edge);
+                
+                if (!this.adjacencyList.has(fromId)) {
+                    this.adjacencyList.set(fromId, []);
+                }
+                this.adjacencyList.get(fromId).push(toId);
+                
+                return edge;
+            }
+            
+            getConnections(nodeId) {
+                const connections = [];
+                
+                // Outgoing
+                this.edges.forEach(edge => {
+                    if (edge.from === nodeId) {
+                        const targetNode = this.nodes.get(edge.to);
+                        if (targetNode) {
+                            connections.push({
+                                direction: 'to',
+                                node: targetNode,
+                                type: edge.type,
+                                strength: edge.strength
+                            });
+                        }
+                    }
+                });
+                
+                // Incoming
+                this.edges.forEach(edge => {
+                    if (edge.to === nodeId) {
+                        const sourceNode = this.nodes.get(edge.from);
+                        if (sourceNode) {
+                            connections.push({
+                                direction: 'from',
+                                node: sourceNode,
+                                type: edge.type,
+                                strength: edge.strength
+                            });
+                        }
+                    }
+                });
+                
+                return connections;
+            }
+        }
+        
+        // ============================================================================
+        // MINIMAL NOTEBOOK STATE
+        // ============================================================================
+        
+        class Notebook {
+            constructor() {
+                this.receiptStore = new ReceiptStore();
+                this.pipeline = new ComputationPipeline(null, this.receiptStore);
+                this.guardian = new CausalityGuardian(this.pipeline, this.receiptStore);
+                this.pipeline.guardian = this.guardian;
+                
+                this.pages = new Map();
+                this.currentPageId = null;
+                this.currentPen = 'pen';
+                this.theme = 'echo';
+                
+                this.loadFromStorage();
+            }
+            
+            createPage(title = '') {
+                const pageId = `p_${Date.now()}`;
+                
+                this.pages.set(pageId, {
+                    id: pageId,
+                    title: title,
+                    content: '',
+                    nodeId: null,
+                    created: Date.now(),
+                    modified: Date.now()
+                });
+                
+                this.saveToStorage();
+                return pageId;
+            }
+            
+            updatePage(pageId, title, content) {
+                const page = this.pages.get(pageId);
+                if (!page) return;
+                
+                page.title = title;
+                page.content = content;
+                page.modified = Date.now();
+                
+                if (content.trim().length > 10) {
+                    if (!page.nodeId) {
+                        page.nodeId = `n_${pageId}`;
+                        
+                        const nodeType = {
+                            'pencil': 'SKETCH',
+                            'pen': 'DOCUMENT',
+                            'marker': 'FOUNDATION'
+                        }[this.currentPen];
+                        
+                        this.pipeline.addNode(page.nodeId, nodeType, content, {
+                            title: title,
+                            pen: this.currentPen
+                        });
+                        
+                        // Connect to recent pages
+                        this.autoConnect(page.nodeId);
+                        
+                        // Show subtle toast
+                        this.showToast('Connected to graph');
+                    } else {
+                        const node = this.pipeline.nodes.get(page.nodeId);
+                        if (node) {
+                            node.content = content;
+                            node.timestamp = Date.now();
+                        }
+                    }
+                }
+                
+                this.saveToStorage();
+            }
+            
+            autoConnect(nodeId) {
+                const recentNodes = Array.from(this.pipeline.nodes.keys())
+                    .filter(id => id !== nodeId)
+                    .slice(-2);
+                
+                for (const targetId of recentNodes) {
+                    const types = ['REQUIRES', 'PRODUCES', 'ENABLES'];
+                    const type = types[Math.floor(Math.random() * types.length)];
+                    this.pipeline.addEdge(nodeId, targetId, type, 0.7);
+                }
+            }
+            
+            deletePage(pageId) {
+                const page = this.pages.get(pageId);
+                if (page && page.nodeId) {
+                    this.pipeline.nodes.delete(page.nodeId);
+                }
+                this.pages.delete(pageId);
+                this.saveToStorage();
+            }
+            
+            showToast(message) {
+                const toast = document.getElementById('toast');
+                toast.textContent = message;
+                toast.classList.add('show');
+                setTimeout(() => toast.classList.remove('show'), 2000);
+            }
+            
+            saveToStorage() {
+                localStorage.setItem('notebook_data', JSON.stringify({
+                    pages: Array.from(this.pages.entries()),
+                    currentPen: this.currentPen,
+                    theme: this.theme
+                }));
+            }
+            
+            loadFromStorage() {
+                const stored = localStorage.getItem('notebook_data');
+                if (stored) {
+                    const data = JSON.parse(stored);
+                    this.pages = new Map(data.pages || []);
+                    this.currentPen = data.currentPen || 'pen';
+                    this.theme = data.theme || 'echo';
+                }
+            }
+        }
+        
+        // ============================================================================
+        // UI CONTROLLER
+        // ============================================================================
+        
+        const notebook = new Notebook();
+        
+        window.createPage = function() {
+            const pageId = notebook.createPage();
+            notebook.currentPageId = pageId;
+            renderPages();
+            selectPage(pageId);
+            closeAll();
+        };
+        
+        window.updatePage = function() {
+            if (!notebook.currentPageId) return;
+            
+            const title = document.getElementById('page-title').value;
+            const content = document.getElementById('page-content').value;
+            
+            notebook.updatePage(notebook.currentPageId, title, content);
+            renderPages();
+            updateInsights();
+        };
+        
+        function selectPage(pageId) {
+            notebook.currentPageId = pageId;
+            const page = notebook.pages.get(pageId);
+            
+            if (page) {
+                document.getElementById('page-title').value = page.title;
+                document.getElementById('page-content').value = page.content;
+                renderPages();
+                updateInsights();
+            }
+            
+            closeAll();
+        }
+        
+        function renderPages() {
+            const container = document.getElementById('pages-list');
+            container.innerHTML = '';
+            
+            const sortedPages = Array.from(notebook.pages.values())
+                .sort((a, b) => b.modified - a.modified);
+            
+            for (const page of sortedPages) {
+                const item = document.createElement('div');
+                item.className = 'page-item';
+                if (page.id === notebook.currentPageId) {
+                    item.classList.add('active');
+                }
+                
+                const node = page.nodeId ? notebook.pipeline.nodes.get(page.nodeId) : null;
+                const hasConnections = node && notebook.pipeline.getConnections(page.nodeId).length > 0;
+                
+                const date = new Date(page.modified).toLocaleDateString(undefined, {
+                    month: 'short',
+                    day: 'numeric'
+                });
+                
+                item.innerHTML = `
+                    <div class="page-item-title">
+                        ${page.title || 'Untitled'}
+                        ${hasConnections ? '<span class="connection-hint"></span>' : ''}
+                    </div>
+                    <div class="page-item-meta">
+                        ${date} • ${page.content.length} chars
+                        <span class="glyph-reveal">${node ? node.glyph : ''}</span>
+                    </div>
+                `;
+                
+                item.onclick = () => selectPage(page.id);
+                
+                // Easter egg: double tap to reveal glyph
+                let lastTap = 0;
+                item.addEventListener('click', (e) => {
+                    const now = Date.now();
+                    if (now - lastTap < 300) {
+                        item.classList.toggle('reveal-glyph');
+                    }
+                    lastTap = now;
+                });
+                
+                container.appendChild(item);
+            }
+        }
+        
+        function updateInsights() {
+            const page = notebook.pages.get(notebook.currentPageId);
+            if (!page || !page.nodeId) return;
+            
+            const connections = notebook.pipeline.getConnections(page.nodeId);
+            const container = document.getElementById('connections-list');
+            
+            if (connections.length === 0) {
+                container.innerHTML = '<div class="insight-text" style="opacity: 0.5;">No connections yet</div>';
+                return;
+            }
+            
+            container.innerHTML = '';
+            
+            connections.forEach(conn => {
+                const targetPage = Array.from(notebook.pages.values())
+                    .find(p => p.nodeId === conn.node.id);
+                
+                if (targetPage) {
+                    const item = document.createElement('div');
+                    item.className = 'connection-item';
+                    item.innerHTML = `
+                        ${conn.direction === 'to' ? '→' : '←'} ${targetPage.title || 'Untitled'}
+                        <div style="font-size: 0.7rem; opacity: 0.5; margin-top: 4px;">${conn.type}</div>
+                    `;
+                    item.onclick = () => selectPage(targetPage.id);
+                    container.appendChild(item);
+                }
+            });
+            
+            // Update hidden graph status
+            document.getElementById('graph-status').innerHTML = `
+                Nodes: ${notebook.pipeline.nodes.size}<br>
+                Edges: ${notebook.pipeline.edges.length}<br>
+                Glyph: ${notebook.pipeline.nodes.get(page.nodeId)?.glyph || 'none'}
+            `;
+        }
+        
+        window.togglePages = function() {
+            const drawer = document.getElementById('pages-drawer');
+            const overlay = document.getElementById('overlay');
+            
+            drawer.classList.toggle('open');
+            overlay.classList.toggle('active');
+            
+            document.getElementById('settings-panel').classList.remove('open');
+            document.getElementById('insight-panel').classList.remove('open');
+        };
+        
+        window.toggleSettings = function() {
+            const panel = document.getElementById('settings-panel');
+            const overlay = document.getElementById('overlay');
+            
+            panel.classList.toggle('open');
+            overlay.classList.toggle('active');
+            
+            document.getElementById('pages-drawer').classList.remove('open');
+            document.getElementById('insight-panel').classList.remove('open');
+        };
+        
+        window.toggleInsights = function() {
+            const panel = document.getElementById('insight-panel');
+            panel.classList.toggle('open');
+        };
+        
+        window.closeAll = function() {
+            document.getElementById('pages-drawer').classList.remove('open');
+            document.getElementById('settings-panel').classList.remove('open');
+            document.getElementById('insight-panel').classList.remove('open');
+            document.getElementById('overlay').classList.remove('active');
+        };
+        
+        window.setPen = function(pen) {
+            notebook.currentPen = pen;
+            notebook.saveToStorage();
+            
+            document.querySelectorAll('.pen-option').forEach(opt => {
+                opt.classList.toggle('active', opt.dataset.pen === pen);
+            });
+            
+            const icons = { pencil: '✎', pen: '✒', marker: '▮' };
+            document.getElementById('pen-indicator').textContent = icons[pen];
+            
+            notebook.showToast(`Mode: ${pen}`);
+        };
+        
+        window.setTheme = function(theme) {
+            notebook.theme = theme;
+            notebook.saveToStorage();
+            
+            document.body.setAttribute('data-theme', theme);
+            
+            document.querySelectorAll('.theme-dot').forEach(dot => {
+                dot.classList.toggle('active', dot.dataset.theme === theme);
+            });
+        };
+        
+        // Swipe up on insight panel
+        let touchStart = 0;
+        let touchEnd = 0;
+        
+        document.addEventListener('touchstart', e => {
+            touchStart = e.changedTouches[0].screenY;
+        });
+        
+        document.addEventListener('touchend', e => {
+            touchEnd = e.changedTouches[0].screenY;
+            
+            // Swipe up from bottom
+            if (touchStart - touchEnd > 100 && touchEnd > window.innerHeight - 100) {
+                toggleInsights();
+            }
+        });
+        
+        // ============================================================================
+        // INITIALIZATION
+        // ============================================================================
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            setTheme(notebook.theme);
+            setPen(notebook.currentPen);
+            renderPages();
+            
+            // Create first page if none exist
+            if (notebook.pages.size === 0) {
+                createPage();
+            } else {
+                // Select most recent page
+                const recent = Array.from(notebook.pages.values())
+                    .sort((a, b) => b.modified - a.modified)[0];
+                if (recent) selectPage(recent.id);
+            }
+            
+            // Keyboard shortcuts
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') closeAll();
+                if (e.metaKey && e.key === 'n') {
+                    e.preventDefault();
+                    createPage();
+                }
+            });
+        });
+    </script>
+</body>
+</html>

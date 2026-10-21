@@ -1,0 +1,14 @@
+{
+  "books": [
+    {
+      "id": "yijing-hatcher-word-by-word",
+      "title": "The Book of Changes \u2014 Yijing, Word By Word",
+      "author": "Bradford Hatcher",
+      "pageCount": 1100,
+      "rawSource": "books/sources/Yijing1+2.pdf",
+      "index": "books/index/yijing_hatcher_index.json",
+      "sha256": "cb47886950546f6cba968922924966114f0a17e7f6596dbf8c167d251654885b",
+      "status": "bundled-user-source"
+    }
+  ]
+}

@@ -1,0 +1,831 @@
+// ============================================================================
+// DESIGN DECISION CONTROLLER (DDC)
+// Synthia Life Engine — GameFactory Architecture for Human Design
+// ============================================================================
+// Maps Human Design chart data into video diffusion action controls
+// Based on: GameFactory (arXiv:2501.08325) — multi-phase training, 
+// hybrid action control, autoregressive generation
+// ============================================================================
+
+import { Tensor, matMul, softmax, layerNorm, linear } from './tensor-ops';
+import { HDChart, Gate, Channel, Center, PlanetPosition } from './hd-types';
+import { SemanticField, AttractorNode, ResonancePath } from './semantic-field';
+
+// ============================================================================
+// CONSTANTS
+// ============================================================================
+
+const DDC_CONFIG = {
+  // Model architecture (matches GameFactory backbone)
+  hiddenDim: 768,
+  numLayers: 12,
+  numHeads: 12,
+  temporalCompression: 4,  // r=4, like GameFactory
+  slidingWindow: 3,        // w=3 for temporal decision effects
+
+  // Action spaces
+  discreteActions: [
+    'WAIT', 'RESPOND', 'INITIATE', 'INFORM', 'ASK',
+    'APPROACH', 'AVOID', 'COMMIT', 'RELEASE', 'OBSERVE',
+    'EXPRESS', 'WITHHOLD', 'ACCEPT', 'REFUSE', 'TRANSFORM'
+  ],
+
+  // Continuous action dimensions
+  continuousDims: [
+    'emotional_intensity',    // 0-1, sacral/SP/emotional wave
+    'mental_perspective',     // -1 to 1, ajna/spleen/head
+    'body_sensation',         // 0-1, physical awareness
+    'social_distance',        // 0-1, interaction proximity
+    'temporal_pressure',      // 0-1, urgency/satisfaction
+    'identity_coherence',     // 0-1, G-center self-alignment
+  ],
+
+  // Design-specific action mappings
+  strategyMap: {
+    'Generator': ['WAIT', 'RESPOND', 'COMMIT', 'RELEASE'],
+    'Manifestor': ['INITIATE', 'INFORM', 'EXPRESS', 'TRANSFORM'],
+    'Projector': ['WAIT', 'ASK', 'OBSERVE', 'ACCEPT'],
+    'Reflector': ['WAIT', 'OBSERVE', 'WITHHOLD', 'TRANSFORM'],
+  },
+
+  authorityMap: {
+    'Sacral': ['RESPOND', 'COMMIT', 'RELEASE'],
+    'Emotional': ['WAIT', 'APPROACH', 'AVOID'],
+    'Splenic': ['APPROACH', 'AVOID', 'OBSERVE'],
+    'Ego': ['COMMIT', 'INITIATE', 'EXPRESS'],
+    'Self-Projected': ['EXPRESS', 'TRANSFORM', 'ACCEPT'],
+    'Mental': ['OBSERVE', 'ASK', 'WITHHOLD'],
+    'Lunar': ['WAIT', 'OBSERVE', 'TRANSFORM'],
+    'No Inner Authority': ['WAIT', 'OBSERVE', 'ASK'],
+  },
+};
+
+// ============================================================================
+// DESIGN-TO-ACTION ENCODER
+// ============================================================================
+// Converts full HD chart into action control embeddings
+// This is the heart of the DDC — where design becomes playable
+// ============================================================================
+
+export class DesignToActionEncoder {
+  private semanticField: SemanticField;
+  private chartEmbedding: Tensor;
+  private attractorField: Map<string, AttractorNode>;
+
+  constructor(semanticField: SemanticField) {
+    this.semanticField = semanticField;
+    this.attractorField = new Map();
+  }
+
+  /**
+   * Encode full HD chart into action-control-compatible embeddings
+   * Input: Complete chart with all planetary positions, gates, lines, colors, tones, bases
+   * Output: Tensor of shape [batch, seq_len, hidden_dim] ready for transformer
+   */
+  encode(chart: HDChart): Tensor {
+    // Build the attractor field from the chart
+    this.buildAttractorField(chart);
+
+    // Encode each component into the semantic field
+    const embeddings: Tensor[] = [];
+
+    // 1. Encode planetary positions (D4 context)
+    const planetaryEmbeddings = this.encodePlanetaryPositions(chart.planets);
+    embeddings.push(planetaryEmbeddings);
+
+    // 2. Encode defined centers (D2 polarity)
+    const centerEmbeddings = this.encodeDefinedCenters(chart.centers);
+    embeddings.push(centerEmbeddings);
+
+    // 3. Encode activated gates (D1 impulse attractors)
+    const gateEmbeddings = this.encodeActivatedGates(chart.gates);
+    embeddings.push(gateEmbeddings);
+
+    // 4. Encode channels (D3 witness/resonance paths)
+    const channelEmbeddings = this.encodeChannels(chart.channels);
+    embeddings.push(channelEmbeddings);
+
+    // 5. Encode profile and type (D5 meaning archetype)
+    const archetypeEmbedding = this.encodeArchetype(chart.type, chart.profile);
+    embeddings.push(archetypeEmbedding);
+
+    // 6. Encode strategy and authority (decision mechanics)
+    const mechanicsEmbedding = this.encodeMechanics(chart.strategy, chart.authority);
+    embeddings.push(mechanicsEmbedding);
+
+    // Concatenate all embeddings into sequence
+    this.chartEmbedding = this.concatEmbeddings(embeddings);
+
+    return this.chartEmbedding;
+  }
+
+  /**
+   * Build attractor field from chart — each gate is an attractor
+   * The field geometry is generated by the chart, not pre-given
+   * M(x) = Σᵢ gᵢ / (1 + |x - aᵢ|) — attractors CREATE the space
+   */
+  private buildAttractorField(chart: HDChart): void {
+    // Each activated gate becomes an attractor node
+    for (const gate of chart.gates) {
+      const attractor: AttractorNode = {
+        id: `gate_${gate.number}`,
+        position: this.gateToPosition(gate),
+        strength: this.calculateGateStrength(gate, chart),
+        semanticCharge: this.semanticField.getGateSemantics(gate.number),
+        harmonicPartners: this.getHarmonicPartners(gate.number),
+        lineExpression: this.getLineExpression(gate.line, gate.number),
+        colorTone: this.getColorToneExpression(gate.color, gate.tone),
+        baseDegree: this.getBaseDegreeExpression(gate.base, gate.degree),
+      };
+      this.attractorField.set(attractor.id, attractor);
+    }
+
+    // Channels create resonance paths between attractors
+    for (const channel of chart.channels) {
+      const gate1 = this.attractorField.get(`gate_${channel.gate1}`);
+      const gate2 = this.attractorField.get(`gate_${channel.gate2}`);
+      if (gate1 && gate2) {
+        const path: ResonancePath = {
+          from: gate1.id,
+          to: gate2.id,
+          weight: this.calculateChannelWeight(channel, chart),
+          type: this.getChannelType(channel.gate1, channel.gate2),
+        };
+        this.semanticField.addResonancePath(path);
+      }
+    }
+  }
+
+  /**
+   * Encode planetary positions into context embeddings (D4)
+   * Each planet at a specific gate/line/color/tone/base creates 
+   * a unique semantic charge in the field
+   */
+  private encodePlanetaryPositions(planets: PlanetPosition[]): Tensor {
+    const embeddings: number[][] = [];
+
+    for (const planet of planets) {
+      // Planet identity (Sun, Moon, Mercury, etc.)
+      const planetVec = this.planetToVector(planet.name);
+
+      // Gate position (1-64)
+      const gateVec = this.gateToVector(planet.gate);
+
+      // Line (1-6) — expression style
+      const lineVec = this.lineToVector(planet.line);
+
+      // Color (1-6) — motivation
+      const colorVec = this.colorToVector(planet.color);
+
+      // Tone (1-6) — mind/wave
+      const toneVec = this.toneToVector(planet.tone);
+
+      // Base (1-5) — archetypal flavor
+      const baseVec = this.baseToVector(planet.base);
+
+      // Degree/Minute/Second — precise position
+      const degreeVec = this.degreeToVector(planet.degree, planet.minute, planet.second);
+
+      // Zodiac sign
+      const zodiacVec = this.zodiacToVector(planet.zodiac);
+
+      // House position
+      const houseVec = this.houseToVector(planet.house);
+
+      // Axis (I Ching line)
+      const axisVec = this.axisToVector(planet.axis);
+
+      // Combine all into planetary embedding
+      const combined = this.combineVectors([
+        planetVec, gateVec, lineVec, colorVec, 
+        toneVec, baseVec, degreeVec, zodiacVec, houseVec, axisVec
+      ]);
+
+      embeddings.push(combined);
+    }
+
+    return new Tensor(embeddings);
+  }
+
+  /**
+   * Encode defined centers (D2 polarity)
+   * Defined = active, generating, consistent
+   * Undefined = receptive, amplifying, inconsistent
+   */
+  private encodeDefinedCenters(centers: Center[]): Tensor {
+    const centerStates = new Array(9).fill(0); // 9 centers
+
+    for (const center of centers) {
+      const idx = this.centerToIndex(center.name);
+      centerStates[idx] = center.defined ? 1.0 : 0.0;
+
+      // Add activation strength based on connected gates
+      if (center.defined) {
+        centerStates[idx] += center.gates.length * 0.1;
+      }
+    }
+
+    // Expand to hidden dimension
+    return this.expandToHidden(centerStates);
+  }
+
+  /**
+   * Encode activated gates (D1 impulse attractors)
+   * Each gate is a semantic particle with specific properties
+   */
+  private encodeActivatedGates(gates: Gate[]): Tensor {
+    const embeddings: number[][] = [];
+
+    for (const gate of gates) {
+      const gateVec = this.gateToVector(gate.number);
+      const lineVec = this.lineToVector(gate.line);
+      const colorVec = this.colorToVector(gate.color);
+      const toneVec = this.toneToVector(gate.tone);
+      const baseVec = this.baseToVector(gate.base);
+
+      // Activation source (design, personality, transit)
+      const sourceVec = this.sourceToVector(gate.source);
+
+      // Combine
+      const combined = this.combineVectors([
+        gateVec, lineVec, colorVec, toneVec, baseVec, sourceVec
+      ]);
+
+      embeddings.push(combined);
+    }
+
+    return new Tensor(embeddings);
+  }
+
+  /**
+   * Encode channels (D3 witness/resonance paths)
+   * Channels are the "witness coordinate" where two gates meet
+   */
+  private encodeChannels(channels: Channel[]): Tensor {
+    const embeddings: number[][] = [];
+
+    for (const channel of channels) {
+      const gate1Vec = this.gateToVector(channel.gate1);
+      const gate2Vec = this.gateToVector(channel.gate2);
+
+      // Channel type (generated, individual, collective)
+      const typeVec = this.channelTypeToVector(channel.type);
+
+      // The channel is the interaction between two attractors
+      // This is the D3 witness — the coordinate where two forces meet
+      const interaction = this.calculateInteraction(gate1Vec, gate2Vec);
+
+      const combined = this.combineVectors([gate1Vec, gate2Vec, typeVec, interaction]);
+      embeddings.push(combined);
+    }
+
+    return new Tensor(embeddings);
+  }
+
+  /**
+   * Encode type and profile (D5 meaning archetype)
+   */
+  private encodeArchetype(type: string, profile: string): Tensor {
+    const typeVec = this.typeToVector(type);
+    const profileVec = this.profileToVector(profile);
+
+    // The archetype is the emergent meaning from type + profile
+    // This is D5 — the highest level of the stack
+    return this.combineVectors([typeVec, profileVec]);
+  }
+
+  /**
+   * Encode strategy and authority (decision mechanics)
+   */
+  private encodeMechanics(strategy: string, authority: string): Tensor {
+    const strategyVec = this.strategyToVector(strategy);
+    const authorityVec = this.authorityToVector(authority);
+
+    return this.combineVectors([strategyVec, authorityVec]);
+  }
+
+  // ============================================================================
+  // HELPER METHODS — Vector encodings for each HD component
+  // ============================================================================
+
+  private gateToVector(gateNum: number): number[] {
+    // 64 gates → 64-dimensional one-hot (or learned embedding)
+    // Using the I Ching hexagram encoding: 6 lines × binary = 64
+    const vec = new Array(64).fill(0);
+    vec[gateNum - 1] = 1.0;
+    return vec;
+  }
+
+  private lineToVector(line: number): number[] {
+    // 6 lines → 6-dimensional
+    const vec = new Array(6).fill(0);
+    vec[line - 1] = 1.0;
+    return vec;
+  }
+
+  private colorToVector(color: number): number[] {
+    // 6 colors → 6-dimensional (motivation spectrum)
+    const vec = new Array(6).fill(0);
+    vec[color - 1] = 1.0;
+    return vec;
+  }
+
+  private toneToVector(tone: number): number[] {
+    // 6 tones → 6-dimensional (cognitive wave)
+    const vec = new Array(6).fill(0);
+    vec[tone - 1] = 1.0;
+    return vec;
+  }
+
+  private baseToVector(base: number): number[] {
+    // 5 bases → 5-dimensional (archetypal flavor)
+    const vec = new Array(5).fill(0);
+    vec[base - 1] = 1.0;
+    return vec;
+  }
+
+  private degreeToVector(deg: number, min: number, sec: number): number[] {
+    // Normalize to [0, 1] for each component
+    return [deg / 360, min / 60, sec / 60];
+  }
+
+  private zodiacToVector(zodiac: string): number[] {
+    const signs = [
+      'Aries', 'Taurus', 'Gemini', 'Cancer', 'Leo', 'Virgo',
+      'Libra', 'Scorpio', 'Sagittarius', 'Capricorn', 'Aquarius', 'Pisces'
+    ];
+    const vec = new Array(12).fill(0);
+    vec[signs.indexOf(zodiac)] = 1.0;
+    return vec;
+  }
+
+  private houseToVector(house: number): number[] {
+    const vec = new Array(12).fill(0);
+    vec[house - 1] = 1.0;
+    return vec;
+  }
+
+  private axisToVector(axis: number): number[] {
+    // 6 axes (I Ching lines)
+    const vec = new Array(6).fill(0);
+    vec[axis - 1] = 1.0;
+    return vec;
+  }
+
+  private planetToVector(planet: string): number[] {
+    const planets = [
+      'Sun', 'Earth', 'Moon', 'North Node', 'South Node',
+      'Mercury', 'Venus', 'Mars', 'Jupiter', 'Saturn',
+      'Uranus', 'Neptune', 'Pluto'
+    ];
+    const vec = new Array(13).fill(0);
+    vec[planets.indexOf(planet)] = 1.0;
+    return vec;
+  }
+
+  private typeToVector(type: string): number[] {
+    const types = ['Generator', 'Manifestor', 'Projector', 'Reflector'];
+    const vec = new Array(4).fill(0);
+    vec[types.indexOf(type)] = 1.0;
+    return vec;
+  }
+
+  private profileToVector(profile: string): number[] {
+    // 12 profiles (1/3, 1/4, 2/4, 2/5, 3/5, 3/6, 4/6, 4/1, 5/1, 5/2, 6/2, 6/3)
+    const profiles = [
+      '1/3', '1/4', '2/4', '2/5', '3/5', '3/6',
+      '4/6', '4/1', '5/1', '5/2', '6/2', '6/3'
+    ];
+    const vec = new Array(12).fill(0);
+    vec[profiles.indexOf(profile)] = 1.0;
+    return vec;
+  }
+
+  private strategyToVector(strategy: string): number[] {
+    const strategies = [
+      'To Respond', 'To Inform', 'To Wait for the Invitation', 'To Wait a Lunar Cycle'
+    ];
+    const vec = new Array(4).fill(0);
+    vec[strategies.indexOf(strategy)] = 1.0;
+    return vec;
+  }
+
+  private authorityToVector(authority: string): number[] {
+    const authorities = [
+      'Sacral', 'Emotional', 'Splenic', 'Ego', 
+      'Self-Projected', 'Mental', 'Lunar', 'No Inner Authority'
+    ];
+    const vec = new Array(8).fill(0);
+    vec[authorities.indexOf(authority)] = 1.0;
+    return vec;
+  }
+
+  private sourceToVector(source: string): number[] {
+    const sources = ['design', 'personality', 'transit'];
+    const vec = new Array(3).fill(0);
+    vec[sources.indexOf(source)] = 1.0;
+    return vec;
+  }
+
+  private channelTypeToVector(type: string): number[] {
+    const types = ['generated', 'individual', 'collective'];
+    const vec = new Array(3).fill(0);
+    vec[types.indexOf(type)] = 1.0;
+    return vec;
+  }
+
+  private centerToIndex(name: string): number {
+    const centers = [
+      'Head', 'Ajna', 'Throat', 'G', 'Heart', 'Solar Plexus',
+      'Sacral', 'Spleen', 'Root'
+    ];
+    return centers.indexOf(name);
+  }
+
+  // ============================================================================
+  // ATTRACTOR FIELD CALCULATIONS
+  // ============================================================================
+
+  private gateToPosition(gate: Gate): number[] {
+    // Map gate number to position in 6D space (I Ching hexagram coordinates)
+    // Each hexagram is 6 binary lines → 6D position
+    const hexagram = this.gateToHexagram(gate.number);
+    return hexagram.map(bit => bit ? 1.0 : -1.0);
+  }
+
+  private gateToHexagram(gateNum: number): boolean[] {
+    // Convert gate number (1-64) to 6-bit binary (I Ching hexagram)
+    const binary = (gateNum - 1).toString(2).padStart(6, '0');
+    return binary.split('').map(b => b === '1');
+  }
+
+  private calculateGateStrength(gate: Gate, chart: HDChart): number {
+    // Strength depends on:
+    // 1. Whether it's in both design and personality (1.0) or just one (0.5)
+    // 2. Whether it's part of a defined channel (adds 0.3)
+    // 3. Whether it's in a defined center (adds 0.2)
+    let strength = gate.source === 'both' ? 1.0 : 0.5;
+
+    const inChannel = chart.channels.some(
+      c => c.gate1 === gate.number || c.gate2 === gate.number
+    );
+    if (inChannel) strength += 0.3;
+
+    const center = chart.centers.find(c => c.gates.includes(gate.number));
+    if (center?.defined) strength += 0.2;
+
+    return Math.min(strength, 1.0);
+  }
+
+  private getHarmonicPartners(gateNum: number): number[] {
+    // Harmonic partners in HD: gates that share the same line structure
+    // This is a simplified version — full implementation uses the complete harmonic table
+    const harmonics: Record<number, number[]> = {
+      1: [2], 2: [1], 3: [50], 4: [49], 5: [15], 6: [36],
+      // ... full 64-gate harmonic mapping
+    };
+    return harmonics[gateNum] || [];
+  }
+
+  private getLineExpression(line: number, gateNum: number): string {
+    // Each line (1-6) has a specific expression style
+    const expressions = [
+      'investigative', 'intimate', 'adaptive', 'opportunistic', 'heretical', 'role-model'
+    ];
+    return expressions[line - 1];
+  }
+
+  private getColorToneExpression(color: number, tone: number): string {
+    // Color = motivation, Tone = cognitive style
+    const motivations = [
+      'fear', 'hope', 'desire', 'need', 'guilt', 'innocence'
+    ];
+    const cognitiveStyles = [
+      'analytical', 'emotional', 'intuitive', 'sensory', 'abstract', 'concrete'
+    ];
+    return `${motivations[color - 1]}_${cognitiveStyles[tone - 1]}`;
+  }
+
+  private getBaseDegreeExpression(base: number, degree: number): string {
+    // Base = archetypal flavor, Degree = precise position
+    const flavors = ['alpha', 'beta', 'gamma', 'delta', 'epsilon'];
+    return `${flavors[base - 1]}_${degree}`;
+  }
+
+  private calculateChannelWeight(channel: Channel, chart: HDChart): number {
+    // Weight depends on whether both gates are defined and in defined centers
+    let weight = 0.5;
+
+    const gate1Defined = chart.gates.some(g => g.number === channel.gate1);
+    const gate2Defined = chart.gates.some(g => g.number === channel.gate2);
+
+    if (gate1Defined && gate2Defined) weight += 0.3;
+    if (channel.type === 'generated') weight += 0.2;
+
+    return Math.min(weight, 1.0);
+  }
+
+  private getChannelType(gate1: number, gate2: number): string {
+    // Determine channel type based on gate numbers
+    // Generated: both gates in same center
+    // Individual: gates in different centers, individual circuit
+    // Collective: gates in different centers, collective circuit
+    // Simplified — full implementation uses circuit logic
+    return 'generated'; // Placeholder
+  }
+
+  private calculateInteraction(v1: number[], v2: number[]): number[] {
+    // The interaction between two gate vectors is their tensor product
+    // This creates the "witness" coordinate (D3)
+    const interaction: number[] = [];
+    for (let i = 0; i < v1.length; i++) {
+      for (let j = 0; j < v2.length; j++) {
+        interaction.push(v1[i] * v2[j]);
+      }
+    }
+    return interaction;
+  }
+
+  private combineVectors(vectors: number[][]): number[] {
+    // Concatenate and normalize
+    const combined = vectors.flat();
+    const norm = Math.sqrt(combined.reduce((sum, v) => sum + v * v, 0));
+    return combined.map(v => v / (norm + 1e-8));
+  }
+
+  private expandToHidden(values: number[]): Tensor {
+    // Expand a small vector to hidden dimension using learned projection
+    // In practice, this would be a learned linear layer
+    const hidden = DDC_CONFIG.hiddenDim;
+    const expanded = new Array(hidden).fill(0);
+    for (let i = 0; i < values.length; i++) {
+      expanded[i % hidden] += values[i];
+    }
+    return new Tensor([expanded]);
+  }
+
+  private concatEmbeddings(embeddings: Tensor[]): Tensor {
+    // Concatenate all embeddings along sequence dimension
+    // Return shape: [1, total_seq_len, hidden_dim]
+    const allValues: number[][] = [];
+    for (const emb of embeddings) {
+      allValues.push(...emb.values);
+    }
+    return new Tensor(allValues);
+  }
+}
+
+// ============================================================================
+// DESIGN DECISION CONTROLLER — Main Module
+// ============================================================================
+// Integrates into transformer blocks like GameFactory's action control module
+// Handles discrete life decisions (cross-attention) and continuous states (concatenation)
+// ============================================================================
+
+export class DesignDecisionController {
+  private encoder: DesignToActionEncoder;
+  private hiddenDim: number;
+  private numHeads: number;
+  private slidingWindow: number;
+
+  // Cross-attention weights for discrete decisions
+  private discreteQuery: Tensor;
+  private discreteKey: Tensor;
+  private discreteValue: Tensor;
+
+  // Concatenation projection for continuous states
+  private continuousProj: Tensor;
+
+  constructor(encoder: DesignToActionEncoder) {
+    this.encoder = encoder;
+    this.hiddenDim = DDC_CONFIG.hiddenDim;
+    this.numHeads = DDC_CONFIG.numHeads;
+    this.slidingWindow = DDC_CONFIG.slidingWindow;
+
+    // Initialize weights (in practice, loaded from trained checkpoint)
+    this.discreteQuery = this.initWeight([this.hiddenDim, this.hiddenDim]);
+    this.discreteKey = this.initWeight([this.hiddenDim, this.hiddenDim]);
+    this.discreteValue = this.initWeight([this.hiddenDim, this.hiddenDim]);
+    this.continuousProj = this.initWeight([this.hiddenDim, this.hiddenDim]);
+  }
+
+  /**
+   * Forward pass: integrate design-based actions into video generation
+   * 
+   * @param hiddenStates — transformer hidden states [batch, seq, hidden]
+   * @param chart — user's HD chart
+   * @param decisions — user's current life decisions (discrete + continuous)
+   * @param timestep — current diffusion timestep
+   * @returns modified hidden states with design action control
+   */
+  forward(
+    hiddenStates: Tensor,
+    chart: HDChart,
+    decisions: LifeDecisions,
+    timestep: number
+  ): Tensor {
+    // Encode chart into design embedding
+    const designEmbedding = this.encoder.encode(chart);
+
+    // Process discrete decisions via cross-attention
+    const discreteControlled = this.applyDiscreteControl(
+      hiddenStates, 
+      decisions.discrete,
+      designEmbedding
+    );
+
+    // Process continuous states via concatenation
+    const continuousControlled = this.applyContinuousControl(
+      discreteControlled,
+      decisions.continuous,
+      designEmbedding
+    );
+
+    // Apply temporal sliding window for decision effects
+    const temporallySmoothed = this.applyTemporalSmoothing(
+      continuousControlled,
+      decisions.history
+    );
+
+    return temporallySmoothed;
+  }
+
+  /**
+   * Discrete decision control via cross-attention
+   * Similar to GameFactory's keyboard input handling
+   * Each discrete decision is a categorical signal that modulates attention
+   */
+  private applyDiscreteControl(
+    hiddenStates: Tensor,
+    discreteDecisions: DiscreteDecision[],
+    designEmbedding: Tensor
+  ): Tensor {
+    // Convert decisions to one-hot vectors
+    const decisionVectors = discreteDecisions.map(d => {
+      const vec = new Array(DDC_CONFIG.discreteActions.length).fill(0);
+      const idx = DDC_CONFIG.discreteActions.indexOf(d.action);
+      vec[idx] = d.confidence;
+      return vec;
+    });
+
+    const decisionTensor = new Tensor(decisionVectors);
+
+    // Cross-attention: decisions query design embedding
+    const Q = matMul(decisionTensor, this.discreteQuery);
+    const K = matMul(designEmbedding, this.discreteKey);
+    const V = matMul(designEmbedding, this.discreteValue);
+
+    // Attention scores
+    const scores = matMul(Q, K.transpose()) / Math.sqrt(this.hiddenDim);
+    const attnWeights = softmax(scores, -1);
+
+    // Apply attention to values
+    const attended = matMul(attnWeights, V);
+
+    // Add to hidden states (residual connection)
+    return hiddenStates.add(attended);
+  }
+
+  /**
+   * Continuous state control via concatenation
+   * Similar to GameFactory's mouse movement handling
+   * Continuous states preserve magnitude for emotional/mental gradients
+   */
+  private applyContinuousControl(
+    hiddenStates: Tensor,
+    continuousStates: ContinuousState,
+    designEmbedding: Tensor
+  ): Tensor {
+    // Extract continuous values in order
+    const continuousValues = DDC_CONFIG.continuousDims.map(dim => {
+      return continuousStates[dim] || 0.5;
+    });
+
+    // Project to hidden dimension
+    const continuousTensor = new Tensor([continuousValues]);
+    const projected = matMul(continuousTensor, this.continuousProj);
+
+    // Concatenate with hidden states along feature dimension
+    // This preserves the magnitude of continuous signals
+    return hiddenStates.concat(projected, -1);
+  }
+
+  /**
+   * Temporal smoothing with sliding window
+   * Handles delayed effects of decisions (like a jump command affecting multiple frames)
+   * In life terms: a decision to "wait" affects not just the current moment but the next few
+   */
+  private applyTemporalSmoothing(
+    hiddenStates: Tensor,
+    decisionHistory: DecisionHistory
+  ): Tensor {
+    // Get last w decisions
+    const recentDecisions = decisionHistory.slice(-this.slidingWindow);
+
+    if (recentDecisions.length < this.slidingWindow) {
+      return hiddenStates;
+    }
+
+    // Average the decision effects over the window
+    // This creates temporal coherence — decisions have lasting effects
+    const smoothed = hiddenStates.multiply(0.7) // Current weight
+      .add(recentDecisions[0].effect.multiply(0.1)) // w-2
+      .add(recentDecisions[1].effect.multiply(0.1)) // w-1
+      .add(recentDecisions[2].effect.multiply(0.1)); // w
+
+    return smoothed;
+  }
+
+  /**
+   * Generate valid decisions for a given chart
+   * Filters the full action space to only design-appropriate actions
+   */
+  generateValidDecisions(chart: HDChart): ValidDecisionSpace {
+    const validDiscrete: string[] = [];
+    const validContinuous: string[] = [...DDC_CONFIG.continuousDims];
+
+    // Filter by strategy
+    const strategyActions = DDC_CONFIG.strategyMap[chart.type] || [];
+    validDiscrete.push(...strategyActions);
+
+    // Filter by authority
+    const authorityActions = DDC_CONFIG.authorityMap[chart.authority] || [];
+    validDiscrete.push(...authorityActions);
+
+    // Add universal actions
+    validDiscrete.push('OBSERVE', 'WAIT');
+
+    // Remove duplicates
+    const uniqueDiscrete = [...new Set(validDiscrete)];
+
+    return {
+      discrete: uniqueDiscrete,
+      continuous: validContinuous,
+      strategy: chart.strategy,
+      authority: chart.authority,
+    };
+  }
+
+  private initWeight(shape: number[]): Tensor {
+    // Xavier initialization
+    const [inDim, outDim] = shape;
+    const scale = Math.sqrt(2.0 / (inDim + outDim));
+    const values: number[][] = [];
+    for (let i = 0; i < inDim; i++) {
+      const row: number[] = [];
+      for (let j = 0; j < outDim; j++) {
+        row.push((Math.random() * 2 - 1) * scale);
+      }
+      values.push(row);
+    }
+    return new Tensor(values);
+  }
+}
+
+// ============================================================================
+// TYPE DEFINITIONS
+// ============================================================================
+
+interface DiscreteDecision {
+  action: string;
+  confidence: number; // 0-1
+  timestamp: number;
+}
+
+interface ContinuousState {
+  emotional_intensity: number;
+  mental_perspective: number;
+  body_sensation: number;
+  social_distance: number;
+  temporal_pressure: number;
+  identity_coherence: number;
+}
+
+interface DecisionHistory {
+  decisions: {
+    action: string;
+    effect: Tensor;
+    timestamp: number;
+  }[];
+  slice(start: number): DecisionHistory;
+}
+
+interface LifeDecisions {
+  discrete: DiscreteDecision[];
+  continuous: ContinuousState;
+  history: DecisionHistory;
+}
+
+interface ValidDecisionSpace {
+  discrete: string[];
+  continuous: string[];
+  strategy: string;
+  authority: string;
+}
+
+// ============================================================================
+// EXPORT
+// ============================================================================
+
+export { DDC_CONFIG };
+export default DesignDecisionController;

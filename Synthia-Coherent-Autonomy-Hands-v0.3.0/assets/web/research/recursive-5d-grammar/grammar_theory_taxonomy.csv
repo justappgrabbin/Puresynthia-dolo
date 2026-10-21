@@ -1,0 +1,27 @@
+theory,primary_role,notes
+Formal grammar,representation + rule/constraint system,"Defines alphabets, productions, derivations, and languages; umbrella formalism."
+Generative grammar,generative/compositional mechanism,Specifies finite means for generating potentially unbounded structures.
+Transformational grammar,transformation mechanism,Maps structural representations through operations such as movement/transformation.
+Dependency grammar,relation system,Represents head-dependent relations rather than phrase constituency as primary.
+Constituency grammar,hierarchical representation,Represents nested constituents/phrases.
+Phrase-structure grammar,rewrite/composition mechanism,Builds constituents by production rules.
+Categorial grammar,compositional + type/compatibility system,Uses categories/types and combinatory operations.
+Construction grammar,form-meaning representation + compositional system,Treats constructions as learned pairings across scales.
+Cognitive grammar,representation + semantic/conceptual mechanism,Emphasizes symbolic/conceptual organization.
+Functional grammar,cross-dimensional functional system,Explains form in relation to communicative/semantic functions.
+Systemic Functional Grammar,choice network + contextual/compositional system,Language as meaning potential organized by systems of options.
+Relational grammar,relation/transition system,Uses grammatical relations as primitives and may model changes among strata.
+Case grammar,semantic-role relation system,Organizes predicate-argument relations via semantic cases/roles.
+Lexical-functional grammar,parallel representation + constraints,Links constituent structure and functional structure with constraints.
+Head-driven phrase structure grammar,typed feature/unification constraint system,Uses rich typed feature structures and unification.
+Tree-adjoining grammar,tree composition mechanism,Uses tree substitution/adjunction; mildly context-sensitive.
+Unification grammar,constraint/composition mechanism,Combines compatible feature structures by unification.
+Attribute grammar,representation + compositional evaluation,Associates attributes/semantic computations with syntax productions.
+Context-free grammar,rewrite/constraint system,Each production rewrites one nonterminal independent of surrounding context.
+Context-sensitive grammar,context-dependent rewrite system,Production applicability can depend on surrounding structure.
+Adaptive grammar,self-modifying transition/rule system,Rule set may change during parsing/generation.
+Dynamic grammar,state-transition/contextual mechanism,Grammar evolves with processing/discourse state; label covers several traditions.
+Emergent grammar,usage/emergence account,Treats grammatical regularities as arising from repeated use rather than fixed prior rules.
+Computational grammar,implementation/formalization umbrella,Machine-executable grammatical representation/parser/generator.
+Probabilistic grammar,weighted constraint/generative system,"Adds probabilities/weights over analyses, rules, or derivations."
+Discourse grammar,cross-sentential relation/context system,"Models coherence, discourse relations, information structure, and context across utterances."

@@ -1,0 +1,50 @@
+[
+  {
+    "claim": "Distinctive features encode minimal phonological contrasts; phonemes can be represented as bundles of features.",
+    "class": "Established",
+    "source": "UC Berkeley PhonLab / Sylak-Glassman dissertation discussing Jakobson-Fant-Halle distinctive features",
+    "url": "https://linguistics.berkeley.edu/phonlab/documents/2014/Sylak-Glassman_Dissertation.pdf"
+  },
+  {
+    "claim": "Morphemes are commonly treated as smallest meaningful units in morphology.",
+    "class": "Established",
+    "source": "UCLA Linguistics morphology materials (Edward Stabler)",
+    "url": "https://linguistics.ucla.edu/people/stabler/isat.pdf"
+  },
+  {
+    "claim": "SFL treats language as a system of meaning-making options and distinguishes strata/functions.",
+    "class": "Established",
+    "source": "Cambridge University Press excerpts on Systemic Functional Linguistics",
+    "url": "https://assets.cambridge.org/97805211/90664/excerpt/9780521190664_excerpt.pdf"
+  },
+  {
+    "claim": "Codons are nucleotide triplets; 4^3 = 64 codons; 61 encode amino acids and three are stop codons in the standard code.",
+    "class": "Established",
+    "source": "NCBI Bookshelf / NHGRI",
+    "url": "https://www.ncbi.nlm.nih.gov/books/NBK21121/"
+  },
+  {
+    "claim": "Six two-valued lines generate 2^6 = 64 configurations; binary encoding of the Shao Yong/Fuxi hexagram arrangement is structurally valid.",
+    "class": "Established/structural",
+    "source": "Cambridge Science in Context 2025; Progress in Biophysics and Molecular Biology 2017",
+    "url": "https://www.cambridge.org/core/journals/science-in-context/article/abs/is-the-fuxi-liushisi-gua-fangwei-diagram-attributed-to-shao-yong-binary-clarifying-a-consequence-of-its-analogy-with-the-binary-arithmetic-of-leibniz/9BA1DB9CFF13D5BEADCAF8FF954108AC"
+  },
+  {
+    "claim": "Phonology→Movement; Morphology→Evolution; Syntax→Design; Semantics→Being; Pragmatics→Space.",
+    "class": "Proposed synthesis",
+    "source": "Derived in this research by functional comparison; not a standard linguistic mapping.",
+    "url": ""
+  },
+  {
+    "claim": "Primitive 64-state transition grammar is the 6-dimensional hypercube Q6 under one-line flips.",
+    "class": "Derived mathematical model",
+    "source": "Direct consequence of treating each state as a six-bit vector and primitive operator as single-coordinate flip.",
+    "url": ""
+  },
+  {
+    "claim": "No canonical codon↔hexagram semantic mapping follows from both having 64 states.",
+    "class": "Derived methodological boundary",
+    "source": "4^3 codons versus 2^6 binary states require an arbitrary 4-symbol→2-bit bijection for one-to-one encoding.",
+    "url": ""
+  }
+]

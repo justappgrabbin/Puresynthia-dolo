@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Synthia Admin — Control Cockpit</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  :root {
+    --bg: #0a0a0f;
+    --surface: #12121a;
+    --surface-raised: #1a1a2e;
+    --text: #e2e8f0;
+    --text-dim: #64748b;
+    --text-bright: #fff;
+    --border: #222;
+    --accent: #7c3aed;
+    --accent-glow: #a78bfa;
+    --success: #10b981;
+    --warn: #f59e0b;
+    --error: #ef4444;
+    --cyan: #06b6d4;
+  }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Fira Code', monospace;
+    font-size: 13px;
+    line-height: 1.5;
+    min-height: 100vh;
+  }
+
+  /* Header */
+  .header {
+    padding: 12px 20px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .header h1 {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--accent-glow);
+    letter-spacing: 1px;
+  }
+  .header-sub {
+    color: var(--text-dim);
+    font-size: 11px;
+  }
+  .nav {
+    margin-left: auto;
+    display: flex;
+    gap: 4px;
+  }
+  .nav a {
+    color: var(--text-dim);
+    text-decoration: none;
+    padding: 4px 12px;
+    border-radius: 4px;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .nav a:hover, .nav a.active {
+    color: var(--accent-glow);
+    background: var(--surface-raised);
+  }
+
+  /* Main grid */
+  .main {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1px;
+    background: var(--border);
+  }
+  @media (max-width: 900px) {
+    .main { grid-template-columns: 1fr; }
+  }
+
+  /* Panel */
+  .panel {
+    background: var(--bg);
+    padding: 16px 20px;
+    min-height: 200px;
+  }
+  .panel-title {
+    font-size: 11px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .panel-title .status {
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 3px;
+  }
+  .status.online { background: rgba(16, 185, 129, 0.15); color: var(--success); }
+  .status.offline { background: rgba(239, 68, 68, 0.15); color: var(--error); }
+  .status.unknown { background: rgba(100, 116, 139, 0.15); color: var(--text-dim); }
+  .status.registered { background: rgba(124, 58, 237, 0.15); color: var(--accent-glow); }
+
+  /* Status rows */
+  .row {
+    display: flex;
+    justify-content: space-between;
+    padding: 6px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 12px;
+  }
+  .row:last-child { border-bottom: none; }
+  .row-key { color: var(--text-dim); }
+  .row-val { color: var(--text-bright); }
+  .row-val.online { color: var(--success); }
+  .row-val.offline { color: var(--error); }
+  .row-val.unknown { color: var(--warn); }
+
+  /* Buttons */
+  .buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 12px;
+  }
+  button {
+    background: var(--surface-raised);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: all 0.2s;
+  }
+  button:hover {
+    background: var(--accent);
+    color: white;
+    border-color: var(--accent);
+  }
+  button.primary {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: white;
+  }
+  button.primary:hover {
+    background: #5b21b6;
+  }
+  button.danger {
+    background: rgba(239, 68, 68, 0.15);
+    border-color: var(--error);
+    color: var(--error);
+  }
+  button.danger:hover {
+    background: var(--error);
+    color: white;
+  }
+
+  /* Terminal */
+  .terminal {
+    grid-column: 1 / -1;
+    background: #000;
+    border-top: 2px solid var(--accent);
+    min-height: 300px;
+    display: flex;
+    flex-direction: column;
+  }
+  .terminal-header {
+    padding: 8px 20px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .terminal-title {
+    font-size: 11px;
+    color: var(--accent-glow);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  .terminal-body {
+    flex: 1;
+    padding: 12px 20px;
+    overflow-y: auto;
+    font-size: 12px;
+    line-height: 1.6;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+  .terminal-input-line {
+    display: flex;
+    align-items: center;
+    padding: 8px 20px;
+    border-top: 1px solid var(--border);
+  }
+  .terminal-prompt {
+    color: var(--accent-glow);
+    margin-right: 8px;
+    font-weight: bold;
+  }
+  .terminal-input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    color: var(--text-bright);
+    font-family: inherit;
+    font-size: 12px;
+    outline: none;
+  }
+  .terminal-output {
+    margin: 2px 0;
+  }
+  .terminal-output.error { color: var(--error); }
+  .terminal-output.event { color: var(--cyan); }
+  .terminal-output.system { color: var(--text-dim); }
+
+  /* Event log */
+  .event-log {
+    max-height: 200px;
+    overflow-y: auto;
+    font-size: 11px;
+  }
+  .event-item {
+    padding: 4px 0;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    gap: 8px;
+  }
+  .event-time { color: var(--text-dim); min-width: 60px; }
+  .event-type { color: var(--accent-glow); min-width: 50px; }
+  .event-source { color: var(--cyan); min-width: 60px; }
+  .event-msg { color: var(--text); flex: 1; }
+  .event-type.error { color: var(--error); }
+  .event-type.route { color: var(--success); }
+
+  /* Full width panels */
+  .fullwidth {
+    grid-column: 1 / -1;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>🜁 SYNTHIA ADMIN</h1>
+  <span class="header-sub">Control Cockpit v1.0</span>
+  <nav class="nav">
+    <a href="/admin" class="active">Cockpit</a>
+    <a href="/admin/mcp">MCP</a>
+    <a href="/admin/agents">Agents</a>
+    <a href="/admin/bodies">Bodies</a>
+    <a href="/admin/routes">Routes</a>
+    <a href="/admin/render">Render</a>
+    <a href="/admin/events">Events</a>
+    <a href="/">Public</a>
+  </nav>
+</div>
+
+<div class="main" id="main">
+
+  <!-- SYSTEM STATUS -->
+  <div class="panel">
+    <div class="panel-title">
+      System Status
+      <span class="status online" id="server-status">online</span>
+    </div>
+    <div class="row"><span class="row-key">Synthia Server</span><span class="row-val online" id="synthia-status">online</span></div>
+    <div class="row"><span class="row-key">Render</span><span class="row-val unknown" id="render-status">unknown</span></div>
+    <div class="row"><span class="row-key">Trident</span><span class="row-val unknown" id="trident-status">unknown</span></div>
+    <div class="row"><span class="row-key">MCP</span><span class="row-val offline" id="mcp-status">offline</span></div>
+    <div class="row"><span class="row-key">Supabase</span><span class="row-val unknown" id="supabase-status">unknown</span></div>
+    <div class="row"><span class="row-key">Last Error</span><span class="row-val" id="last-error">none</span></div>
+    <div class="row"><span class="row-key">Last Message</span><span class="row-val" id="last-message">none</span></div>
+    <div class="row"><span class="row-key">Events</span><span class="row-val" id="event-count">0</span></div>
+  </div>
+
+  <!-- AGENTS -->
+  <div class="panel">
+    <div class="panel-title">
+      AI Agents
+      <span class="status unknown" id="agents-status">unknown</span>
+    </div>
+    <div class="row"><span class="row-key">Kimi</span><span class="row-val unknown" id="kimi-status">unknown</span></div>
+    <div class="row"><span class="row-key">ChatGPT</span><span class="row-val unknown" id="chatgpt-status">unknown</span></div>
+    <div class="buttons">
+      <button onclick="wakeMCP()">Wake MCP</button>
+      <button onclick="checkTrident()">Check Trident</button>
+      <button onclick="registerAgent('kimi')">Register Kimi</button>
+      <button onclick="registerAgent('chatgpt')">Register ChatGPT</button>
+    </div>
+  </div>
+
+  <!-- BODIES -->
+  <div class="panel">
+    <div class="panel-title">
+      Human Bodies
+      <span class="status offline" id="bodies-status">offline</span>
+    </div>
+    <div class="row"><span class="row-key">Alexis (Adaya)</span><span class="row-val offline" id="alexis-status">offline</span></div>
+    <div class="row"><span class="row-key">Joe</span><span class="row-val offline" id="joe-status">offline</span></div>
+    <div class="buttons">
+      <button onclick="sendTestMessage()">Send Test Message</button>
+      <button onclick="refreshStatus()">Refresh Status</button>
+      <button onclick="downloadClient()">Download Client</button>
+    </div>
+  </div>
+
+  <!-- QUICK ACTIONS -->
+  <div class="panel">
+    <div class="panel-title">
+      Quick Actions
+      <span class="status online">ready</span>
+    </div>
+    <div class="buttons">
+      <button class="primary" onclick="wakeMCP()">Wake MCP</button>
+      <button onclick="checkTrident()">Check Trident</button>
+      <button onclick="registerAgent('kimi')">Register Kimi</button>
+      <button onclick="registerAgent('chatgpt')">Register ChatGPT</button>
+      <button onclick="sendTestMessage()">Send Test Message</button>
+      <button onclick="refreshStatus()">Refresh Status</button>
+      <button onclick="downloadClient()">Download Client</button>
+      <button onclick="viewEvents()">View Events</button>
+    </div>
+  </div>
+
+  <!-- EVENTS -->
+  <div class="panel fullwidth">
+    <div class="panel-title">
+      Recent Events
+      <span class="status" id="events-status">live</span>
+    </div>
+    <div class="event-log" id="event-log">
+      <div class="event-item">
+        <span class="event-time">--:--</span>
+        <span class="event-type">system</span>
+        <span class="event-source">admin</span>
+        <span class="event-msg">Waiting for events...</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- TERMINAL -->
+  <div class="terminal fullwidth">
+    <div class="terminal-header">
+      <span class="terminal-title">◉ TERMINAL</span>
+      <span style="color:#64748b;font-size:10px;">WebSocket: <span id="ws-status">connecting...</span></span>
+    </div>
+    <div class="terminal-body" id="terminal-body">
+      <div class="terminal-output system">Synthia Admin Terminal v1.0</div>
+      <div class="terminal-output system">Type 'help' for commands</div>
+      <div class="terminal-output system">Auto-start: MCP server waking...</div>
+    </div>
+    <div class="terminal-input-line">
+      <span class="terminal-prompt">$</span>
+      <input type="text" class="terminal-input" id="terminal-input" 
+        placeholder="status, wake mcp, check trident, agents, bodies, events, help..."
+        onkeydown="if(event.key==='Enter')executeCommand(this.value);this.value=''"
+      />
+    </div>
+  </div>
+
+</div>
+
+<script>
+const API = window.location.origin;
+let ws = null;
+let systemState = {};
+
+// ═══════════════════════════════════════════════════════════════════
+// WEBSOCKET TERMINAL
+// ═══════════════════════════════════════════════════════════════════
+
+function connectTerminal() {
+  const wsUrl = `wss://${window.location.host}/terminal`;
+  ws = new WebSocket(wsUrl);
+
+  ws.onopen = () => {
+    document.getElementById('ws-status').textContent = 'connected';
+    document.getElementById('ws-status').style.color = '#10b981';
+    logTerminal('system', 'Terminal connected to server');
+  };
+
+  ws.onmessage = (event) => {
+    const data = JSON.parse(event.data);
+
+    if (data.type === 'init') {
+      systemState = data.system;
+      updateDashboard(data.system);
+      data.events.forEach(e => logEvent(e));
+    }
+    else if (data.type === 'event') {
+      logEvent(data.event);
+      updateDashboard(data.event.detail?.system || systemState);
+    }
+    else if (data.type === 'mcp_status') {
+      document.getElementById('mcp-status').textContent = data.status;
+      document.getElementById('mcp-status').className = 'row-val ' + (data.status === 'online' ? 'online' : 'offline');
+    }
+    else if (data.type === 'output') {
+      logTerminal('output', data.output);
+    }
+    else if (data.type === 'error') {
+      logTerminal('error', data.output || data.message);
+    }
+    else if (data.type === 'clear') {
+      document.getElementById('terminal-body').innerHTML = '';
+    }
+  };
+
+  ws.onclose = () => {
+    document.getElementById('ws-status').textContent = 'disconnected';
+    document.getElementById('ws-status').style.color = '#ef4444';
+    logTerminal('error', 'Terminal disconnected. Reconnecting...');
+    setTimeout(connectTerminal, 3000);
+  };
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// TERMINAL COMMANDS
+// ═══════════════════════════════════════════════════════════════════
+
+function executeCommand(cmd) {
+  if (!cmd.trim()) return;
+  logTerminal('input', `$ ${cmd}`);
+
+  if (ws && ws.readyState === WebSocket.OPEN) {
+    ws.send(JSON.stringify({ type: 'exec', command: cmd }));
+  } else {
+    // Fallback to HTTP API
+    handleHttpCommand(cmd);
+  }
+}
+
+async function handleHttpCommand(cmd) {
+  if (cmd === 'status') {
+    const res = await fetch(`${API}/admin/status`);
+    const data = await res.json();
+    updateDashboard(data);
+    logTerminal('output', formatStatusText(data));
+  }
+  else if (cmd === 'wake mcp') {
+    const res = await fetch(`${API}/mcp/bootstrap`, { method: 'POST' });
+    const data = await res.json();
+    logTerminal('output', `MCP: ${data.status}`);
+  }
+  else if (cmd === 'check trident') {
+    const res = await fetch(`${API}/trident/status`);
+    const data = await res.json();
+    logTerminal('output', `Trident: ${data.trident.status}`);
+  }
+  else if (cmd === 'agents') {
+    const res = await fetch(`${API}/mcp/agents`);
+    const data = await res.json();
+    logTerminal('output', formatAgentsText(data.agents));
+  }
+  else if (cmd === 'bodies') {
+    const res = await fetch(`${API}/admin/status`);
+    const data = await res.json();
+    logTerminal('output', formatBodiesText(data.bodies));
+  }
+  else if (cmd === 'events') {
+    const res = await fetch(`${API}/mcp/events?limit=20`);
+    const data = await res.json();
+    data.events.forEach(e => logEvent(e));
+  }
+  else if (cmd === 'help') {
+    logTerminal('output', `Commands: status, wake mcp, check trident, agents, bodies, events, help, clear`);
+  }
+  else if (cmd === 'clear') {
+    document.getElementById('terminal-body').innerHTML = '';
+  }
+  else {
+    logTerminal('error', `Unknown command: ${cmd}. Type 'help'.`);
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// DASHBOARD UPDATES
+// ═══════════════════════════════════════════════════════════════════
+
+function updateDashboard(data) {
+  if (!data) return;
+
+  // System status
+  if (data.synthia) {
+    document.getElementById('synthia-status').textContent = data.synthia.status;
+    document.getElementById('synthia-status').className = 'row-val ' + data.synthia.status;
+  }
+  if (data.render) {
+    document.getElementById('render-status').textContent = data.render.status;
+    document.getElementById('render-status').className = 'row-val ' + data.render.status;
+  }
+  if (data.trident) {
+    document.getElementById('trident-status').textContent = data.trident.status;
+    document.getElementById('trident-status').className = 'row-val ' + data.trident.status;
+  }
+  if (data.mcp) {
+    document.getElementById('mcp-status').textContent = data.mcp.status;
+    document.getElementById('mcp-status').className = 'row-val ' + (data.mcp.status === 'online' ? 'online' : 'offline');
+  }
+  if (data.supabase) {
+    document.getElementById('supabase-status').textContent = data.supabase.status;
+    document.getElementById('supabase-status').className = 'row-val ' + data.supabase.status;
+  }
+
+  // Agents
+  if (data.agents) {
+    const kimi = data.agents.kimi;
+    const chatgpt = data.agents.chatgpt;
+    document.getElementById('kimi-status').textContent = kimi.status + (kimi.registered ? ' (registered)' : '');
+    document.getElementById('kimi-status').className = 'row-val ' + (kimi.registered ? 'registered' : kimi.status);
+    document.getElementById('chatgpt-status').textContent = chatgpt.status + (chatgpt.registered ? ' (registered)' : '');
+    document.getElementById('chatgpt-status').className = 'row-val ' + (chatgpt.registered ? 'registered' : chatgpt.status);
+
+    const allRegistered = kimi.registered && chatgpt.registered;
+    document.getElementById('agents-status').textContent = allRegistered ? 'ready' : 'pending';
+    document.getElementById('agents-status').className = 'status ' + (allRegistered ? 'online' : 'warn');
+  }
+
+  // Bodies
+  if (data.bodies) {
+    const alexis = data.bodies.alexis;
+    const joe = data.bodies.joe;
+    document.getElementById('alexis-status').textContent = alexis.status;
+    document.getElementById('alexis-status').className = 'row-val ' + alexis.status;
+    document.getElementById('joe-status').textContent = joe.status;
+    document.getElementById('joe-status').className = 'row-val ' + joe.status;
+
+    const anyOnline = alexis.status === 'online' || joe.status === 'online';
+    document.getElementById('bodies-status').textContent = anyOnline ? 'online' : 'offline';
+    document.getElementById('bodies-status').className = 'status ' + (anyOnline ? 'online' : 'offline');
+  }
+
+  // Last error/message
+  if (data.last_error) {
+    document.getElementById('last-error').textContent = data.last_error.message.substring(0, 50);
+    document.getElementById('last-error').style.color = '#ef4444';
+  }
+  if (data.last_routed_message) {
+    document.getElementById('last-message').textContent = data.last_routed_message.substring(0, 50) + '...';
+  }
+  if (data.event_count !== undefined) {
+    document.getElementById('event-count').textContent = data.event_count;
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// BUTTON ACTIONS
+// ═══════════════════════════════════════════════════════════════════
+
+async function wakeMCP() {
+  logTerminal('system', 'Waking MCP...');
+  const res = await fetch(`${API}/mcp/bootstrap`, { method: 'POST' });
+  const data = await res.json();
+  logTerminal('output', `MCP status: ${data.mcp.status}`);
+  updateDashboard({ mcp: data.mcp });
+}
+
+async function checkTrident() {
+  logTerminal('system', 'Checking Trident...');
+  const res = await fetch(`${API}/trident/status`);
+  const data = await res.json();
+  logTerminal('output', `Trident: ${data.trident.status}`);
+  updateDashboard({ trident: data.trident });
+}
+
+async function registerAgent(name) {
+  logTerminal('system', `Registering ${name}...`);
+  const res = await fetch(`${API}/admin/agents/register`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name, api_key: 'registered' })
+  });
+  const data = await res.json();
+  logTerminal('output', `${name}: ${data.success ? 'registered' : 'failed'}`);
+  if (data.agent) updateDashboard({ agents: { [name]: data.agent } });
+}
+
+async function sendTestMessage() {
+  const text = prompt('Test message:', 'Hello from admin cockpit');
+  if (!text) return;
+
+  logTerminal('system', `Sending test: ${text}`);
+  const res = await fetch(`${API}/admin/test-message`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ text })
+  });
+  const data = await res.json();
+  logTerminal('output', `Sent: ${data.text}`);
+}
+
+async function refreshStatus() {
+  logTerminal('system', 'Refreshing status...');
+  const res = await fetch(`${API}/admin/status`);
+  const data = await res.json();
+  updateDashboard(data);
+  logTerminal('output', 'Status refreshed');
+}
+
+function downloadClient() {
+  logTerminal('system', 'Downloading client...');
+  window.open('/client', '_blank');
+}
+
+function viewEvents() {
+  document.querySelector('.event-log').scrollIntoView({ behavior: 'smooth' });
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// FORMATTERS
+// ═══════════════════════════════════════════════════════════════════
+
+function formatStatusText(data) {
+  return `Synthia: ${data.synthia?.status}\nRender: ${data.render?.status}\nTrident: ${data.trident?.status}\nMCP: ${data.mcp?.status}\nSupabase: ${data.supabase?.status}\nAgents: Kimi=${data.agents?.kimi?.status}, ChatGPT=${data.agents?.chatgpt?.status}\nBodies: Alexis=${data.bodies?.alexis?.status}, Joe=${data.bodies?.joe?.status}`;
+}
+
+function formatAgentsText(agents) {
+  return Object.entries(agents).map(([n, a]) => `${n}: ${a.status} ${a.registered ? '(registered)' : ''}`).join('\n');
+}
+
+function formatBodiesText(bodies) {
+  return Object.entries(bodies).map(([n, b]) => `${n}: ${b.status} (${b.identity})`).join('\n');
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// TERMINAL LOGGING
+// ═══════════════════════════════════════════════════════════════════
+
+function logTerminal(type, text) {
+  const body = document.getElementById('terminal-body');
+  const div = document.createElement('div');
+  div.className = `terminal-output ${type}`;
+  div.textContent = text;
+  body.appendChild(div);
+  body.scrollTop = body.scrollHeight;
+}
+
+function logEvent(event) {
+  const log = document.getElementById('event-log');
+  const div = document.createElement('div');
+  div.className = 'event-item';
+  div.innerHTML = `
+    <span class="event-time">${new Date(event.timestamp).toLocaleTimeString()}</span>
+    <span class="event-type ${event.type}">${event.type}</span>
+    <span class="event-source">${event.source}</span>
+    <span class="event-msg">${event.message}</span>
+  `;
+  log.insertBefore(div, log.firstChild);
+  if (log.children.length > 50) log.lastChild.remove();
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════════════
+
+connectTerminal();
+refreshStatus();
+setInterval(refreshStatus, 10000); // Auto-refresh every 10s
+
+logTerminal('system', 'Admin cockpit loaded');
+logTerminal('system', 'Auto-start: MCP server will wake on server startup');
+</script>
+
+</body>
+</html>

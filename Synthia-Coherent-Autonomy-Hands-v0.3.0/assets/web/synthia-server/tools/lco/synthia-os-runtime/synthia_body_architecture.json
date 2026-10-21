@@ -1,0 +1,63 @@
+{
+  "system_name": "Synthia Body",
+  "version": "1.0",
+  "description": "A living Human Design bodygraph as a navigable world. Users explore their own psyche through cities (centers), buildings (gates), and scenarios (I Ching hexagrams).",
+  "components": {
+    "body_map": {
+      "centers": 9,
+      "gates": 64,
+      "channels": 32,
+      "description": "The Human Design chart rendered as a world map"
+    },
+    "klein_processors": {
+      "AutoLink": "Natural language parser and semantic interface",
+      "DISEMINER": "Pattern detection and life insight engine",
+      "AutoNovel": "Generative narrative engine - writes scenarios",
+      "WorldEngine": "3D world builder from I Ching symbols"
+    },
+    "genome_agents": {
+      "description": "Autonomous agents that traverse the body, carry messages, and spawn MCP tools",
+      "features": [
+        "travel along channels",
+        "deliver messages",
+        "replicate",
+        "mutate",
+        "spawn MCP tools"
+      ],
+      "placeholder_for": "Original Gene Gnomes from user's previous build"
+    },
+    "mcp_hub": {
+      "description": "External tool integration - genomes spawn these as needed",
+      "tools": [
+        "CodeGen",
+        "Meshy3D",
+        "ElevenVoice",
+        "WeatherAPI",
+        "DALLE",
+        "SunoMusic",
+        "Calendar",
+        "NewsAPI"
+      ]
+    }
+  },
+  "user_flow": [
+    "1. User opens app - sees their Synthia Body (Human Design chart as world map)",
+    "2. Centers glow based on defined/undefined (bright = defined, dim = undefined)",
+    "3. Genomes travel along channels (glowing paths with traffic)",
+    "4. User clicks a center \u2192 zooms into that city (3D environment)",
+    "5. User clicks a gate \u2192 enters a scenario (Sims-like skit)",
+    "6. Scenario is personalized based on user's patterns (DISEMINER)",
+    "7. User makes choices, learns lessons, outcome feeds back to system",
+    "8. Body map evolves - new areas glow, channels brighten, genomes multiply"
+  ],
+  "mobile_compatibility": {
+    "platforms": [
+      "Termux (Android)",
+      "Web (PWA)",
+      "iOS (future)"
+    ],
+    "backend": "Python (runs on mobile via Termux)",
+    "frontend": "WebGL/Unity (can run in browser or native app)",
+    "notes": "Designed to run on low-resource mobile devices"
+  }
+}

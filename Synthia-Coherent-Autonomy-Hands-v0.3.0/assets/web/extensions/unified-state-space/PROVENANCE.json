@@ -1,0 +1,33 @@
+{
+  "artifact": "Synthia-Unified-StateSpace-Kimi-Emergent-v0.1.1",
+  "created": "2026-08-28",
+  "merge_policy": "retain-all-perspectives",
+  "llm_dependency": false,
+  "donors": {
+    "kimi": {
+      "status": "recovered executable sovereign bundle; exact historical archive provenance unresolved",
+      "source_library_artifact": "index(20260823-011201).html",
+      "evidence": "as_is_test_results.txt / Synthia-alive-v2-test-results.txt",
+      "pure_automata_v2_manifest_sha256": "977323b7e065188f7daec61b164d87001e1626d0b8503c4263dee94d6d34829c"
+    },
+    "emergent": {
+      "status": "recovered source file; canonical v0.6.8 archive provenance unresolved",
+      "source_library_artifact": "state-space-model.js",
+      "canonical_target_sha256": "b5bd17303e7a3f8293233edfa9c2baa2ade3704c7ca91530f1f80669486b986f"
+    }
+  },
+  "vendor_snapshots": {
+    "vendor/kimi-sovereign-recovered.bundle.cjs": {
+      "sha256": "e4a6e1ac832da257636efaaa234d342a37e2fecc8e0b697697bbb803c012b8b0",
+      "bytes": 381261
+    },
+    "vendor/emergent-state-space.cjs": {
+      "sha256": "21cd1b0f26ea026c0bd89ba139d2a99128fbf84771000b2f72d99d9a2379050c",
+      "bytes": 41204
+    },
+    "vendor/emergent-state-transitions.mjs": {
+      "sha256": "d31c362d2223e9a0a3dddd3db76a925b30135ea537662126d7d665b63290d00a",
+      "bytes": 10547
+    }
+  }
+}

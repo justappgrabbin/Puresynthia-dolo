@@ -1,0 +1,14 @@
+44804439fc367085f6036be4100bd59c8528a08dc31b3a07d812815d0a95aebd  ./PROVENANCE.json
+092bae96628bd7dca7fb9017901bb0db737eb3f66d257f830953738d027520c1  ./README.md
+ec2a3973656cca1c339fb0afc5deb89ce82d88e68844abadcf84658187d9ebdc  ./evidence/PHASE2-STATUS-PERSPECTIVE-MERGE.json
+7ed0c34142b62157d2a5b16fdff79b4803618149342e7a5257d3271afffef8d0  ./evidence/Synthia-PureAutomata-ALIVE-CONTINUOUS-v2.manifest.json
+75cb4a2dfa147b419c585d0dd33099d02f2410545a826bee913a6e6d5f4889eb  ./evidence/Synthia-alive-v2-test-results.txt
+28b44c4d7d6fee298fba79edcac5c8080b0e4ada365704deccfc88047b3fa324  ./package.json
+cae0a9eb0b8e57a656d448351c171889643b23f9a19f46334f4ee3f554c42e7d  ./src/emergent-adapter.mjs
+4eee3f6844b05979b31c331773c2865e7fea01ea8ba673e25a6415fbd382b138  ./src/kimi-adapter.mjs
+20cb2d507e8c32ed58c7cd1325aa6a15a49aaeb186d372a72ac18718e32d2ffd  ./src/unified-state-space.mjs
+17c66fb9e2b5d42f59ecc17c4c0c41fbeda6212775f16f8fe33be66e067c3ed1  ./test/smoke.mjs
+e37eff6a3db073b2a70827bd4a363a6a59f35738e7f37848b5859386aebaf1cc  ./test/unified-state-space.test.mjs
+21cd1b0f26ea026c0bd89ba139d2a99128fbf84771000b2f72d99d9a2379050c  ./vendor/emergent-state-space.cjs
+d31c362d2223e9a0a3dddd3db76a925b30135ea537662126d7d665b63290d00a  ./vendor/emergent-state-transitions.mjs
+e4a6e1ac832da257636efaaa234d342a37e2fecc8e0b697697bbb803c012b8b0  ./vendor/kimi-sovereign-recovered.bundle.cjs

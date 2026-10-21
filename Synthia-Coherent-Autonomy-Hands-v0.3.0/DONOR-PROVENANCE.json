@@ -1,0 +1,55 @@
+{
+  "generated_for": "Synthia-Coherent-Autonomy-Hands-v0.3.0",
+  "approach": "clean-room/adapted concepts; no upstream telemetry stack or monolithic agent runtime bundled",
+  "donors": [
+    {
+      "repository": "https://github.com/mobile-next/mobile-mcp",
+      "commit": "648a6a4b86a8501fd8ebcae923474fc5f11311f2",
+      "license": "Apache-2.0",
+      "used_for": [
+        "accessibility-first mobile observation model",
+        "element refs",
+        "gesture/app-control capability vocabulary"
+      ],
+      "excluded": [
+        "MCP server",
+        "Node dependency",
+        "ADB/simulator controller",
+        "PostHog",
+        "Scarf telemetry"
+      ]
+    },
+    {
+      "repository": "https://github.com/aamunozm/aion-superagente",
+      "commit": "7d12124ce05b433ef73d6ce023bd3580ab0c02f3",
+      "license": "MIT OR Apache-2.0",
+      "used_for": [
+        "re-entrant event workspace concept",
+        "measured self-state discipline",
+        "gated promotion/canary/circuit breaker pattern"
+      ],
+      "excluded": [
+        "Rust monolith",
+        "Next.js UI",
+        "Ollama/Gemma/ReAct brain",
+        "cloud sync",
+        "WASM host implementation"
+      ]
+    },
+    {
+      "artifact": "Synthia-Native-JS-Stack-v0.2.0.zip",
+      "kind": "user-provided local donor",
+      "used_for": [
+        "role-level automaton lifecycle alignment",
+        "governed promotion alignment"
+      ]
+    },
+    {
+      "artifact": "ato-mcp-v0_1-fixed.zip",
+      "kind": "user-provided local donor",
+      "used_for": [
+        "confidence/automaton/mesh architecture alignment"
+      ]
+    }
+  ]
+}

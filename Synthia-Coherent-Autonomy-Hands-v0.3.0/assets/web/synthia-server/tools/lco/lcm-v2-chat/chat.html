@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cynthia — Language Contact Model</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: #0a0a0f;
+    color: #e0e0e0;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+  #header {
+    padding: 16px 24px;
+    border-bottom: 1px solid #1a1a2e;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  #header h1 {
+    font-size: 18px;
+    font-weight: 500;
+    color: #c0a0ff;
+  }
+  #header .status {
+    font-size: 12px;
+    color: #4ade80;
+    background: #1a2e1a;
+    padding: 2px 8px;
+    border-radius: 12px;
+  }
+  #chat {
+    flex: 1;
+    overflow-y: auto;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .message {
+    max-width: 80%;
+    padding: 12px 16px;
+    border-radius: 12px;
+    line-height: 1.5;
+    font-size: 14px;
+  }
+  .message.user {
+    align-self: flex-end;
+    background: #1a1a3e;
+    border-bottom-right-radius: 4px;
+  }
+  .message.lcm {
+    align-self: flex-start;
+    background: #1a1a2e;
+    border-bottom-left-radius: 4px;
+  }
+  .message .speaker {
+    font-size: 11px;
+    color: #888;
+    margin-bottom: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .message .traversal {
+    font-size: 11px;
+    color: #666;
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid #2a2a3e;
+  }
+  #input-area {
+    padding: 16px 24px;
+    border-top: 1px solid #1a1a2e;
+    display: flex;
+    gap: 12px;
+  }
+  #input {
+    flex: 1;
+    background: #1a1a2e;
+    border: 1px solid #2a2a3e;
+    border-radius: 8px;
+    padding: 12px 16px;
+    color: #e0e0e0;
+    font-size: 14px;
+    outline: none;
+  }
+  #input:focus { border-color: #c0a0ff; }
+  #send {
+    background: #c0a0ff;
+    color: #0a0a0f;
+    border: none;
+    border-radius: 8px;
+    padding: 12px 24px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+  }
+  #send:hover { background: #d0b0ff; }
+  #state-panel {
+    position: fixed;
+    right: 0;
+    top: 60px;
+    width: 300px;
+    height: calc(100vh - 60px);
+    background: #0f0f1a;
+    border-left: 1px solid #1a1a2e;
+    padding: 16px;
+    font-size: 12px;
+    overflow-y: auto;
+    transform: translateX(100%);
+    transition: transform 0.3s;
+  }
+  #state-panel.open { transform: translateX(0); }
+  #state-panel h3 {
+    color: #c0a0ff;
+    font-size: 13px;
+    margin-bottom: 12px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  #state-panel .metric {
+    display: flex;
+    justify-content: space-between;
+    padding: 6px 0;
+    border-bottom: 1px solid #1a1a2e;
+  }
+  #state-panel .metric .label { color: #888; }
+  #state-panel .metric .value { color: #e0e0e0; font-family: monospace; }
+  #state-panel .gate-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-top: 8px;
+  }
+  #state-panel .gate-tag {
+    background: #1a1a2e;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-family: monospace;
+    font-size: 11px;
+  }
+  #toggle-state {
+    position: fixed;
+    right: 16px;
+    top: 70px;
+    background: #1a1a2e;
+    border: 1px solid #2a2a3e;
+    color: #888;
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-size: 12px;
+    cursor: pointer;
+    z-index: 10;
+  }
+  #toggle-state:hover { color: #c0a0ff; border-color: #c0a0ff; }
+</style>
+</head>
+<body>
+
+<div id="header">
+  <h1>Cynthia</h1>
+  <span class="status">● online</span>
+</div>
+
+<button id="toggle-state" onclick="toggleState()">State</button>
+
+<div id="chat"></div>
+
+<div id="input-area">
+  <input id="input" type="text" placeholder="Say something..." autocomplete="off">
+  <button id="send" onclick="send()">Send</button>
+</div>
+
+<div id="state-panel">
+  <h3>I Ching State</h3>
+  <div class="metric"><span class="label">Activations</span><span class="value" id="activations">0</span></div>
+  <div class="metric"><span class="label">Centroid Gate</span><span class="value" id="centroid">—</span></div>
+  <div class="metric"><span class="label">Trajectory</span><span class="value" id="trajectory">0</span></div>
+  <div class="metric"><span class="label">Turn</span><span class="value" id="turn">0</span></div>
+
+  <h3 style="margin-top: 20px;">Emotional State</h3>
+  <div class="metric"><span class="label">Tension</span><span class="value" id="tension">0.00</span></div>
+  <div class="metric"><span class="label">Openness</span><span class="value" id="openness">0.00</span></div>
+  <div class="metric"><span class="label">Curiosity</span><span class="value" id="curiosity">0.00</span></div>
+  <div class="metric"><span class="label">Coherence</span><span class="value" id="coherence">0.00</span></div>
+
+  <h3 style="margin-top: 20px;">Active Gates</h3>
+  <div class="gate-list" id="gate-list"></div>
+</div>
+
+<script>
+// ============================================================
+// EMBEDDED LCM RUNTIME — Full chat engine in the browser
+// ============================================================
+
+// --- I Ching Substrate (embedded) ---
+const PLANETARY_FILTERS = ['sun','earth','moon','north-node','south-node','mercury','venus','mars','jupiter','saturn','uranus','neptune','pluto'];
+const COLORS = ['red','black','white','yellow'];
+const TONES = ['1st','2nd','3rd','4th','5th','6th'];
+
+function addressToArcSeconds(addr) {
+  const gateArcSec = (addr.gate - 1) * 20250;
+  const lineArcSec = (addr.line - 1) * 3375;
+  const colorArcSec = COLORS.indexOf(addr.color) * 844;
+  const toneArcSec = TONES.indexOf(addr.tone) * 141;
+  const baseArcSec = addr.base === 'left' ? 0 : 70;
+  return gateArcSec + lineArcSec + colorArcSec + toneArcSec + baseArcSec;
+}
+
+function createState() {
+  return { activations: new Map(), centroid: null, trajectory: [], step: 0 };
+}
+
+function activate(state, addr, strength) {
+  const key = `${addr.gate}:${addr.line}:${addr.color}:${addr.tone}:${addr.base}:${addr.filter}`;
+  state.activations.set(key, Math.min(Math.max(strength, 0), 1));
+  state.step++;
+  state.trajectory.push(addr);
+  state.centroid = computeCentroid(state);
+}
+
+function computeCentroid(state) {
+  if (state.activations.size === 0) return null;
+  let totalArcSec = 0, totalWeight = 0;
+  for (const [key, weight] of state.activations) {
+    const p = key.split(':');
+    const arcSec = addressToArcSeconds({
+      gate: parseInt(p[0]), line: parseInt(p[1]), color: p[2], tone: p[3], base: p[4], filter: p[5]
+    });
+    totalArcSec += arcSec * weight;
+    totalWeight += weight;
+  }
+  return arcSecondsToAddress(totalArcSec / totalWeight);
+}
+
+function arcSecondsToAddress(arcSec) {
+  const gate = Math.min(Math.max(Math.floor(arcSec / 20250) + 1, 1), 64);
+  const rem = arcSec % 20250;
+  const line = Math.min(Math.max(Math.floor(rem / 3375) + 1, 1), 6);
+  const colorRem = rem % 3375;
+  const colorIdx = Math.min(Math.floor(colorRem / 844), 3);
+  const toneRem = colorRem % 844;
+  const toneIdx = Math.min(Math.floor(toneRem / 141), 5);
+  const baseRem = toneRem % 141;
+  return { gate, line, color: COLORS[colorIdx], tone: TONES[toneIdx], base: baseRem < 70 ? 'left' : 'right', filter: 'sun' };
+}
+
+// --- Klein Decomposer (embedded, simplified) ---
+function hashString(str) {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    hash = ((hash << 5) - hash) + str.charCodeAt(i);
+    hash = hash & hash;
+  }
+  return Math.abs(hash);
+}
+
+function decompose(input) {
+  const tokens = input.toLowerCase().replace(/[.,;:!?]/g, ' ').split(/\s+/).filter(w => w.length > 0);
+  const state = createState();
+
+  // Simple entity/event extraction
+  const entities = tokens.filter(t => ['i','you','he','she','it','we','they','me','my','myself'].includes(t) || t.length > 4);
+  const events = tokens.filter(t => ['need','want','decide','make','take','go','come','leave','stay','choose','feel','think','know'].includes(t));
+
+  // Map to I Ching addresses
+  const dims = [
+    { name: 'who', gates: [1,13,25,33,44,57], features: entities },
+    { name: 'what', gates: [3,14,21,42,53,56], features: events },
+    { name: 'where', gates: [20,31,41,52,54,62], features: tokens.filter(t => ['here','there','away','near','far','room','space'].includes(t)) },
+    { name: 'when', gates: [5,15,29,36,49,60], features: tokens.filter(t => ['now','then','soon','later','before','after'].includes(t)) },
+    { name: 'why', gates: [2,9,11,16,23,46], features: tokens.filter(t => ['because','since','for','why','reason'].includes(t)) }
+  ];
+
+  const result = { who: null, what: null, where: null, when: null, why: null, fullStructure: null, state };
+
+  for (const dim of dims) {
+    if (dim.features.length > 0) {
+      const hash = hashString(dim.features.join(' '));
+      const gate = dim.gates[hash % dim.gates.length];
+      const line = (hash % 6) + 1;
+      const color = COLORS[hash % 4];
+      const tone = TONES[hash % 6];
+      const base = hash % 2 === 0 ? 'left' : 'right';
+      const filter = PLANETARY_FILTERS[hash % 13];
+      const addr = { gate, line, color, tone, base, filter };
+      activate(state, addr, 0.7);
+      result[dim.name] = { head: dim.features[0], address: addr, activation: 0.7 };
+    }
+  }
+
+  // If no dimensions found, activate a default
+  if (state.activations.size === 0) {
+    activate(state, { gate: 1, line: 1, color: 'red', tone: '1st', base: 'left', filter: 'sun' }, 0.3);
+  }
+
+  return result;
+}
+
+// --- Gate Vocabulary ---
+const GATE_VOCAB = {
+  1: ['creating','initiating','beginning anew','inspiring'],
+  2: ['receiving','responding','nurturing','supporting'],
+  3: ['ordering','structuring','organizing','arranging'],
+  4: ['answering','resolving','clarifying','explaining'],
+  5: ['waiting','finding rhythm','being patient','timing'],
+  6: ['acknowledging friction','recognizing pressure','feeling tension','noticing conflict'],
+  7: ['gathering','collecting','organizing people','leading'],
+  8: ['joining','uniting','collaborating','harmonizing'],
+  9: ['refining','polishing','perfecting','detailing'],
+  10: ['treading carefully','walking the path','proceeding','advancing'],
+  11: ['peace','prosperity','flowering','thriving'],
+  12: ['stagnation','standstill','waiting','holding'],
+  13: ['fellowship','community','togetherness','alliance'],
+  14: ['possession','having','holding','containing'],
+  15: ['humility','modesty','grounding','earthing'],
+  16: ['enthusiasm','excitement','motivation','inspiration'],
+  17: ['following','adapting','adjusting','flowing'],
+  18: ['correction','repair','healing','fixing'],
+  19: ['approach','nearing','coming close','advancing'],
+  20: ['contemplation','observing','watching','witnessing'],
+  21: ['biting through','breaking through','penetrating','resolving'],
+  22: ['grace','beauty','elegance','adornment'],
+  23: ['splitting apart','dissolving','breaking down','decomposing'],
+  24: ['return','coming back','turning','cycling'],
+  25: ['innocence','simplicity','naturalness','spontaneity'],
+  26: ['taming power','controlling force','managing energy','harnessing'],
+  27: ['nourishing','feeding','sustaining','providing'],
+  28: ['excess','greatness','abundance','overflow'],
+  29: ['abyss','depth','danger','the unknown'],
+  30: ['clarity','brightness','illumination','fire'],
+  31: ['influence','attraction','drawing near','wooing'],
+  32: ['duration','perseverance','continuing','enduring'],
+  33: ['retreat','withdrawal','pulling back','yielding'],
+  34: ['great power','strength','force','momentum'],
+  35: ['progress','advancing','moving forward','growing'],
+  36: ['darkening','concealment','hiding','protecting'],
+  37: ['family','household','clan','tribe'],
+  38: ['opposition','divergence','contrast','polarity'],
+  39: ['obstruction','difficulty','hardship','challenge'],
+  40: ['deliverance','liberation','release','freedom'],
+  41: ['decrease','reducing','simplifying','letting go'],
+  42: ['increase','growing','expanding','augmenting'],
+  43: ['breakthrough','resoluteness','determination','decision'],
+  44: ['coming to meet','encounter','attraction','temptation'],
+  45: ['gathering together','collecting','assembling','convening'],
+  46: ['pushing upward','rising','ascending','climbing'],
+  47: ['exhaustion','oppression','confinement','constraint'],
+  48: ['the well','source','foundation','resource'],
+  49: ['revolution','change','transformation','mutation'],
+  50: ['the cauldron','transformation','cooking','refining'],
+  51: ['shock','thunder','awakening','surprise'],
+  52: ['keeping still','mountain','meditation','stopping'],
+  53: ['development','gradual progress','maturing','evolving'],
+  54: ['the marrying maiden','adaptation','adjustment','fitting in'],
+  55: ['abundance','fullness','prosperity','wealth'],
+  56: ['the wanderer','traveling','journeying','exploring'],
+  57: ['the gentle','penetrating','wind','subtle influence'],
+  58: ['the joyous','lake','pleasure','satisfaction'],
+  59: ['dispersion','dissolving','scattering','dissipating'],
+  60: ['limitation','measuring','regulation','boundary'],
+  61: ['inner truth','sincerity','authenticity','genuineness'],
+  62: ['preponderance of the small','attention to detail','carefulness','caution'],
+  63: ['after completion','fulfillment','achievement','accomplishment'],
+  64: ['before completion','anticipation','preparation','readiness']
+};
+
+// --- Chat Engine (embedded) ---
+class ChatEngine {
+  constructor(name = "Cynthia") {
+    this.name = name;
+    this.coreState = createState();
+    this.affinities = new Map();
+    this.conversation = [];
+    this.emotion = { tension: 0.2, openness: 0.8, curiosity: 0.7, coherence: 0.9 };
+    this.turn = 0;
+
+    // Initialize core state
+    activate(this.coreState, { gate: 1, line: 1, color: 'red', tone: '1st', base: 'left', filter: 'sun' }, 0.8);
+    activate(this.coreState, { gate: 6, line: 4, color: 'yellow', tone: '4th', base: 'right', filter: 'sun' }, 0.6);
+    activate(this.coreState, { gate: 25, line: 3, color: 'white', tone: '3rd', base: 'left', filter: 'moon' }, 0.5);
+    activate(this.coreState, { gate: 50, line: 2, color: 'black', tone: '2nd', base: 'right', filter: 'mercury' }, 0.4);
+
+    this.affinities.set('1:1', 0.9);
+    this.affinities.set('6:4', 0.7);
+    this.affinities.set('25:3', 0.6);
+    this.affinities.set('50:2', 0.5);
+  }
+
+  chat(userInput) {
+    this.turn++;
+    const userDecomp = decompose(userInput);
+
+    // Perturb
+    const perturbation = this.perturb(userDecomp.state, userDecomp);
+
+    // Traverse
+    const traversal = this.traverseResponse(perturbation);
+
+    // Build response state
+    const responseState = this.buildResponseState(traversal);
+
+    // Realize
+    const responseText = this.realizeResponse(responseState, traversal, userDecomp);
+
+    // Integrate
+    this.integrate(userDecomp.state, responseState);
+    this.updateEmotion(userDecomp.state, responseState);
+
+    // Record
+    this.conversation.push({ turn: this.turn, speaker: 'user', text: userInput });
+    this.conversation.push({ turn: this.turn, speaker: 'lcm', text: responseText, traversal });
+
+    return { text: responseText, traversal };
+  }
+
+  perturb(userState, userDecomp) {
+    let intensity = 0;
+    let dominantGate = null;
+    const affectedDimensions = [];
+
+    for (const [key, activation] of userState.activations) {
+      const parts = key.split(':');
+      const gate = parseInt(parts[0]);
+      const affinityKey = `${parts[0]}:${parts[1]}`;
+      const affinity = this.affinities.get(affinityKey) || 0;
+
+      if (affinity > 0.3) {
+        intensity += activation * affinity;
+        if (!dominantGate || activation > 0.5) dominantGate = gate;
+
+        const dims = { who: [1,13,25,33,44,57], what: [3,14,21,42,53,56], where: [20,31,41,52,54,62], when: [5,15,29,36,49,60], why: [2,9,11,16,23,46] };
+        for (const [dimName, gates] of Object.entries(dims)) {
+          if (gates.includes(gate) && !affectedDimensions.includes(dimName)) affectedDimensions.push(dimName);
+        }
+      }
+
+      // Integrate into core state (weakened)
+      const addr = { gate: parseInt(parts[0]), line: parseInt(parts[1]), color: parts[2], tone: parts[3], base: parts[4], filter: parts[5] };
+      activate(this.coreState, addr, activation * 0.3);
+    }
+
+    return { affectedDimensions, intensity, dominantGate };
+  }
+
+  traverseResponse(perturbation) {
+    const steps = [];
+    const current = computeCentroid(this.coreState) || { gate: 1, line: 1, color: 'red', tone: '1st', base: 'left', filter: 'sun' };
+    let pos = { ...current };
+
+    if (perturbation.dominantGate) {
+      const target = { ...pos, gate: perturbation.dominantGate, line: Math.min(pos.line + 1, 6) };
+      steps.push({ from: pos, to: target, operator: 'advance_line', reason: `responding to gate ${perturbation.dominantGate}` });
+      pos = target;
+    }
+
+    if (perturbation.intensity > 0.6) {
+      const filters = ['sun','moon','mercury','venus','mars'];
+      const target = { ...pos, filter: filters[Math.floor(Math.random() * filters.length)] };
+      steps.push({ from: pos, to: target, operator: 'planetary_shift', reason: `high intensity (${perturbation.intensity.toFixed(2)})` });
+      pos = target;
+    }
+
+    if (this.emotion.openness > 0.6 && perturbation.intensity < 0.8) {
+      const nearby = this.findNearbyGates(pos.gate);
+      if (nearby.length > 0) {
+        const target = { ...pos, gate: nearby[Math.floor(Math.random() * nearby.length)] };
+        steps.push({ from: pos, to: target, operator: 'cross_gate', reason: `openness (${this.emotion.openness.toFixed(2)})` });
+        pos = target;
+      }
+    }
+
+    if (this.emotion.tension > 0.7) {
+      const target = { gate: 1, line: pos.line, color: 'red', tone: '1st', base: 'left', filter: 'sun' };
+      steps.push({ from: pos, to: target, operator: 'retreat_line', reason: `high tension (${this.emotion.tension.toFixed(2)})` });
+    }
+
+    return steps;
+  }
+
+  findNearbyGates(gate) {
+    const nearby = [];
+    if (gate > 1) nearby.push(gate - 1);
+    if (gate < 64) nearby.push(gate + 1);
+    if (gate <= 32) nearby.push(gate + 32);
+    if (gate > 32) nearby.push(gate - 32);
+    return nearby;
+  }
+
+  buildResponseState(traversal) {
+    const state = createState();
+    for (const [key, act] of this.coreState.activations) {
+      const p = key.split(':');
+      activate(state, { gate: parseInt(p[0]), line: parseInt(p[1]), color: p[2], tone: p[3], base: p[4], filter: p[5] }, act * 0.5);
+    }
+    for (const step of traversal) {
+      activate(state, step.to, 0.7);
+    }
+    if (traversal.length > 0) {
+      activate(state, traversal[traversal.length - 1].to, 0.9);
+    }
+    return state;
+  }
+
+  realizeResponse(state, traversal, userDecomp) {
+    const sorted = Array.from(state.activations.entries()).sort((a, b) => b[1] - a[1]).slice(0, 5);
+    const parts = [];
+
+    if (this.emotion.openness > 0.7) parts.push("I see");
+    else if (this.emotion.tension > 0.6) parts.push("I need to think about this");
+    else parts.push("I understand");
+
+    for (const step of traversal) {
+      const vocab = GATE_VOCAB[step.to.gate];
+      if (vocab) parts.push(vocab[Math.min(step.to.line - 1, vocab.length - 1)]);
+    }
+
+    if (userDecomp.why?.address) {
+      parts.push("because");
+      const vocab = GATE_VOCAB[userDecomp.why.address.gate];
+      if (vocab) parts.push(vocab[Math.min(userDecomp.why.address.line - 1, vocab.length - 1)]);
+    }
+    if (userDecomp.what?.address) {
+      parts.push("the issue is");
+      const vocab = GATE_VOCAB[userDecomp.what.address.gate];
+      if (vocab) parts.push(vocab[Math.min(userDecomp.what.address.line - 1, vocab.length - 1)]);
+    }
+    if (userDecomp.who?.address) parts.push("from my perspective");
+
+    const text = parts.filter(p => p.length > 0).join(' ').replace(/\s+/g, ' ').trim();
+    return text.charAt(0).toUpperCase() + text.slice(1) + '.';
+  }
+
+  integrate(userState, responseState) {
+    for (const [key, act] of userState.activations) {
+      const p = key.split(':');
+      const addr = { gate: parseInt(p[0]), line: parseInt(p[1]), color: p[2], tone: p[3], base: p[4], filter: p[5] };
+      const current = this.coreState.activations.get(key) || 0;
+      activate(this.coreState, addr, current * 0.8 + act * 0.2);
+    }
+    for (const [key, act] of responseState.activations) {
+      const p = key.split(':');
+      const addr = { gate: parseInt(p[0]), line: parseInt(p[1]), color: p[2], tone: p[3], base: p[4], filter: p[5] };
+      const current = this.coreState.activations.get(key) || 0;
+      activate(this.coreState, addr, Math.max(current, act * 0.5));
+    }
+    for (const [key, act] of this.coreState.activations) {
+      const p = key.split(':');
+      const affinityKey = `${p[0]}:${p[1]}`;
+      const current = this.affinities.get(affinityKey) || 0;
+      this.affinities.set(affinityKey, Math.min(current + act * 0.05, 1.0));
+    }
+  }
+
+  updateEmotion(userState, responseState) {
+    const userEnergy = Array.from(userState.activations.values()).reduce((a, b) => a + b, 0);
+    const responseEnergy = Array.from(responseState.activations.values()).reduce((a, b) => a + b, 0);
+    this.emotion.tension = Math.min(this.emotion.tension * 0.7 + (userEnergy - responseEnergy) * 0.1, 1.0);
+    const flow = Math.min(userEnergy, responseEnergy) / Math.max(userEnergy, responseEnergy) || 0;
+    this.emotion.openness = Math.min(this.emotion.openness * 0.8 + flow * 0.2, 1.0);
+    const novel = Array.from(userState.activations.keys()).filter(k => !this.coreState.activations.has(k)).length;
+    this.emotion.curiosity = Math.min(this.emotion.curiosity * 0.9 + novel * 0.02, 1.0);
+    this.emotion.coherence = Math.min(this.emotion.coherence * 0.95 + (1 / (this.coreState.activations.size + 1)) * 0.05, 1.0);
+  }
+
+  getState() {
+    return {
+      activations: this.coreState.activations.size,
+      centroid: computeCentroid(this.coreState),
+      trajectory: this.coreState.trajectory.length,
+      turn: this.turn,
+      emotion: { ...this.emotion },
+      gates: Array.from(new Set(Array.from(this.coreState.activations.keys()).map(k => parseInt(k.split(':')[0])))),
+      conversation: this.conversation
+    };
+  }
+}
+
+// --- UI ---
+const engine = new ChatEngine("Cynthia");
+
+function addMessage(speaker, text, traversal) {
+  const chat = document.getElementById('chat');
+  const div = document.createElement('div');
+  div.className = `message ${speaker}`;
+  div.innerHTML = `<div class="speaker">${speaker === 'user' ? 'You' : 'Cynthia'}</div><div>${escapeHtml(text)}</div>`;
+  if (traversal && traversal.length > 0) {
+    div.innerHTML += `<div class="traversal">${traversal.map(t => `→ ${t.operator}: Gate ${t.from.gate} → ${t.to.gate}`).join('<br>')}</div>`;
+  }
+  chat.appendChild(div);
+  chat.scrollTop = chat.scrollHeight;
+}
+
+function escapeHtml(text) {
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+function send() {
+  const input = document.getElementById('input');
+  const text = input.value.trim();
+  if (!text) return;
+
+  addMessage('user', text);
+  input.value = '';
+
+  const response = engine.chat(text);
+  addMessage('lcm', response.text, response.traversal);
+  updateStatePanel();
+}
+
+function updateStatePanel() {
+  const state = engine.getState();
+  document.getElementById('activations').textContent = state.activations;
+  document.getElementById('centroid').textContent = state.centroid ? `Gate ${state.centroid.gate}:${state.centroid.line}` : '—';
+  document.getElementById('trajectory').textContent = state.trajectory;
+  document.getElementById('turn').textContent = state.turn;
+  document.getElementById('tension').textContent = state.emotion.tension.toFixed(2);
+  document.getElementById('openness').textContent = state.emotion.openness.toFixed(2);
+  document.getElementById('curiosity').textContent = state.emotion.curiosity.toFixed(2);
+  document.getElementById('coherence').textContent = state.emotion.coherence.toFixed(2);
+
+  const gateList = document.getElementById('gate-list');
+  gateList.innerHTML = state.gates.map(g => `<span class="gate-tag">${g}</span>`).join('');
+}
+
+function toggleState() {
+  document.getElementById('state-panel').classList.toggle('open');
+}
+
+document.getElementById('input').addEventListener('keypress', (e) => {
+  if (e.key === 'Enter') send();
+});
+
+// Initial greeting
+setTimeout(() => {
+  const greeting = engine.chat("Hello");
+  addMessage('lcm', greeting.text, greeting.traversal);
+  updateStatePanel();
+}, 100);
+</script>
+
+</body>
+</html>

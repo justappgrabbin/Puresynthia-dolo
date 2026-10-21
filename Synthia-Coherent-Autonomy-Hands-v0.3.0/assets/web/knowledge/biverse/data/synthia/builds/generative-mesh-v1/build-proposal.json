@@ -1,0 +1,177 @@
+{
+  "assignmentId": "synthia-build-generative-mesh-v1",
+  "createdAt": "2026-07-25T14:18:23.274Z",
+  "status": "proposal",
+  "retrievedEvidence": [
+    {
+      "sourceId": "books:source-reading",
+      "location": "circuitry.txt#7.1",
+      "checksum": "59fa8765afa6f2c5c3ab1b2036ce4bb6c8672284a5e0bb764542f5756bdcc3c6",
+      "score": 40
+    },
+    {
+      "sourceId": "instruction:synthia-build-generative-mesh-v1",
+      "location": "document#1.1",
+      "checksum": "6ebe5ad5750eff9b6e7a260732ddc33f0d2024f001a8fa2eca0926df11001bab",
+      "score": 39
+    },
+    {
+      "sourceId": "books:source-reading",
+      "location": "hatcher.txt#87.2",
+      "checksum": "d39e0f0551e2012a9a4b1ba18974ac9d9f6917fafaa2d220a66b01c651fefb89",
+      "score": 37
+    },
+    {
+      "sourceId": "books:source-reading",
+      "location": "hua-ching-ni.txt#502.2",
+      "checksum": "a033f78dff50cfa60d70cefe438a0d4d1eacdf6782d0fcc66296fb7692f975c4",
+      "score": 37
+    },
+    {
+      "sourceId": "books:source-reading",
+      "location": "circuitry.txt#116.1",
+      "checksum": "c2a09c5de6de2bfaf08645618a7196ddfc49c003259640fa0368ee5470ad6699",
+      "score": 36
+    },
+    {
+      "sourceId": "books:source-reading",
+      "location": "hatcher.txt#85.2",
+      "checksum": "bb876abf07f966c300064943bb143fac00ab3a78809175c25cc2c4342872484d",
+      "score": 36
+    },
+    {
+      "sourceId": "books:source-reading",
+      "location": "hua-ching-ni.txt#233.1",
+      "checksum": "eea5d088ce05dddbe35a5de1a24561580ea8fd86c2c8dcf1f8d8adfcf8b93f68",
+      "score": 36
+    },
+    {
+      "sourceId": "books:source-reading",
+      "location": "hua-ching-ni.txt#517.1",
+      "checksum": "506f155b519f9d1357f0f5c0a9af801fb9edadff50682b9bd641e388068e0c0a",
+      "score": 36
+    },
+    {
+      "sourceId": "repository:isohuman",
+      "location": "mesh/KleinMeshRuntime.ts#1.1",
+      "checksum": "08e4699b63b773f9eb4b98253344f53b749e542658cd0ae07fa5092578a6db60",
+      "score": 10
+    },
+    {
+      "sourceId": "repository:isohuman",
+      "location": "index.ts#1.1",
+      "checksum": "0c07e396b43c3f7904c42ad001e586d503b5832eba6ae571793fc868eaeced11",
+      "score": 9
+    },
+    {
+      "sourceId": "repository:human-design-llm",
+      "location": "scripts/evaluate_v2.py#12.1",
+      "checksum": "b57a1a34442de4455e201725c8178bd4bc0b74c2670ccee1592da0ee536e0d3f",
+      "score": 9
+    },
+    {
+      "sourceId": "repository:isohuman",
+      "location": "mesh/KleinMeshRuntime.ts#5.1",
+      "checksum": "be3000afa1e63cf5667ffe08e62aba2a7b0f105c7a8bb53dca61f15973860520",
+      "score": 9
+    },
+    {
+      "sourceId": "github:joyozhang333-lgtm/human-design-llm",
+      "location": "scripts/evaluate_v2.py#12.1",
+      "checksum": "b57a1a34442de4455e201725c8178bd4bc0b74c2670ccee1592da0ee536e0d3f",
+      "score": 9
+    },
+    {
+      "sourceId": "repository:isohuman",
+      "location": "mesh/KleinMeshRuntime.ts#6.1",
+      "checksum": "82b1345d9aa4dd0964a6abc004adb819a3c3bf28e3925a4a5387eb2bec2a378d",
+      "score": 8
+    },
+    {
+      "sourceId": "repository:human-design-llm",
+      "location": "data/empirical/public_figure_manifest.jsonl#1.42",
+      "checksum": "677921796e57c1224731831f2cf159736a82f65e4e8d60f8584f72008b862472",
+      "score": 8
+    },
+    {
+      "sourceId": "repository:human-design-llm",
+      "location": "data/empirical/public_figure_manifest.jsonl#1.58",
+      "checksum": "5d7657c896ef0120a5df0a146748a092ca7e7d8d8f9017894fbbab0f5a1a978c",
+      "score": 8
+    },
+    {
+      "sourceId": "repository:human-design-llm",
+      "location": "data/empirical/public_figure_manifest.jsonl#1.68",
+      "checksum": "c7980613c7ca52e762f38e85723a0187e2713946f76d25444b86150f18691f14",
+      "score": 8
+    },
+    {
+      "sourceId": "repository:human-design-llm",
+      "location": "data/empirical/public_figure_manifest.jsonl#1.95",
+      "checksum": "ff5b192b01d206f7ce1c81868a0053ca073ba36e0e3f824b9306e97ce2adcda3",
+      "score": 8
+    },
+    {
+      "sourceId": "repository:human-design-llm",
+      "location": "data/empirical/public_figure_manifest.jsonl#1.852",
+      "checksum": "485388168dbbe5d27c3565dca9bcf970854074963ccd975d7a3560b68f692faa",
+      "score": 8
+    },
+    {
+      "sourceId": "repository:human-design-llm",
+      "location": "data/empirical/public_figure_manifest.jsonl#1.4786",
+      "checksum": "f56e963ab94ab24d72777f22fb6b4ef1594cb2ba5772ed6e21690bc232dda48e",
+      "score": 8
+    },
+    {
+      "sourceId": "repository:human-design-llm",
+      "location": "human_design/relationship_reading.py#9.1",
+      "checksum": "4ed634e0a5c1da5b91b75050e652162771daf653a85da88bc9df7c0fc7a35d75",
+      "score": 8
+    },
+    {
+      "sourceId": "repository:isohuman",
+      "location": "mesh/LearningMesh.ts#19.1",
+      "checksum": "fc13e1429348966ba7584c6031ddf1b097812af0c489340a60004bb729ec2e90",
+      "score": 8
+    },
+    {
+      "sourceId": "github:joyozhang333-lgtm/human-design-llm",
+      "location": "human_design/relationship_reading.py#9.1",
+      "checksum": "4ed634e0a5c1da5b91b75050e652162771daf653a85da88bc9df7c0fc7a35d75",
+      "score": 8
+    },
+    {
+      "sourceId": "repository:human-design-llm",
+      "location": "scripts/evaluate_v2.py#17.2",
+      "checksum": "d4242546d9991bf14281c6d9a0ec5f3e51badc2d648402a1485039ec029654bc",
+      "score": 6
+    }
+  ],
+  "findings": [
+    "24 source-grounded passages were retrieved.",
+    "6 Klein organs share the learning mesh.",
+    "Every required evidence kind is represented."
+  ],
+  "buildSteps": [
+    "Retrieve evidence for the requested capability.",
+    "Let AUTOLING and Control of Grammar learn language and structural constraints.",
+    "Let DISEMINER extract candidate semantic triples.",
+    "Map accepted triples and transformations through ATO onto the mesh.",
+    "Compose compatible input, transform, and output organs.",
+    "Generate prose with AutoNovel and Paraphraser.",
+    "Validate claims and generated modules against cited evidence.",
+    "Run acceptance tests; preserve failed attempts and reversible revisions."
+  ],
+  "acceptanceTests": [
+    "All registered Klein organs receive accepted mesh learning after reload.",
+    "New language learned by AUTOLING is visible to the other organs through shared mesh state.",
+    "Every accepted relation resolves to source ID, location, checksum, and original text.",
+    "ATO transformations are reversible.",
+    "Generated reports contain prose and claim-level evidence.",
+    "Corrections propagate without deleting prior revisions.",
+    "Generated modules remain inactive until automated tests pass.",
+    "A full shutdown and restart preserves accepted learning and tool growth."
+  ],
+  "warning": "This proposal does not authorize silent source rewriting or untested promotion. Generated code must pass its tests before becoming an active mesh organ."
+}

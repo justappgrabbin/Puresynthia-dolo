@@ -1,0 +1,494 @@
+{
+  "learnings": [
+    {
+      "toolId": "diseminer",
+      "kind": "observation",
+      "value": "===== PDF PAGE 7 ===== INTERNATIONAL HUMAN DESIGN SCHOOLS INTRODUCTION TO THE CIRCUITS AND THE CIRCUIT GROUPS RAVE CIRCUITS AND CIRCUITRY; A CAUTION In the advanced level of Human Design we begin by examining the rave circuits, the circuit groups and the channels themselves.",
+      "confidence": 0.95,
+      "evidence": [
+        {
+          "sourceId": "books:source-reading",
+          "location": "circuitry.txt#7.1",
+          "checksum": "59fa8765afa6f2c5c3ab1b2036ce4bb6c8672284a5e0bb764542f5756bdcc3c6",
+          "text": "===== PDF PAGE 7 =====\nINTERNATIONAL HUMAN DESIGN SCHOOLS \nINTRODUCTION TO THE CIRCUITS AND THE CIRCUIT GROUPS \nRAVE CIRCUITS AND CIRCUITRY; A CAUTION \nIn the advanced level of Human Design we begin by examining the rave circuits, the \ncircuit groups and the channels themselves. Students who have decided to study \nHuman Design beyond the basic level of the Living Design training, welcome and \nbeware! Welcome because this is quite a journey you are embarking upon, and \nbeware because understanding takes time. Ever since Human Design has been \ntaught, people have wanted to understand the meanings of the channels. The \nchannels are by their very nature mysterious. They are mysterious because they are \nall polarities, created by the fusion of opposite forces. In this sense each channel is \nsomething of a paradox; a zen koan that cannot be resolved by the mind alone. This \nis knowledge that has to be absorbed at a cellular level as well as at a mental level. \nTo fully understand Human Design takes seven years. To fully understand the \nchannels and circuits takes seven years. Therefore go slowly and allow the \nexperiment of living your own design to lead the way. \nA Guide to the Channels"
+        }
+      ],
+      "id": "dd2a1a9f9ef37fe2f3b0e1ec1ffc340adc7bd7bff3f980d6ab0ab6b8a212241a",
+      "learnedAt": "2026-07-25T14:18:23.236Z",
+      "revision": 1
+    },
+    {
+      "toolId": "diseminer",
+      "kind": "observation",
+      "value": "Use the supplied books, user instructions, Klein tools, ATO materials, Human Design repositories, and GitHub research to build a shared generative mesh whose tools learn from one another while preserving distinct functions.",
+      "confidence": 0.9400000000000001,
+      "evidence": [
+        {
+          "sourceId": "instruction:synthia-build-generative-mesh-v1",
+          "location": "document#1.1",
+          "checksum": "6ebe5ad5750eff9b6e7a260732ddc33f0d2024f001a8fa2eca0926df11001bab",
+          "text": "Use the supplied books, user instructions, Klein tools, ATO materials, Human Design repositories, and GitHub research to build a shared generative mesh whose tools learn from one another while preserving distinct functions."
+        }
+      ],
+      "id": "535e91a3347f60aec4a7921b0fea0fd625ab1c6178282c2863d6ef074cf4f93c",
+      "learnedAt": "2026-07-25T14:18:23.248Z",
+      "revision": 1
+    },
+    {
+      "toolId": "diseminer",
+      "kind": "observation",
+      "value": "still not diminish the child.",
+      "confidence": 0.92,
+      "evidence": [
+        {
+          "sourceId": "books:source-reading",
+          "location": "hatcher.txt#87.2",
+          "checksum": "d39e0f0551e2012a9a4b1ba18974ac9d9f6917fafaa2d220a66b01c651fefb89",
+          "text": "still not diminish the child.\n04.2, 9 2nd, Zhi Gua 23: Bo, Decomposing\n(Fan Yao 23.2: depriving bed of frame, dismissing persistence)\nEmbracing the inexperienced is promising\nInvolving the women is promising\nThe young one can manage the household\n04.2x The young one can manage the household:\nThe firm (and) the flexible interrelate\nOld master keeps a vigil as a young son is apprenticed to life, learning how to live.\nLoosed among the other young fools, he learns to share and play, fight and retreat.\nLoosed among the women he learns to mistrust expectations, and of the family life,\nwith its palette of diverse points of view. Among his daily duties he learns to trade\neffort for value, and thus to weigh value itself against effort. There can be no better\nteacher of duty than freedom, or teacher of freedom than duty. He w ill slowly add\nreal context, training in safe environs as consequence is slowly stepped up. Learning\nhow to learn and why  will precede what to learn and when. Education is backwards\nif the object is to teach someone a subject. The subject will learn when his mind has\nobjectives. The subject best taught is the student himself, and relevance is the bait.\n79"
+        }
+      ],
+      "id": "84db0eba6109bd8bd4819179927b7be78c29814e5f152d13efda3df984f26051",
+      "learnedAt": "2026-07-25T14:18:23.250Z",
+      "revision": 1
+    },
+    {
+      "toolId": "diseminer",
+      "kind": "observation",
+      "value": "be made to fit the people: people should not be made to fit the clothing.’ Exactly how much of this is your own contribution?” “I do not claim credit for this point of view.",
+      "confidence": 0.92,
+      "evidence": [
+        {
+          "sourceId": "books:source-reading",
+          "location": "hua-ching-ni.txt#502.2",
+          "checksum": "a033f78dff50cfa60d70cefe438a0d4d1eacdf6782d0fcc66296fb7692f975c4",
+          "text": " be made to fit the people:\npeople should not be made to fit  the clothing.’ Exactly how\nmuch of this is your own contribution?”\n“I do not claim  credit for this point of view. Rebellious\npeople also use these words, but what they say has no true\nspiritual value. My spiritual value was obtained from serious\ncultivation. thus I do not speak out of rebellious igncrance.\nFrom spiritual achievement I am able to reach the truth. I\nvalue the healthy spiritual education that the human race has\ndeveloped. I deny anythnrg  that can be an obstruction to\nreaching the truth.”\n‘Wait a moment,” one of them exclaimed, “this is the point\nwe really need to know. Now, what is the truth you have\nreached, and by what books were you inspired? Quickly, tell\nus!”\nIn this room was a table on which were many different\nimportant books and translations of world religions. At this\nmoment I was inspired and stacked all the books into one pile\nas a stool and sat on them. Someone then passed me one\ncopy of Lao Tzu and one copy of Chuang Tzu,  and said: ‘Take\nthese also, to make you sit higher.” When I refused, he\ndemanded the reason.\nI answered: “I know what is beneath me, and what is not\nbeneath me.”"
+        }
+      ],
+      "id": "e66c9e12731a12a1328737cb775feef9c84fde3e3d58bbda53672828dee9b613",
+      "learnedAt": "2026-07-25T14:18:23.252Z",
+      "revision": 1
+    },
+    {
+      "toolId": "diseminer",
+      "kind": "observation",
+      "value": "===== PDF PAGE 116 ===== INTERNATIONAL HUMAN DESIGN SCHOOLS CONCLUSION This whole Rave Cartography training program has been designed to simply bring you back to the surface.",
+      "confidence": 0.91,
+      "evidence": [
+        {
+          "sourceId": "books:source-reading",
+          "location": "circuitry.txt#116.1",
+          "checksum": "c2a09c5de6de2bfaf08645618a7196ddfc49c003259640fa0368ee5470ad6699",
+          "text": "===== PDF PAGE 116 =====\nINTERNATIONAL HUMAN DESIGN SCHOOLS \nCONCLUSION \nThis whole Rave Cartography training program has been designed to simply bring \nyou back to the surface. In the early days, Human Design was taught from the detail \nupwards. Now we have looked at the channels from another level. It is in a sense, a \nhigher and purer level, because we have looked at them simply through the way in \nwhich they flow and work. Remember, a channel is just a connection between two \ncenters. In the Living Design training, we learned about the centers in depth. How \neasy it is to look at what happens when two centers meet in a human being. These \nare such simple formulas. You always have to remember that if somebody is coming \nto you, the first thing that someone needs to know is their definition. It is essential for \nthem to understand what is reliable for them in their life because they do not know. \nMost human beings are so deeply embedded in the not-self that even when you tell \nthem who they are they don't recognize it. In giving someone their definition, you \nhave already taken them to their type. The two are inseparable. It is essential to be \nable to liberate someone enough so "
+        }
+      ],
+      "id": "abf5d36430df5887f1dd5542fd5945d401a6e7c7648e31b95c4f8290ea14828e",
+      "learnedAt": "2026-07-25T14:18:23.254Z",
+      "revision": 1
+    },
+    {
+      "toolId": "diseminer",
+      "kind": "observation",
+      "value": "not the duty or function of oracles to chase a young fool around with advice.",
+      "confidence": 0.91,
+      "evidence": [
+        {
+          "sourceId": "books:source-reading",
+          "location": "hatcher.txt#85.2",
+          "checksum": "bb876abf07f966c300064943bb143fac00ab3a78809175c25cc2c4342872484d",
+          "text": " not the duty or function of oracles to chase a young fool around with advice.\nNor is it wisdom to give or seek answers. Wis dom lies in the way one questions,\nthe say one has in the way that one hungers, the taste that one has in one’s wants.\nPointless, inane and importune questions get no information at all, but not because\nthey irk Teacher. There is just nothing there to receive or contain information, and\nno way to process the changes. You do not need the answer to question, but this will\nshape the response with language and context. To learn is to change oneself, from\nan earlier state to a later. The young one is born with half of what is needed and half\nof what must be lost. Too much of potential is there in the being at birth, to go to\nhalf of anywhere, and do half of any thing, but half of which are danger and trouble.\nTo this end the young one begins his life as a halfwit. The other half is the culture,\ntempered by family and friends, with two tools: for all there is to be lost there is no,\nfor all to be won there is yes. The child is blessed who has both in good measure.\nTo grow in every direction is no direction at all. Being specific means boundaries.\n77"
+        }
+      ],
+      "id": "01630e4cc26fcfc7dde66abb4f90de511a7e34bff86b8a81c41c67ad1c4de6af",
+      "learnedAt": "2026-07-25T14:18:23.254Z",
+      "revision": 1
+    },
+    {
+      "toolId": "diseminer",
+      "kind": "observation",
+      "value": "===== PDF PAGE 233 ===== GUIDANCE: We creative with these basic yang VfliueS: initiative, prugressizxmess, sup~rtiveness and persistence.” The great Oneness expresses itself through the perpetually interacting and integrating energies of yin and yang.",
+      "confidence": 0.91,
+      "evidence": [
+        {
+          "sourceId": "books:source-reading",
+          "location": "hua-ching-ni.txt#233.1",
+          "checksum": "eea5d088ce05dddbe35a5de1a24561580ea8fd86c2c8dcf1f8d8adfcf8b93f68",
+          "text": "===== PDF PAGE 233 =====\nGUIDANCE: We creative with these basic yang VfliueS:\ninitiative, prugressizxmess,  sup~rtiveness  and  persistence.”\nThe great Oneness expresses itself through the\nperpetually interacting and integrating energies of yin and\nyang. Of the two, yang is the primary mover and initiator.\nWhen it moves, it creates time and space and transforms all\nthings in the manifest universe while, at the same time,\nremaining beyond time and space. Being self-generating and\nself-motivating, it has no creator and is therefore sometimes\nconfused with a personalized concept of God. Universal yang\nenergy is the true creator, positive performer and endless\ngenerator of all that exists. It is beyond conceptualization.\nWhen yang moves, yin becomes apparent. Like  an\nobject and its shadow, these two energies cannot exist\nseparately. Although yang is the initiator, it is not correct\nto think that it precedes yin, for at their deepest levels the\ncreative and receptive beget one another, the dynamic and\nresponsive sustain one another, the progressive and\nrecessive \nexist  in one another. Whereas yang is expan-\nsive, stimulating and transforming, yin completes,\nstructures and accomplishes"
+        }
+      ],
+      "id": "86a2007299779bf5d1f6c0333411c9eb22064bd25bad61ad74cc6a08d3f379cf",
+      "learnedAt": "2026-07-25T14:18:23.255Z",
+      "revision": 1
+    },
+    {
+      "toolId": "diseminer",
+      "kind": "observation",
+      "value": "===== PDF PAGE 517 ===== [48] - Jing We4 501 Water in tile Well can De compared to potential mental clarity.",
+      "confidence": 0.91,
+      "evidence": [
+        {
+          "sourceId": "books:source-reading",
+          "location": "hua-ching-ni.txt#517.1",
+          "checksum": "506f155b519f9d1357f0f5c0a9af801fb9edadff50682b9bd641e388068e0c0a",
+          "text": "===== PDF PAGE 517 =====\n[48] - Jing We4  501\nWater in tile  Well can De compared to potential mental clarity.\nAt this level, particles that cloud the water have settled.\nLikewise, the particles of one’s mind can also settle, allowing\nthe mind to become stable and clean, thus returning to its\noriginal state. The top part of the well, from the water to the\nrim, symbolizes one’s spirit.\nThe rails that surround a well are like the discipline that\nis needed to guide the mind. The well’s openness, usefulness\nand resourcefulness are characteristic of an unspoiled mind.\nand these attributes are the source of public virtue and\nunselfishness. One’s self-development becomes like a well\nwhen one offers one’s service to others. On the highest level,\nindividuality is replaced with public service. However, just as\nthere are people who resourcefully draw from the well, there\nare those who dirty the water. One must keep the well and\nthe mind in good condition and beware of those who abuse or\nsoil it.\nSome people dig only three to five feet for water, and upon\nstriking rock, dig another hole and then another. With such\nshallow efforts, water is never reached. An ancient proverb\nsays that it is bett"
+        }
+      ],
+      "id": "d53fc45a3038cf768c60b2ef23b58a64a1e0a84b085c8633882a7a7b220b6cd0",
+      "learnedAt": "2026-07-25T14:18:23.255Z",
+      "revision": 1
+    },
+    {
+      "toolId": "diseminer",
+      "kind": "observation",
+      "value": "import { AutolingEngine } from \"../klein/AutolingEngine\"; import { DiseminerEngine } from \"../klein/DiseminerEngine\"; import { GrammarInducer } from \"../klein/GrammarInducer\"; import { NarrativeGenerator } from \"../klein/NarrativeGenerator\"; import { Paraphraser } from \"../klein/Paraphraser\"; import { SymbolicValidator } from \"../klein/SymbolicValidator\"; import { KleinToolId, LearningMesh, MeshLearning, MeshOrgan } from \"./LearningMesh\";",
+      "confidence": 0.65,
+      "evidence": [
+        {
+          "sourceId": "repository:isohuman",
+          "location": "mesh/KleinMeshRuntime.ts#1.1",
+          "checksum": "08e4699b63b773f9eb4b98253344f53b749e542658cd0ae07fa5092578a6db60",
+          "text": "import { AutolingEngine } from \"../klein/AutolingEngine\";\nimport { DiseminerEngine } from \"../klein/DiseminerEngine\";\nimport { GrammarInducer } from \"../klein/GrammarInducer\";\nimport { NarrativeGenerator } from \"../klein/NarrativeGenerator\";\nimport { Paraphraser } from \"../klein/Paraphraser\";\nimport { SymbolicValidator } from \"../klein/SymbolicValidator\";\nimport { KleinToolId, LearningMesh, MeshLearning, MeshOrgan } from \"./LearningMesh\";"
+        }
+      ],
+      "id": "c649b7bf431ce67dfa6479f6de5a674ff2631ffa93c17f9d50b2c4a13948cbbf",
+      "learnedAt": "2026-07-25T14:18:23.256Z",
+      "revision": 1
+    },
+    {
+      "toolId": "diseminer",
+      "kind": "observation",
+      "value": "export * from \"./models\"; export * from \"./state/FiveSpaceState\"; export * from \"./emergence/GateEmergence\"; export * from \"./ato/ATOEngine\"; export * from \"./ato/KleinStrongEquivalence\"; export * from \"./composition/TripletToolComposer\"; export * from \"./memory/SharedLearningMemory\"; export * from \"./correction/ReversibleCorrection\"; export * from \"./persistence/JsonSnapshotRepository\"; export * from \"./astrology/GeonatalCalculator\"; export * from \"./composition/ToolGenomeRegistry\"; export * fr",
+      "confidence": 0.64,
+      "evidence": [
+        {
+          "sourceId": "repository:isohuman",
+          "location": "index.ts#1.1",
+          "checksum": "0c07e396b43c3f7904c42ad001e586d503b5832eba6ae571793fc868eaeced11",
+          "text": "export * from \"./models\";\nexport * from \"./state/FiveSpaceState\";\nexport * from \"./emergence/GateEmergence\";\nexport * from \"./ato/ATOEngine\";\nexport * from \"./ato/KleinStrongEquivalence\";\nexport * from \"./composition/TripletToolComposer\";\nexport * from \"./memory/SharedLearningMemory\";\nexport * from \"./correction/ReversibleCorrection\";\nexport * from \"./persistence/JsonSnapshotRepository\";\nexport * from \"./astrology/GeonatalCalculator\";\nexport * from \"./composition/ToolGenomeRegistry\";\nexport * from \"./channels/EmergentChannelFunction\";\nexport * from \"./mesh/LearningMesh\";\nexport * from \"./mesh/KleinMeshRuntime\";\nexport * from \"./rag/SourceRAG\";\nexport * from \"./synthia/SynthiaMeshBuilder\";"
+        }
+      ],
+      "id": "ba4318d58fbc4d2236970c807afd3936cdbe09fb972c7c4ec4ffd515afc028ee",
+      "learnedAt": "2026-07-25T14:18:23.257Z",
+      "revision": 1
+    },
+    {
+      "toolId": "diseminer",
+      "kind": "observation",
+      "value": "def evaluate_v2() -> dict: single_smoke = run_smoke_suite(ROOT / \"tests\" / \"fixtures\" / \"chart_cases.json\") single_narrative = run_narrative_eval_suite(ROOT / \"tests\" / \"fixtures\" / \"narrative_cases.json\") relationship_smoke = run_relationship_smoke_suite(ROOT / \"tests\" / \"fixtures\" / \"relationship_cases.json\") relationship_narrative = run_relationship_narrative_eval_suite( ROOT / \"tests\" / \"fixtures\" / \"relationship_narrative_cases.json\" ) timing_smoke = run_timing_smoke_suite(ROOT / \"tests\" / ",
+      "confidence": 0.64,
+      "evidence": [
+        {
+          "sourceId": "repository:human-design-llm",
+          "location": "scripts/evaluate_v2.py#12.1",
+          "checksum": "b57a1a34442de4455e201725c8178bd4bc0b74c2670ccee1592da0ee536e0d3f",
+          "text": "def evaluate_v2() -> dict:\n    single_smoke = run_smoke_suite(ROOT / \"tests\" / \"fixtures\" / \"chart_cases.json\")\n    single_narrative = run_narrative_eval_suite(ROOT / \"tests\" / \"fixtures\" / \"narrative_cases.json\")\n    relationship_smoke = run_relationship_smoke_suite(ROOT / \"tests\" / \"fixtures\" / \"relationship_cases.json\")\n    relationship_narrative = run_relationship_narrative_eval_suite(\n        ROOT / \"tests\" / \"fixtures\" / \"relationship_narrative_cases.json\"\n    )\n    timing_smoke = run_timing_smoke_suite(ROOT / \"tests\" / \"fixtures\" / \"timing_cases.json\")\n    timing_narrative = run_timing_narrative_eval_suite(\n        ROOT / \"tests\" / \"fixtures\" / \"timing_narrative_cases.json\"\n    )\n    public_figure_accuracy = run_public_figure_accuracy_suite(\n        ROOT / \"tests\" / \"fixtures\" / \"public_figures.json\"\n    )\n    public_figure_score = score_eval_checks(public_figure_accuracy)\n    empirical_readiness = run_empirical_readiness_suite(\n        ROOT / \"docs\" / \"empirical-validation-protocol.md\",\n        ROOT / \"docs\" / \"contracts\" / \"empirical-trial.md\",\n        ROOT / \"tests\" / \"fixtures\" / \"empirical_forced_choice_demo.json\",\n    )\n    empirical_readiness_score = score_eval_checks"
+        }
+      ],
+      "id": "6d013283ad51b7695a095b3fa7206f2952f602312622ec89c5acb195c996a166",
+      "learnedAt": "2026-07-25T14:18:23.257Z",
+      "revision": 1
+    },
+    {
+      "toolId": "diseminer",
+      "kind": "observation",
+      "value": "export class KleinMeshRuntime { readonly mesh = new LearningMesh(); readonly autoling = new AutolingEngine(); readonly grammar = new GrammarInducer(); readonly diseminer = new DiseminerEngine(); readonly paraphraser = new Paraphraser(); readonly autonovel = new NarrativeGenerator(); readonly validator = new SymbolicValidator();",
+      "confidence": 0.64,
+      "evidence": [
+        {
+          "sourceId": "repository:isohuman",
+          "location": "mesh/KleinMeshRuntime.ts#5.1",
+          "checksum": "be3000afa1e63cf5667ffe08e62aba2a7b0f105c7a8bb53dca61f15973860520",
+          "text": "export class KleinMeshRuntime {\n  readonly mesh = new LearningMesh();\n  readonly autoling = new AutolingEngine();\n  readonly grammar = new GrammarInducer();\n  readonly diseminer = new DiseminerEngine();\n  readonly paraphraser = new Paraphraser();\n  readonly autonovel = new NarrativeGenerator();\n  readonly validator = new SymbolicValidator();"
+        }
+      ],
+      "id": "7cee9034851bd004946a5ace0ad2793d76f5703ab1b9972c2456de79853cbebb",
+      "learnedAt": "2026-07-25T14:18:23.258Z",
+      "revision": 1
+    },
+    {
+      "toolId": "diseminer",
+      "kind": "observation",
+      "value": "def evaluate_v2() -> dict: single_smoke = run_smoke_suite(ROOT / \"tests\" / \"fixtures\" / \"chart_cases.json\") single_narrative = run_narrative_eval_suite(ROOT / \"tests\" / \"fixtures\" / \"narrative_cases.json\") relationship_smoke = run_relationship_smoke_suite(ROOT / \"tests\" / \"fixtures\" / \"relationship_cases.json\") relationship_narrative = run_relationship_narrative_eval_suite( ROOT / \"tests\" / \"fixtures\" / \"relationship_narrative_cases.json\" ) timing_smoke = run_timing_smoke_suite(ROOT / \"tests\" / ",
+      "confidence": 0.64,
+      "evidence": [
+        {
+          "sourceId": "github:joyozhang333-lgtm/human-design-llm",
+          "location": "scripts/evaluate_v2.py#12.1",
+          "checksum": "b57a1a34442de4455e201725c8178bd4bc0b74c2670ccee1592da0ee536e0d3f",
+          "text": "def evaluate_v2() -> dict:\n    single_smoke = run_smoke_suite(ROOT / \"tests\" / \"fixtures\" / \"chart_cases.json\")\n    single_narrative = run_narrative_eval_suite(ROOT / \"tests\" / \"fixtures\" / \"narrative_cases.json\")\n    relationship_smoke = run_relationship_smoke_suite(ROOT / \"tests\" / \"fixtures\" / \"relationship_cases.json\")\n    relationship_narrative = run_relationship_narrative_eval_suite(\n        ROOT / \"tests\" / \"fixtures\" / \"relationship_narrative_cases.json\"\n    )\n    timing_smoke = run_timing_smoke_suite(ROOT / \"tests\" / \"fixtures\" / \"timing_cases.json\")\n    timing_narrative = run_timing_narrative_eval_suite(\n        ROOT / \"tests\" / \"fixtures\" / \"timing_narrative_cases.json\"\n    )\n    public_figure_accuracy = run_public_figure_accuracy_suite(\n        ROOT / \"tests\" / \"fixtures\" / \"public_figures.json\"\n    )\n    public_figure_score = score_eval_checks(public_figure_accuracy)\n    empirical_readiness = run_empirical_readiness_suite(\n        ROOT / \"docs\" / \"empirical-validation-protocol.md\",\n        ROOT / \"docs\" / \"contracts\" / \"empirical-trial.md\",\n        ROOT / \"tests\" / \"fixtures\" / \"empirical_forced_choice_demo.json\",\n    )\n    empirical_readiness_score = score_eval_checks"
+        }
+      ],
+      "id": "0aa3ff30b1a8c893a543db6a846b9c91967a4a939caa0111e376ed2fb1d1fc82",
+      "learnedAt": "2026-07-25T14:18:23.259Z",
+      "revision": 1
+    },
+    {
+      "toolId": "diseminer",
+      "kind": "observation",
+      "value": "constructor() { this.mesh.register(new LearningOrgan(\"autoling\", (learning, mesh) => { const language = learning.kind === \"language\" ?",
+      "confidence": 0.63,
+      "evidence": [
+        {
+          "sourceId": "repository:isohuman",
+          "location": "mesh/KleinMeshRuntime.ts#6.1",
+          "checksum": "82b1345d9aa4dd0964a6abc004adb819a3c3bf28e3925a4a5387eb2bec2a378d",
+          "text": "constructor() {\n    this.mesh.register(new LearningOrgan(\"autoling\", (learning, mesh) => {\n      const language =\n        learning.kind === \"language\"\n          ? learning.value.split(\":\")[0].trim().toLowerCase()\n          : \"english\";\n      mesh.recordLanguage(\"autoling\", language);\n    }));\n    this.mesh.register(new LearningOrgan(\"control-of-grammar\", (learning) => {\n      const sequence = learning.value.toLowerCase().match(/[a-z]+/g) ?? [];\n      if (sequence.length > 1) this.grammar.learn([{ sequence, valid: true }]);\n    }));\n    this.mesh.register(new LearningOrgan(\"diseminer\", (learning, mesh) => {\n      const match = learning.value.match(/^\\s*(.+?)\\s+(is|has|becomes|causes|contains)\\s+(.+?)\\s*$/i);\n      if (match) mesh.connect(match[1], match[3], match[2].toLowerCase(), [learning.id]);\n    }));\n    this.mesh.register(new LearningOrgan(\"paraphraser\", () => undefined));\n    this.mesh.register(new LearningOrgan(\"autonovel\", () => undefined));\n    this.mesh.register(new LearningOrgan(\"symbolic-validator\", () => undefined));\n  }"
+        }
+      ],
+      "id": "04a8a9304b62a461132625443213adb5067320b96afdfa8835b7b9cb5b97b59f",
+      "learnedAt": "2026-07-25T14:18:23.260Z",
+      "revision": 1
+    },
+    {
+      "toolId": "diseminer",
+      "kind": "observation",
+      "value": "Stress - Distant\", \"Lifestyle : Work : Many job changes\", \"Notable : Book Collection : Occult/ Misc.",
+      "confidence": 0.63,
+      "evidence": [
+        {
+          "sourceId": "repository:human-design-llm",
+          "location": "data/empirical/public_figure_manifest.jsonl#1.42",
+          "checksum": "677921796e57c1224731831f2cf159736a82f65e4e8d60f8584f72008b862472",
+          "text": " Stress - Distant\", \"Lifestyle : Work : Many job changes\", \"Notable : Book Collection : Occult/ Misc. Collection\", \"Notable : Famous : Criminal cases\", \"Passions : Criminal Perpetrator : Homicide single\", \"Passions : Criminal Perpetrator : Kidnapper\", \"Passions : Criminal Perpetrator : Prison sentence\", \"Passions : Criminal Perpetrator : Thief/ Financial crime\", \"Personal : Death : Suicide Attempt\", \"Personal : Religion/Spirituality : Western\", \"Vocation : Law : Legal system employee\", \"Vocation : Misc. : Cleaning service\", \"Vocation : Misc. : Outdoor vocations\"], \"life_events\": [\"Family : Childhood : Family distant\", \"Family : Childhood : Parents divorced\", \"Family : Parenting : Kids none\", \"Family : Relationship : Mate - Interracial\", \"Family : Relationship : Stress - Distant\", \"Lifestyle : Work : Many job changes\", \"Notable : Book Collection : Occult/ Misc. Collection\", \"Notable : Famous : Criminal cases\", \"Passions : Criminal Perpetrator : Homicide single\", \"Passions : Criminal Perpetrator : Kidnapper\", \"Passions : Criminal Perpetrator : Prison sentence\", \"Passions : Criminal Perpetrator : Thief/ Financial crime\", \"Personal : Death : Suicide Attempt\", \"Personal : Religion/Spiri"
+        }
+      ],
+      "id": "05f57d1cdb40276b710d561767e1406fe666c2b7925473d4d8a10c78b2c6cdb5",
+      "learnedAt": "2026-07-25T14:18:23.265Z",
+      "revision": 1
+    },
+    {
+      "toolId": "diseminer",
+      "kind": "observation",
+      "value": ": Criminal Perpetrator : Kidnapper\", \"Passions : Criminal Perpetrator : Prison sentence\", \"Passions : Criminal Perpetrator : Rapist/ Sex crime\", \"Passions : Criminal Perpetrator : Social crime/ delinquent\", \"Passions : Criminal Perpetrator : Thief/ Financial crime\", \"Passions : Criminal Perpetrator : Torturer/ Sadist\", \"Traits : Body : Race\"], \"life_events\": [\"Lifestyle : Home : Left home late more than 30\", \"Notable : Book Collection : Crime Collection\", \"Notable : Famous : Criminal cases\", \"Pa",
+      "confidence": 0.63,
+      "evidence": [
+        {
+          "sourceId": "repository:human-design-llm",
+          "location": "data/empirical/public_figure_manifest.jsonl#1.58",
+          "checksum": "5d7657c896ef0120a5df0a146748a092ca7e7d8d8f9017894fbbab0f5a1a978c",
+          "text": " : Criminal Perpetrator : Kidnapper\", \"Passions : Criminal Perpetrator : Prison sentence\", \"Passions : Criminal Perpetrator : Rapist/ Sex crime\", \"Passions : Criminal Perpetrator : Social crime/ delinquent\", \"Passions : Criminal Perpetrator : Thief/ Financial crime\", \"Passions : Criminal Perpetrator : Torturer/ Sadist\", \"Traits : Body : Race\"], \"life_events\": [\"Lifestyle : Home : Left home late more than 30\", \"Notable : Book Collection : Crime Collection\", \"Notable : Famous : Criminal cases\", \"Passions : Criminal Perpetrator : Homicide serial\", \"Passions : Criminal Perpetrator : Kidnapper\", \"Passions : Criminal Perpetrator : Prison sentence\", \"Passions : Criminal Perpetrator : Rapist/ Sex crime\", \"Passions : Criminal Perpetrator : Social crime/ delinquent\", \"Passions : Criminal Perpetrator : Thief/ Financial crime\", \"Passions : Criminal Perpetrator : Torturer/ Sadist\"], \"traits\": [\"Traits : Body : Race\"], \"vocation\": []}, \"name\": \"David Carpenter\", \"record_hash\": \"1f814f333128031353e2c1fd03f9934abcff50365befdf4ff120d010481e347e\", \"rodden_rating\": \"AA\", \"sample_id\": \"adb-841\", \"source_export\": \"https://www.astro.com/adbexport/c_sample.zip\", \"source_name\": \"Astro-Databank c_sample ex"
+        }
+      ],
+      "id": "aa2f9c36755eeb39f72a446038564c90c75d9d7b4364b933799489575a0bc0fe",
+      "learnedAt": "2026-07-25T14:18:23.266Z",
+      "revision": 1
+    },
+    {
+      "toolId": "diseminer",
+      "kind": "observation",
+      "value": "aphy\": true, \"strip_name\": true, \"strip_occupation_categories\": true}, \"data_type\": \"Public Figure\", \"gender\": \"M\", \"labels\": {\"all_categories\": [\"Diagnoses : Major Diseases : Asthma\", \"Family : Childhood : Memories Bad\", \"Family : Relationship : Number of Marriages\", \"Notable : Book Collection : Crime Collection\", \"Notable : Famous : Criminal cases\", \"Passions : Criminal Perpetrator : Executed\", \"Passions : Criminal Perpetrator : Homicide single\", \"Passions : Criminal Perpetrator : Rapist/ Sex ",
+      "confidence": 0.63,
+      "evidence": [
+        {
+          "sourceId": "repository:human-design-llm",
+          "location": "data/empirical/public_figure_manifest.jsonl#1.68",
+          "checksum": "c7980613c7ca52e762f38e85723a0187e2713946f76d25444b86150f18691f14",
+          "text": "aphy\": true, \"strip_name\": true, \"strip_occupation_categories\": true}, \"data_type\": \"Public Figure\", \"gender\": \"M\", \"labels\": {\"all_categories\": [\"Diagnoses : Major Diseases : Asthma\", \"Family : Childhood : Memories Bad\", \"Family : Relationship : Number of Marriages\", \"Notable : Book Collection : Crime Collection\", \"Notable : Famous : Criminal cases\", \"Passions : Criminal Perpetrator : Executed\", \"Passions : Criminal Perpetrator : Homicide single\", \"Passions : Criminal Perpetrator : Rapist/ Sex crime\", \"Passions : Criminal Perpetrator : Thief/ Financial crime\", \"Traits : Body : Constitution sensitive\", \"Vocation : Writers : Autobiographer\"], \"life_events\": [\"Family : Childhood : Memories Bad\", \"Family : Relationship : Number of Marriages\", \"Notable : Book Collection : Crime Collection\", \"Notable : Famous : Criminal cases\", \"Passions : Criminal Perpetrator : Executed\", \"Passions : Criminal Perpetrator : Homicide single\", \"Passions : Criminal Perpetrator : Rapist/ Sex crime\", \"Passions : Criminal Perpetrator : Thief/ Financial crime\"], \"traits\": [\"Traits : Body : Constitution sensitive\"], \"vocation\": [\"Vocation : Writers : Autobiographer\"]}, \"name\": \"Caryl Chessman\", \"record_hash\": \""
+        }
+      ],
+      "id": "003a0b66fe640790ba7b3c22d8a4da96216f8e10a48ca58b9121fb1a295ace8f",
+      "learnedAt": "2026-07-25T14:18:23.267Z",
+      "revision": 1
+    },
+    {
+      "toolId": "diseminer",
+      "kind": "observation",
+      "value": "\"data_type\": \"Public Figure\", \"gender\": \"M\", \"labels\": {\"all_categories\": [\"Diagnoses : Psychological : Abuse Alcohol\", \"Diagnoses : Psychological : Psychotic Episode\", \"Family : Parenting : Kids 1-3\", \"Notable : Book Collection : Crime Collection\", \"Notable : Famous : Criminal cases\", \"Passions : Criminal Perpetrator : Assault/ Battery\", \"Passions : Criminal Perpetrator : Homicide serial\", \"Passions : Criminal Perpetrator : Prison sentence\", \"Passions : Criminal Perpetrator : Rapist/ Sex crime\"",
+      "confidence": 0.63,
+      "evidence": [
+        {
+          "sourceId": "repository:human-design-llm",
+          "location": "data/empirical/public_figure_manifest.jsonl#1.95",
+          "checksum": "ff5b192b01d206f7ce1c81868a0053ca073ba36e0e3f824b9306e97ce2adcda3",
+          "text": "\"data_type\": \"Public Figure\", \"gender\": \"M\", \"labels\": {\"all_categories\": [\"Diagnoses : Psychological : Abuse Alcohol\", \"Diagnoses : Psychological : Psychotic Episode\", \"Family : Parenting : Kids 1-3\", \"Notable : Book Collection : Crime Collection\", \"Notable : Famous : Criminal cases\", \"Passions : Criminal Perpetrator : Assault/ Battery\", \"Passions : Criminal Perpetrator : Homicide serial\", \"Passions : Criminal Perpetrator : Prison sentence\", \"Passions : Criminal Perpetrator : Rapist/ Sex crime\", \"Passions : Criminal Perpetrator : Thief/ Financial crime\", \"Passions : Criminal Perpetrator : Torturer/ Sadist\", \"Passions : Sexuality : Sodomy\", \"Vocation : Business : Data entry\"], \"life_events\": [\"Family : Parenting : Kids 1-3\", \"Notable : Book Collection : Crime Collection\", \"Notable : Famous : Criminal cases\", \"Passions : Criminal Perpetrator : Assault/ Battery\", \"Passions : Criminal Perpetrator : Homicide serial\", \"Passions : Criminal Perpetrator : Prison sentence\", \"Passions : Criminal Perpetrator : Rapist/ Sex crime\", \"Passions : Criminal Perpetrator : Thief/ Financial crime\", \"Passions : Criminal Perpetrator : Torturer/ Sadist\", \"Passions : Sexuality : Sodomy\"], \"traits\": [], \"vo"
+        }
+      ],
+      "id": "249e7d42d042591739d965bf532229b10dec501a44d3a352f9e45ff358a04e52",
+      "learnedAt": "2026-07-25T14:18:23.268Z",
+      "revision": 1
+    },
+    {
+      "toolId": "diseminer",
+      "kind": "observation",
+      "value": "\"birth\": {\"calendar\": \"g\", \"country\": \"Massachusetts\", \"date_text\": \"1964/07/30\", \"day\": 30, \"jd_ut\": 2438606.820139, \"latitude\": \"42n05\", \"longitude\": \"71w01\", \"month\": 7, \"place\": \"Brockton\", \"time_description\": \"daylight saving time\", \"time_text\": \"03:41\", \"time_type\": \"d\", \"timezone_abbr\": \"EDT\", \"timezone_meridian\": \"h4w\", \"year\": 1964}, \"blind_safe\": {\"strip_birth_place\": true, \"strip_identifying_biography\": true, \"strip_name\": true, \"strip_occupation_categories\": true}, \"data_type\": \"Publ",
+      "confidence": 0.63,
+      "evidence": [
+        {
+          "sourceId": "repository:human-design-llm",
+          "location": "data/empirical/public_figure_manifest.jsonl#1.852",
+          "checksum": "485388168dbbe5d27c3565dca9bcf970854074963ccd975d7a3560b68f692faa",
+          "text": " \"birth\": {\"calendar\": \"g\", \"country\": \"Massachusetts\", \"date_text\": \"1964/07/30\", \"day\": 30, \"jd_ut\": 2438606.820139, \"latitude\": \"42n05\", \"longitude\": \"71w01\", \"month\": 7, \"place\": \"Brockton\", \"time_description\": \"daylight saving time\", \"time_text\": \"03:41\", \"time_type\": \"d\", \"timezone_abbr\": \"EDT\", \"timezone_meridian\": \"h4w\", \"year\": 1964}, \"blind_safe\": {\"strip_birth_place\": true, \"strip_identifying_biography\": true, \"strip_name\": true, \"strip_occupation_categories\": true}, \"data_type\": \"Public Figure\", \"gender\": \"M\", \"labels\": {\"all_categories\": [\"Passions : Criminal Perpetrator : Assault/ Battery\", \"Passions : Criminal Perpetrator : Kidnapper\", \"Passions : Criminal Perpetrator : Social crime/ delinquent\", \"Passions : Criminal Perpetrator : Thief/ Financial crime\", \"Traits : Body : Body builder\", \"Traits : Personality : Opportunist\", \"Vocation : Sex Business : Exotic Dancers\"], \"life_events\": [\"Passions : Criminal Perpetrator : Assault/ Battery\", \"Passions : Criminal Perpetrator : Kidnapper\", \"Passions : Criminal Perpetrator : Social crime/ delinquent\", \"Passions : Criminal Perpetrator : Thief/ Financial crime\"], \"traits\": [\"Traits : Body : Body builder\", \"Traits : Personality"
+        }
+      ],
+      "id": "00e1b287888d75f9159affd11e37373459919f9f467e278d8dc68866ae5bde9b",
+      "learnedAt": "2026-07-25T14:18:23.269Z",
+      "revision": 1
+    },
+    {
+      "toolId": "diseminer",
+      "kind": "observation",
+      "value": "dar\": \"g\", \"country\": \"Belgium\", \"date_text\": \"1890/03/26\", \"day\": 26, \"jd_ut\": 2411452.654514, \"latitude\": \"50n50\", \"longitude\": \"4e20\", \"month\": 3, \"place\": \"Brussels\", \"time_description\": \"standard time\", \"time_text\": \"04:00\", \"time_type\": \"s\", \"timezone_abbr\": \"BMT\", \"timezone_meridian\": \"m4e2230\", \"year\": 1890}, \"blind_safe\": {\"strip_birth_place\": true, \"strip_identifying_biography\": true, \"strip_name\": true, \"strip_occupation_categories\": true}, \"data_type\": \"Public Figure\", \"gender\": \"M\",",
+      "confidence": 0.63,
+      "evidence": [
+        {
+          "sourceId": "repository:human-design-llm",
+          "location": "data/empirical/public_figure_manifest.jsonl#1.4786",
+          "checksum": "f56e963ab94ab24d72777f22fb6b4ef1594cb2ba5772ed6e21690bc232dda48e",
+          "text": "dar\": \"g\", \"country\": \"Belgium\", \"date_text\": \"1890/03/26\", \"day\": 26, \"jd_ut\": 2411452.654514, \"latitude\": \"50n50\", \"longitude\": \"4e20\", \"month\": 3, \"place\": \"Brussels\", \"time_description\": \"standard time\", \"time_text\": \"04:00\", \"time_type\": \"s\", \"timezone_abbr\": \"BMT\", \"timezone_meridian\": \"m4e2230\", \"year\": 1890}, \"blind_safe\": {\"strip_birth_place\": true, \"strip_identifying_biography\": true, \"strip_name\": true, \"strip_occupation_categories\": true}, \"data_type\": \"Public Figure\", \"gender\": \"M\", \"labels\": {\"all_categories\": [\"Notable : Famous : Criminal cases\", \"Passions : Criminal Perpetrator : Executed\", \"Passions : Criminal Perpetrator : Homicide serial\", \"Passions : Criminal Perpetrator : Social crime/ delinquent\", \"Passions : Criminal Perpetrator : Thief/ Financial crime\", \"Personal : Death : Short Life less than 29 Yrs\", \"Vocation : Art : Photography\"], \"life_events\": [\"Notable : Famous : Criminal cases\", \"Passions : Criminal Perpetrator : Executed\", \"Passions : Criminal Perpetrator : Homicide serial\", \"Passions : Criminal Perpetrator : Social crime/ delinquent\", \"Passions : Criminal Perpetrator : Thief/ Financial crime\", \"Personal : Death : Short Life less than 29 Yrs\"], \"tr"
+        }
+      ],
+      "id": "67c0af3d278512ea219e50b9de95a78049af54198808d9598a453d70d032fa6a",
+      "learnedAt": "2026-07-25T14:18:23.270Z",
+      "revision": 1
+    },
+    {
+      "toolId": "diseminer",
+      "kind": "observation",
+      "value": "def _resonance_section(comparison: RelationshipComparisonResult) -> ReadingSection: shared_centers = comparison.centers.shared shared_channels = comparison.channels.shared shared_gates = comparison.gates.shared summary = ( f\"这段关系当前最自然的连接面，来自 {len(shared_centers)} 个共享定义中心、\" f\"{len(shared_channels)} 条共享通道和 {len(shared_gates)} 个共享闸门。\" \"共享结构越多，越容易觉得“某些地方我们天生就懂彼此”。\" ) bullets = ( ( f\"共享中心：{_format_center_codes(shared_centers)}。这意味着在这些议题上，你们更容易感到彼此稳定、好理解。\" if shared_centers else \"共享中心：当前没有重合的定义中心，关系中的",
+      "confidence": 0.63,
+      "evidence": [
+        {
+          "sourceId": "repository:human-design-llm",
+          "location": "human_design/relationship_reading.py#9.1",
+          "checksum": "4ed634e0a5c1da5b91b75050e652162771daf653a85da88bc9df7c0fc7a35d75",
+          "text": "def _resonance_section(comparison: RelationshipComparisonResult) -> ReadingSection:\n    shared_centers = comparison.centers.shared\n    shared_channels = comparison.channels.shared\n    shared_gates = comparison.gates.shared\n    summary = (\n        f\"这段关系当前最自然的连接面，来自 {len(shared_centers)} 个共享定义中心、\"\n        f\"{len(shared_channels)} 条共享通道和 {len(shared_gates)} 个共享闸门。\"\n        \"共享结构越多，越容易觉得“某些地方我们天生就懂彼此”。\"\n    )\n    bullets = (\n        (\n            f\"共享中心：{_format_center_codes(shared_centers)}。这意味着在这些议题上，你们更容易感到彼此稳定、好理解。\"\n            if shared_centers\n            else \"共享中心：当前没有重合的定义中心，关系中的稳定感更依赖清晰沟通和现实规则，而不是自然同频。\"\n        ),\n        (\n            \"共享通道：\"\n            + \"；\".join(_channel_bullet(code) for code in shared_channels[:3])\n            if shared_channels\n            else \"共享通道：当前没有完全重合的通道，因此连接感更多来自局部共鸣，而不是整条能量回路的一致。\"\n        ),\n        (\n            f\"共享闸门：{_format_ints(shared_gates[:6])}。这些重复主题是你们最容易彼此认出、也最容易共同放大的地方。\"\n            if shared_gates\n            else \"共享闸门：当前没有重合的激活闸门，关系更偏差异互补型，而不是镜像同频型。\"\n        ),\n    )\n    return ReadingSection(\n        key=\"resonance\",\n        title=\"共同连接面\",\n        summary=summary,\n        bullets=bullets,\n        sources=_unique_sources(\n     "
+        }
+      ],
+      "id": "69e824973ac819f63524d1072b79d1a873e38c04b723dac67806b87b3ef42a1c",
+      "learnedAt": "2026-07-25T14:18:23.270Z",
+      "revision": 1
+    },
+    {
+      "toolId": "diseminer",
+      "kind": "observation",
+      "value": "restore(snapshot: LearningMeshSnapshot): void { this.learnings.clear(); this.edges.clear(); this.growth.clear(); for (const learning of snapshot.learnings) this.learnings.set(learning.id, clone(learning)); for (const edge of snapshot.edges) this.edges.set(edge.id, clone(edge)); for (const tool of snapshot.tools) { this.growth.set(tool.toolId, { ...clone(tool), receivedLearnings: tool.receivedLearnings ??",
+      "confidence": 0.63,
+      "evidence": [
+        {
+          "sourceId": "repository:isohuman",
+          "location": "mesh/LearningMesh.ts#19.1",
+          "checksum": "fc13e1429348966ba7584c6031ddf1b097812af0c489340a60004bb729ec2e90",
+          "text": "restore(snapshot: LearningMeshSnapshot): void {\n    this.learnings.clear();\n    this.edges.clear();\n    this.growth.clear();\n    for (const learning of snapshot.learnings) this.learnings.set(learning.id, clone(learning));\n    for (const edge of snapshot.edges) this.edges.set(edge.id, clone(edge));\n    for (const tool of snapshot.tools) {\n      this.growth.set(tool.toolId, {\n        ...clone(tool),\n        receivedLearnings: tool.receivedLearnings ?? 0,\n      });\n    }\n  }"
+        }
+      ],
+      "id": "834da58808b4b1dc2d2dcd13339f967a54f5dd790a5d6d82b347c2f6521a8e8e",
+      "learnedAt": "2026-07-25T14:18:23.271Z",
+      "revision": 1
+    },
+    {
+      "toolId": "diseminer",
+      "kind": "observation",
+      "value": "def _resonance_section(comparison: RelationshipComparisonResult) -> ReadingSection: shared_centers = comparison.centers.shared shared_channels = comparison.channels.shared shared_gates = comparison.gates.shared summary = ( f\"这段关系当前最自然的连接面，来自 {len(shared_centers)} 个共享定义中心、\" f\"{len(shared_channels)} 条共享通道和 {len(shared_gates)} 个共享闸门。\" \"共享结构越多，越容易觉得“某些地方我们天生就懂彼此”。\" ) bullets = ( ( f\"共享中心：{_format_center_codes(shared_centers)}。这意味着在这些议题上，你们更容易感到彼此稳定、好理解。\" if shared_centers else \"共享中心：当前没有重合的定义中心，关系中的",
+      "confidence": 0.63,
+      "evidence": [
+        {
+          "sourceId": "github:joyozhang333-lgtm/human-design-llm",
+          "location": "human_design/relationship_reading.py#9.1",
+          "checksum": "4ed634e0a5c1da5b91b75050e652162771daf653a85da88bc9df7c0fc7a35d75",
+          "text": "def _resonance_section(comparison: RelationshipComparisonResult) -> ReadingSection:\n    shared_centers = comparison.centers.shared\n    shared_channels = comparison.channels.shared\n    shared_gates = comparison.gates.shared\n    summary = (\n        f\"这段关系当前最自然的连接面，来自 {len(shared_centers)} 个共享定义中心、\"\n        f\"{len(shared_channels)} 条共享通道和 {len(shared_gates)} 个共享闸门。\"\n        \"共享结构越多，越容易觉得“某些地方我们天生就懂彼此”。\"\n    )\n    bullets = (\n        (\n            f\"共享中心：{_format_center_codes(shared_centers)}。这意味着在这些议题上，你们更容易感到彼此稳定、好理解。\"\n            if shared_centers\n            else \"共享中心：当前没有重合的定义中心，关系中的稳定感更依赖清晰沟通和现实规则，而不是自然同频。\"\n        ),\n        (\n            \"共享通道：\"\n            + \"；\".join(_channel_bullet(code) for code in shared_channels[:3])\n            if shared_channels\n            else \"共享通道：当前没有完全重合的通道，因此连接感更多来自局部共鸣，而不是整条能量回路的一致。\"\n        ),\n        (\n            f\"共享闸门：{_format_ints(shared_gates[:6])}。这些重复主题是你们最容易彼此认出、也最容易共同放大的地方。\"\n            if shared_gates\n            else \"共享闸门：当前没有重合的激活闸门，关系更偏差异互补型，而不是镜像同频型。\"\n        ),\n    )\n    return ReadingSection(\n        key=\"resonance\",\n        title=\"共同连接面\",\n        summary=summary,\n        bullets=bullets,\n        sources=_unique_sources(\n     "
+        }
+      ],
+      "id": "f94a9af613b3d32b124a9a7a1058397c21b5dafa57051ccfe959793cf1d072e1",
+      "learnedAt": "2026-07-25T14:18:23.272Z",
+      "revision": 1
+    },
+    {
+      "toolId": "diseminer",
+      "kind": "observation",
+      "value": "\"actual_accuracy_status\": \"not-established-until-blind-and-prospective-outcomes-are-scored\", }, \"breakdown\": { \"single\": single_score, \"relationship\": relationship_score, \"timing\": timing_score, \"output_session\": output_session_score, \"release\": release_score, }, \"output_session_checks\": output_session_checks, \"reports\": { \"single_smoke\": single_smoke.to_dict(), \"single_narrative\": single_narrative.to_dict(), \"relationship_smoke\": relationship_smoke.to_dict(), \"relationship_narrative\": relations",
+      "confidence": 0.6100000000000001,
+      "evidence": [
+        {
+          "sourceId": "repository:human-design-llm",
+          "location": "scripts/evaluate_v2.py#17.2",
+          "checksum": "d4242546d9991bf14281c6d9a0ec5f3e51badc2d648402a1485039ec029654bc",
+          "text": "     \"actual_accuracy_status\": \"not-established-until-blind-and-prospective-outcomes-are-scored\",\n        },\n        \"breakdown\": {\n            \"single\": single_score,\n            \"relationship\": relationship_score,\n            \"timing\": timing_score,\n            \"output_session\": output_session_score,\n            \"release\": release_score,\n        },\n        \"output_session_checks\": output_session_checks,\n        \"reports\": {\n            \"single_smoke\": single_smoke.to_dict(),\n            \"single_narrative\": single_narrative.to_dict(),\n            \"relationship_smoke\": relationship_smoke.to_dict(),\n            \"relationship_narrative\": relationship_narrative.to_dict(),\n            \"timing_smoke\": timing_smoke.to_dict(),\n            \"timing_narrative\": timing_narrative.to_dict(),\n            \"public_figure_accuracy\": public_figure_accuracy.to_dict(),\n            \"empirical_readiness\": empirical_readiness.to_dict(),\n            \"accuracy_benchmark\": accuracy_benchmark.to_dict(),\n        },\n    }"
+        }
+      ],
+      "id": "a0b38c2df1b6d03df8722c0394bb6e7b80ecc40f8677ec34be232680e12ef6e3",
+      "learnedAt": "2026-07-25T14:18:23.273Z",
+      "revision": 1
+    }
+  ],
+  "edges": [
+    {
+      "id": "e21830e9a6b57f59f2ca0d71191f3b1ffc217161508ac2f227660b25042e5107",
+      "from": "be made to fit the people: people should not be made to fit the clothing.’ Exactly how much of this",
+      "to": "your own contribution?” “I do not claim credit for this point of view.",
+      "relation": "is",
+      "weight": 0.5,
+      "traversals": 1,
+      "evidenceIds": [
+        "e66c9e12731a12a1328737cb775feef9c84fde3e3d58bbda53672828dee9b613"
+      ]
+    },
+    {
+      "id": "261b036fc1b439597e97539fbc20968b2df44a9338ed26bfcd6192832537af23",
+      "from": "===== PDF PAGE 116 ===== INTERNATIONAL HUMAN DESIGN SCHOOLS CONCLUSION This whole Rave Cartography training program",
+      "to": "been designed to simply bring you back to the surface.",
+      "relation": "has",
+      "weight": 0.5,
+      "traversals": 1,
+      "evidenceIds": [
+        "abf5d36430df5887f1dd5542fd5945d401a6e7c7648e31b95c4f8290ea14828e"
+      ]
+    }
+  ],
+  "tools": [
+    {
+      "toolId": "autoling",
+      "observations": 0,
+      "acceptedLearnings": 0,
+      "receivedLearnings": 24,
+      "languages": [
+        "english"
+      ],
+      "version": 26,
+      "lastLearnedAt": "2026-07-25T14:18:23.273Z"
+    },
+    {
+      "toolId": "control-of-grammar",
+      "observations": 0,
+      "acceptedLearnings": 0,
+      "receivedLearnings": 24,
+      "languages": [],
+      "version": 25,
+      "lastLearnedAt": "2026-07-25T14:18:23.273Z"
+    },
+    {
+      "toolId": "diseminer",
+      "observations": 24,
+      "acceptedLearnings": 24,
+      "receivedLearnings": 24,
+      "languages": [],
+      "version": 49,
+      "lastLearnedAt": "2026-07-25T14:18:23.273Z"
+    },
+    {
+      "toolId": "paraphraser",
+      "observations": 0,
+      "acceptedLearnings": 0,
+      "receivedLearnings": 24,
+      "languages": [],
+      "version": 25,
+      "lastLearnedAt": "2026-07-25T14:18:23.273Z"
+    },
+    {
+      "toolId": "autonovel",
+      "observations": 0,
+      "acceptedLearnings": 0,
+      "receivedLearnings": 24,
+      "languages": [],
+      "version": 25,
+      "lastLearnedAt": "2026-07-25T14:18:23.273Z"
+    },
+    {
+      "toolId": "symbolic-validator",
+      "observations": 0,
+      "acceptedLearnings": 0,
+      "receivedLearnings": 24,
+      "languages": [],
+      "version": 25,
+      "lastLearnedAt": "2026-07-25T14:18:23.273Z"
+    }
+  ]
+}

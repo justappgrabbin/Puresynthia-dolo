@@ -1,0 +1,41 @@
+{
+  "name": "klein-language-contact-model",
+  "version": "1.0.0",
+  "description": "A modern synthesis of Sheldon Klein's complete toolkit (1965-2002) with LLM-competitive capabilities",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "jest",
+    "demo": "ts-node examples/demo.ts",
+    "simulate": "ts-node examples/simulation.ts",
+    "novel": "ts-node examples/novel.ts",
+    "research": "ts-node examples/research.ts"
+  },
+  "keywords": [
+    "nlp",
+    "computational-linguistics",
+    "language-contact",
+    "historical-linguistics",
+    "semantic-networks",
+    "simulation",
+    "analogical-reasoning",
+    "sheldon-klein",
+    "meta-symbolic",
+    "distributional-semantics"
+  ],
+  "author": "Synthia OS",
+  "license": "MIT",
+  "dependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0"
+  },
+  "devDependencies": {
+    "ts-node": "^10.9.0",
+    "jest": "^29.0.0",
+    "@types/jest": "^29.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

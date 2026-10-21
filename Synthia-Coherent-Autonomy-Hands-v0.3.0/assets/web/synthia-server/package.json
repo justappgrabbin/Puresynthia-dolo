@@ -1,0 +1,17 @@
+{
+  "name": "synthia-phone-combined-server",
+  "version": "1.0.0",
+  "description": "Phone-friendly combined Synthia server, app ingestion kit, and Android build tools.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "phone": "node server.js",
+    "check": "node --check server.js",
+    "ingest": "python tools/autobuilder/autobuilder.py ingest"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "ws": "^8.13.0"
+  }
+}

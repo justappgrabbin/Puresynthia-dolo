@@ -1,0 +1,4 @@
+import {cutOffSegmentPlan} from './CutOffPlan.mjs';
+export class RelationalConstructionInferer {
+  infer(source,examples=[]){if(!source?.resolution?.ready)return Object.freeze({status:'needs-definition',reason:'DEPENDENCIES_UNRESOLVED'});const text=String(source.text??'');if(/greater of two .*straight lines/i.test(text)&&/cut off .*equal to the less/i.test(text))return Object.freeze({status:examples.length?'candidate':'needs-evidence',plan:cutOffSegmentPlan(),contract:{inputs:['greater-segment:AB','lesser-segment:CD'],outputs:['segment:AE'],constraints:['AE=CD'],dependencies:source.resolution.dependencies.filter(item=>item.toolId).map(item=>item.toolId).concat(['cut-off-segment'])},evidence:Object.freeze(examples.map(example=>example.condition))});return Object.freeze({status:'needs-definition',reason:'NO_RELATIONAL_CONSTRUCTION_MATCH'});}
+}

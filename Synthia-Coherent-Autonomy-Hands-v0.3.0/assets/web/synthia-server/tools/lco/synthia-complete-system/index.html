@@ -1,0 +1,1089 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0a0a0f">
+<title>Synthia Kiosk</title>
+<style>
+  :root {
+    --bg: #07070c; --panel: #0e0e18; --surface: #161622;
+    --accent: #00d4ff; --accent2: #ff6b35; --accent3: #7c3aed;
+    --text: #e8e8f0; --dim: #6b6b80; --success: #00ff88;
+    --warn: #ffcc00; --error: #ff3366; --border: #1e1e2e;
+    --border-light: #2a2a3e; --shadow: rgba(0,0,0,0.6);
+    --tap: rgba(0,212,255,0.08);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+  html, body { width: 100%; height: 100%; overflow: hidden; background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'SF Pro', 'Segoe UI', Roboto, monospace; font-size: 14px; line-height: 1.5; -webkit-font-smoothing: antialiased; }
+
+  /* Ambient field */
+  .field { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
+  .field-orb { position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.15; animation: orbDrift 18s ease-in-out infinite; }
+  .field-orb:nth-child(1) { width: 300px; height: 300px; background: var(--accent); top: -80px; left: -60px; }
+  .field-orb:nth-child(2) { width: 250px; height: 250px; background: var(--accent3); bottom: -60px; right: -40px; animation-delay: -6s; }
+  .field-orb:nth-child(3) { width: 200px; height: 200px; background: var(--accent2); top: 40%; left: 60%; animation-delay: -12s; opacity: 0.08; }
+  @keyframes orbDrift { 0%,100% { transform: translate(0,0) scale(1); } 33% { transform: translate(30px,-20px) scale(1.08); } 66% { transform: translate(-20px,15px) scale(0.95); } }
+
+  .grid { position: fixed; inset: 0; pointer-events: none; z-index: 1; background-image: linear-gradient(rgba(0,212,255,0.025) 1px, transparent 1px), linear-gradient(90deg, rgba(0,212,255,0.025) 1px, transparent 1px); background-size: 32px 32px; }
+
+  #app { position: relative; z-index: 10; width: 100%; height: 100%; display: flex; flex-direction: column; }
+
+  /* Header */
+  .header { flex-shrink: 0; padding: 12px 16px; border-bottom: 1px solid var(--border); background: rgba(7,7,12,0.92); backdrop-filter: blur(20px); display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  .header-brand { display: flex; align-items: center; gap: 10px; }
+  .logo { width: 36px; height: 36px; border-radius: 8px; background: linear-gradient(135deg, var(--accent), var(--accent3)); display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 14px; color: #fff; box-shadow: 0 0 16px rgba(0,212,255,0.25); flex-shrink: 0; }
+  .brand-text h1 { font-size: 15px; font-weight: 700; letter-spacing: 0.5px; line-height: 1.2; }
+  .brand-text p { font-size: 10px; color: var(--dim); line-height: 1.2; }
+  .header-actions { display: flex; gap: 6px; align-items: center; }
+  .btn-icon { width: 36px; height: 36px; border-radius: 8px; border: 1px solid var(--border); background: var(--panel); color: var(--text); display: flex; align-items: center; justify-content: center; font-size: 16px; cursor: pointer; transition: all 0.2s; flex-shrink: 0; }
+  .btn-icon:active { background: var(--tap); transform: scale(0.95); }
+  .btn-icon.active { border-color: var(--accent); background: rgba(0,212,255,0.1); }
+  .btn-icon .badge-dot { position: absolute; top: 4px; right: 4px; width: 8px; height: 8px; border-radius: 50%; background: var(--accent); border: 2px solid var(--panel); }
+
+  /* Tab bar */
+  .tab-bar { flex-shrink: 0; display: flex; border-bottom: 1px solid var(--border); background: rgba(7,7,12,0.95); overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+  .tab-bar::-webkit-scrollbar { display: none; }
+  .tab { flex: 1; min-width: 70px; padding: 12px 8px; border: none; background: none; color: var(--dim); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; cursor: pointer; transition: all 0.2s; position: relative; white-space: nowrap; font-family: inherit; }
+  .tab:active { color: var(--text); }
+  .tab.active { color: var(--accent); }
+  .tab.active::after { content: ''; position: absolute; bottom: 0; left: 20%; right: 20%; height: 2px; background: var(--accent); border-radius: 1px; }
+  .tab-badge { display: inline-block; margin-left: 4px; padding: 1px 5px; border-radius: 8px; background: var(--accent); color: var(--bg); font-size: 9px; font-weight: 700; min-width: 16px; text-align: center; }
+
+  /* Content */
+  .content { flex: 1; overflow: hidden; position: relative; }
+  .view { position: absolute; inset: 0; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 12px; opacity: 0; pointer-events: none; transition: opacity 0.25s ease; }
+  .view.active { opacity: 1; pointer-events: auto; }
+  .view::-webkit-scrollbar { width: 3px; }
+  .view::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 2px; }
+
+  /* Presets */
+  .preset-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 16px; }
+  .preset-card { padding: 16px 12px; border-radius: 12px; border: 1px solid var(--border); background: var(--panel); cursor: pointer; transition: all 0.2s; text-align: center; }
+  .preset-card:active { transform: scale(0.97); border-color: var(--accent); background: var(--tap); }
+  .preset-card .preset-icon { font-size: 28px; margin-bottom: 6px; }
+  .preset-card .preset-name { font-size: 13px; font-weight: 600; margin-bottom: 2px; }
+  .preset-card .preset-desc { font-size: 10px; color: var(--dim); line-height: 1.3; }
+
+  .section-title { font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--dim); margin: 16px 0 10px 4px; display: flex; align-items: center; gap: 8px; }
+  .section-title::before { content: ''; width: 3px; height: 14px; background: var(--accent); border-radius: 2px; }
+
+  /* Component cards */
+  .comp-list { display: flex; flex-direction: column; gap: 8px; }
+  .comp-card { padding: 14px; border-radius: 12px; border: 1px solid var(--border); background: var(--panel); cursor: pointer; transition: all 0.2s; position: relative; overflow: hidden; }
+  .comp-card:active { transform: scale(0.98); }
+  .comp-card.selected { border-color: var(--accent); background: rgba(0,212,255,0.06); box-shadow: 0 0 20px rgba(0,212,255,0.08); }
+  .comp-card.installed::after { content: '✓'; position: absolute; top: 10px; right: 10px; width: 20px; height: 20px; border-radius: 50%; background: var(--success); color: var(--bg); font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+  .comp-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+  .comp-name { font-size: 14px; font-weight: 600; }
+  .comp-badge { font-size: 9px; padding: 2px 7px; border-radius: 4px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 700; }
+  .badge-core { background: rgba(0,212,255,0.12); color: var(--accent); }
+  .badge-rag { background: rgba(124,58,237,0.12); color: var(--accent3); }
+  .badge-mcp { background: rgba(255,107,53,0.12); color: var(--accent2); }
+  .badge-signal { background: rgba(0,255,136,0.12); color: var(--success); }
+  .badge-client { background: rgba(255,204,0,0.12); color: var(--warn); }
+  .badge-train { background: rgba(255,51,102,0.12); color: var(--error); }
+  .comp-desc { font-size: 12px; color: var(--dim); line-height: 1.5; margin-bottom: 8px; }
+  .comp-meta { display: flex; gap: 12px; font-size: 10px; color: var(--dim); }
+  .comp-meta span { display: flex; align-items: center; gap: 4px; }
+
+  /* Assembly slots */
+  .slot-grid { display: flex; flex-direction: column; gap: 10px; }
+  .slot-card { border-radius: 12px; border: 1.5px dashed var(--border); background: rgba(14,14,24,0.6); min-height: 120px; padding: 14px; transition: all 0.3s; position: relative; }
+  .slot-card.occupied { border-style: solid; border-color: var(--accent); background: var(--panel); }
+  .slot-card.highlight { border-color: var(--accent); background: rgba(0,212,255,0.04); animation: slotPulse 1.5s ease-in-out infinite; }
+  @keyframes slotPulse { 0%,100% { box-shadow: 0 0 0 0 rgba(0,212,255,0.1); } 50% { box-shadow: 0 0 0 8px rgba(0,212,255,0); } }
+  .slot-label { font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--dim); margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+  .slot-empty { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; padding: 16px 0; color: var(--dim); }
+  .slot-empty .icon { font-size: 28px; opacity: 0.3; }
+  .slot-empty p { font-size: 12px; }
+  .slot-empty .hint { font-size: 10px; opacity: 0.6; }
+  .slot-occupied { width: 100%; }
+  .slot-occupied-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+  .slot-occupied-name { font-size: 14px; font-weight: 600; }
+  .slot-remove { width: 28px; height: 28px; border-radius: 6px; border: 1px solid var(--error); background: transparent; color: var(--error); display: flex; align-items: center; justify-content: center; font-size: 12px; cursor: pointer; transition: all 0.2s; }
+  .slot-remove:active { background: var(--error); color: #fff; }
+  .slot-config { display: flex; flex-direction: column; gap: 8px; }
+  .config-row { display: flex; align-items: center; gap: 8px; }
+  .config-row label { font-size: 11px; color: var(--dim); width: 90px; flex-shrink: 0; }
+  .config-row input, .config-row select { flex: 1; background: var(--bg); border: 1px solid var(--border); color: var(--text); padding: 8px 10px; border-radius: 6px; font-family: inherit; font-size: 12px; min-width: 0; }
+  .config-row input:focus, .config-row select:focus { outline: none; border-color: var(--accent); }
+  .config-row input[type="checkbox"] { width: 20px; height: 20px; flex: 0 0 20px; accent-color: var(--accent); }
+
+  /* Pipeline */
+  .pipeline { flex-shrink: 0; padding: 12px 16px; border-top: 1px solid var(--border); background: rgba(7,7,12,0.95); backdrop-filter: blur(20px); }
+  .pipeline-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+  .pipeline-title { font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--dim); }
+  .pipeline-progress-text { font-size: 11px; font-weight: 600; color: var(--accent); }
+  .pipeline-flow { display: flex; align-items: center; gap: 4px; overflow-x: auto; scrollbar-width: none; padding-bottom: 4px; }
+  .pipeline-flow::-webkit-scrollbar { display: none; }
+  .p-node { flex-shrink: 0; padding: 6px 10px; border-radius: 6px; border: 1px solid var(--border); background: var(--panel); font-size: 10px; display: flex; align-items: center; gap: 4px; transition: all 0.3s; white-space: nowrap; }
+  .p-node.active { border-color: var(--accent); background: rgba(0,212,255,0.08); box-shadow: 0 0 8px rgba(0,212,255,0.15); }
+  .p-node.completed { border-color: var(--success); color: var(--success); }
+  .p-node.error { border-color: var(--error); color: var(--error); }
+  .p-arrow { color: var(--dim); font-size: 10px; flex-shrink: 0; }
+  .progress-bar-wrap { margin-top: 8px; height: 3px; background: var(--border); border-radius: 2px; overflow: hidden; }
+  .progress-bar { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent3)); border-radius: 2px; transition: width 0.5s cubic-bezier(0.4,0,0.2,1); width: 0%; }
+
+  /* Action bar */
+  .action-bar { flex-shrink: 0; padding: 12px 16px 20px; border-top: 1px solid var(--border); background: rgba(7,7,12,0.95); display: flex; gap: 10px; }
+  .btn { flex: 1; padding: 14px; border-radius: 10px; border: 1px solid var(--border); background: var(--panel); color: var(--text); font-family: inherit; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 6px; }
+  .btn:active { transform: scale(0.97); }
+  .btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+  .btn-primary { background: linear-gradient(135deg, var(--accent), var(--accent3)); border-color: transparent; color: #fff; box-shadow: 0 4px 16px rgba(0,212,255,0.2); }
+  .btn-primary:active { box-shadow: 0 2px 8px rgba(0,212,255,0.15); }
+  .btn-danger { background: var(--error); border-color: transparent; color: #fff; }
+
+  /* CHAT VIEW */
+  .chat-container { display: flex; flex-direction: column; height: 100%; }
+  .chat-messages { flex: 1; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 10px; }
+  .chat-messages::-webkit-scrollbar { width: 3px; }
+  .chat-messages::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 2px; }
+  .chat-msg { display: flex; gap: 10px; max-width: 85%; animation: msgIn 0.2s ease; }
+  .chat-msg.user { align-self: flex-end; flex-direction: row-reverse; }
+  .chat-msg.agent { align-self: flex-start; }
+  @keyframes msgIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+  .chat-avatar { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
+  .chat-msg.user .chat-avatar { background: linear-gradient(135deg, var(--accent), var(--accent3)); }
+  .chat-msg.agent .chat-avatar { background: var(--surface); border: 1px solid var(--border); }
+  .chat-bubble { padding: 10px 14px; border-radius: 12px; font-size: 13px; line-height: 1.5; word-break: break-word; }
+  .chat-msg.user .chat-bubble { background: linear-gradient(135deg, var(--accent), var(--accent3)); color: #fff; border-bottom-right-radius: 4px; }
+  .chat-msg.agent .chat-bubble { background: var(--panel); border: 1px solid var(--border); border-bottom-left-radius: 4px; }
+  .chat-bubble .code-block { background: var(--bg); padding: 8px 10px; border-radius: 6px; font-family: 'SF Mono', monospace; font-size: 11px; margin-top: 6px; overflow-x: auto; border: 1px solid var(--border); }
+  .chat-bubble .status-badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: 600; margin-top: 6px; }
+  .chat-bubble .status-badge.success { background: rgba(0,255,136,0.12); color: var(--success); }
+  .chat-bubble .status-badge.error { background: rgba(255,51,102,0.12); color: var(--error); }
+  .chat-input-area { flex-shrink: 0; padding: 12px 16px; border-top: 1px solid var(--border); background: rgba(7,7,12,0.95); display: flex; gap: 10px; }
+  .chat-input { flex: 1; background: var(--bg); border: 1px solid var(--border); color: var(--text); padding: 12px 14px; border-radius: 10px; font-family: inherit; font-size: 14px; outline: none; }
+  .chat-input:focus { border-color: var(--accent); }
+  .chat-send { width: 44px; height: 44px; border-radius: 10px; border: none; background: linear-gradient(135deg, var(--accent), var(--accent3)); color: #fff; font-size: 18px; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; }
+  .chat-send:active { transform: scale(0.95); }
+  .chat-send:disabled { opacity: 0.4; cursor: not-allowed; }
+  .chat-typing { align-self: flex-start; padding: 8px 14px; background: var(--panel); border: 1px solid var(--border); border-radius: 12px; font-size: 12px; color: var(--dim); display: flex; align-items: center; gap: 6px; animation: msgIn 0.2s ease; }
+  .typing-dots { display: flex; gap: 3px; }
+  .typing-dots span { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); animation: typingDot 1.4s infinite; }
+  .typing-dots span:nth-child(2) { animation-delay: 0.2s; }
+  .typing-dots span:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes typingDot { 0%,60%,100% { transform: translateY(0); } 30% { transform: translateY(-4px); } }
+
+  /* Suggestions */
+  .chat-suggestions { display: flex; gap: 6px; overflow-x: auto; padding: 0 12px 8px; scrollbar-width: none; }
+  .chat-suggestions::-webkit-scrollbar { display: none; }
+  .chat-suggestion { padding: 6px 12px; border-radius: 16px; border: 1px solid var(--border); background: var(--panel); color: var(--dim); font-size: 12px; white-space: nowrap; cursor: pointer; transition: all 0.2s; }
+  .chat-suggestion:active { border-color: var(--accent); color: var(--accent); background: var(--tap); }
+
+  /* Console overlay */
+  .console-overlay { position: fixed; inset: 0; z-index: 50; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); opacity: 0; pointer-events: none; transition: opacity 0.25s; }
+  .console-overlay.open { opacity: 1; pointer-events: auto; }
+  .console-panel { position: fixed; bottom: 0; left: 0; right: 0; z-index: 51; background: var(--panel); border-top: 1px solid var(--border); border-radius: 16px 16px 0 0; max-height: 70vh; display: flex; flex-direction: column; transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.4,0,0.2,1); }
+  .console-overlay.open + .console-panel, .console-panel.open { transform: translateY(0); }
+  .console-header { padding: 14px 16px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; }
+  .console-header h3 { font-size: 13px; text-transform: uppercase; letter-spacing: 1px; }
+  .console-close { width: 32px; height: 32px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--dim); display: flex; align-items: center; justify-content: center; font-size: 16px; cursor: pointer; }
+  .console-body { flex: 1; overflow-y: auto; padding: 12px; font-size: 11px; line-height: 1.6; font-family: 'SF Mono', 'Fira Code', monospace; }
+  .console-body::-webkit-scrollbar { width: 3px; }
+  .console-body::-webkit-scrollbar-thumb { background: var(--accent); }
+  .log-entry { margin: 3px 0; padding: 5px 8px; border-radius: 4px; word-break: break-word; }
+  .log-info { color: var(--accent); background: rgba(0,212,255,0.04); }
+  .log-success { color: var(--success); background: rgba(0,255,136,0.04); }
+  .log-warn { color: var(--warn); background: rgba(255,204,0,0.04); }
+  .log-error { color: var(--error); background: rgba(255,51,102,0.04); }
+  .log-time { color: var(--dim); margin-right: 6px; font-size: 10px; }
+
+  /* Deploy overlay */
+  .deploy-overlay { position: fixed; inset: 0; z-index: 100; background: var(--bg); display: none; flex-direction: column; align-items: center; justify-content: center; gap: 20px; }
+  .deploy-overlay.active { display: flex; }
+  .deploy-ring { width: 120px; height: 120px; border-radius: 50%; border: 2px solid transparent; border-top-color: var(--accent); border-right-color: var(--accent3); animation: deploySpin 1.5s linear infinite; }
+  @keyframes deploySpin { to { transform: rotate(360deg); } }
+  .deploy-text { font-size: 16px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; }
+  .deploy-sub { font-size: 12px; color: var(--dim); max-width: 280px; text-align: center; line-height: 1.5; }
+  .deploy-progress { width: 200px; height: 3px; background: var(--border); border-radius: 2px; overflow: hidden; }
+  .deploy-progress-bar { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent3)); border-radius: 2px; transition: width 0.3s ease; width: 0%; }
+
+  /* Modal */
+  .modal-overlay { position: fixed; inset: 0; z-index: 90; background: rgba(0,0,0,0.7); backdrop-filter: blur(5px); display: none; align-items: flex-end; justify-content: center; padding: 0 16px 24px; }
+  .modal-overlay.active { display: flex; }
+  .modal { background: var(--panel); border: 1px solid var(--border); border-radius: 16px; width: 100%; max-width: 480px; max-height: 70vh; overflow: hidden; display: flex; flex-direction: column; box-shadow: 0 20px 60px var(--shadow); }
+  .modal-header { padding: 18px 20px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+  .modal-header h2 { font-size: 17px; font-weight: 700; }
+  .modal-body { padding: 16px 20px; overflow-y: auto; font-size: 13px; line-height: 1.6; }
+  .modal-body pre { background: var(--bg); padding: 12px; border-radius: 8px; overflow-x: auto; font-size: 11px; line-height: 1.5; border: 1px solid var(--border); margin: 10px 0; }
+  .modal-body code { font-family: 'SF Mono', 'Fira Code', monospace; color: var(--accent); }
+  .modal-footer { padding: 14px 20px; border-top: 1px solid var(--border); display: flex; gap: 10px; flex-shrink: 0; }
+  .modal-footer .btn { padding: 12px; }
+
+  /* Toast */
+  .toast-container { position: fixed; top: 70px; left: 50%; transform: translateX(-50%); z-index: 200; display: flex; flex-direction: column; gap: 8px; pointer-events: none; width: 90%; max-width: 400px; }
+  .toast { padding: 12px 16px; border-radius: 10px; background: var(--surface); border: 1px solid var(--border); color: var(--text); font-size: 13px; box-shadow: 0 8px 32px var(--shadow); animation: toastIn 0.3s ease, toastOut 0.3s ease 2.7s forwards; pointer-events: auto; display: flex; align-items: center; gap: 10px; }
+  .toast.success { border-color: var(--success); }
+  .toast.warn { border-color: var(--warn); }
+  .toast.error { border-color: var(--error); }
+  @keyframes toastIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes toastOut { from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(-10px); } }
+
+  /* Empty states */
+  .empty-assembly { text-align: center; padding: 40px 20px; color: var(--dim); }
+  .empty-assembly .icon { font-size: 48px; margin-bottom: 12px; opacity: 0.2; }
+  .empty-assembly h3 { font-size: 15px; margin-bottom: 6px; color: var(--text); }
+  .empty-assembly p { font-size: 12px; line-height: 1.5; }
+
+  /* Connection status */
+  .conn-status { width: 8px; height: 8px; border-radius: 50%; background: var(--error); transition: background 0.3s; }
+  .conn-status.connected { background: var(--success); }
+  .conn-status.connecting { background: var(--warn); animation: pulseConn 1s infinite; }
+  @keyframes pulseConn { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+  /* Responsive */
+  @media (min-width: 768px) {
+    .preset-grid { grid-template-columns: repeat(4, 1fr); }
+    .slot-grid { display: grid; grid-template-columns: repeat(2, 1fr); }
+    .modal-overlay { align-items: center; padding-bottom: 0; }
+  }
+</style>
+</head>
+<body>
+  <!-- Ambient field -->
+  <div class="field">
+    <div class="field-orb"></div>
+    <div class="field-orb"></div>
+    <div class="field-orb"></div>
+  </div>
+  <div class="grid"></div>
+
+  <!-- Toast container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- Deploy overlay -->
+  <div class="deploy-overlay" id="deployOverlay">
+    <div class="deploy-ring"></div>
+    <div class="deploy-text" id="deployText">Assembling</div>
+    <div class="deploy-sub" id="deploySub">Initializing...</div>
+    <div class="deploy-progress">
+      <div class="deploy-progress-bar" id="deployProgressBar"></div>
+    </div>
+  </div>
+
+  <!-- Modal -->
+  <div class="modal-overlay" id="modalOverlay" onclick="if(event.target===this)Kiosk.closeModal()"></div>
+  <div class="modal" id="modal" style="display:none;">
+    <div class="modal-header"><h2 id="modalTitle">Title</h2></div>
+    <div class="modal-body" id="modalBody"></div>
+    <div class="modal-footer" id="modalFooter"></div>
+  </div>
+
+  <!-- Console -->
+  <div class="console-overlay" id="consoleOverlay" onclick="Kiosk.toggleConsole()"></div>
+  <div class="console-panel" id="consolePanel">
+    <div class="console-header">
+      <h3>Build Log</h3>
+      <button class="console-close" onclick="Kiosk.toggleConsole()">✕</button>
+    </div>
+    <div class="console-body" id="consoleBody"></div>
+  </div>
+
+  <!-- Main App -->
+  <div id="app">
+    <!-- Header -->
+    <header class="header">
+      <div class="header-brand">
+        <div class="logo">SK</div>
+        <div class="brand-text">
+          <h1>Synthia Kiosk</h1>
+          <p>Agent · Assembly · Chat</p>
+        </div>
+      </div>
+      <div class="header-actions">
+        <div class="conn-status" id="connStatus" title="Connection status"></div>
+        <button class="btn-icon" id="consoleBtn" onclick="Kiosk.toggleConsole()" title="Console">📋</button>
+        <button class="btn-icon" id="chatBtn" onclick="Kiosk.switchView('chat')" title="Chat">💬</button>
+        <button class="btn-icon" id="clearBtn" onclick="Kiosk.clearAll()" title="Clear">🗑️</button>
+      </div>
+    </header>
+
+    <!-- Tab Bar -->
+    <nav class="tab-bar" id="tabBar">
+      <button class="tab active" data-view="components" onclick="Kiosk.switchView('components')">Components</button>
+      <button class="tab" data-view="assembly" onclick="Kiosk.switchView('assembly')">Assembly<span class="tab-badge" id="assemblyBadge" style="display:none">0</span></button>
+      <button class="tab" data-view="pipeline" onclick="Kiosk.switchView('pipeline')">Pipeline</button>
+      <button class="tab" data-view="rag" onclick="Kiosk.switchView('rag')">RAG</button>
+    <button class="tab" data-view="chat" onclick="Kiosk.switchView('chat')">Chat</button>
+    </nav>
+
+    <!-- Content -->
+    <div class="content">
+      <!-- Components View -->
+      <div class="view active" id="view-components">
+        <div class="preset-grid" id="presetGrid"></div>
+        <div class="section-title">Available Modules</div>
+        <div class="comp-list" id="compList"></div>
+      </div>
+
+      <!-- Assembly View -->
+      <div class="view" id="view-assembly">
+        <div class="slot-grid" id="slotGrid"></div>
+      </div>
+
+      <!-- Pipeline View -->
+      <div class="view" id="view-pipeline">
+        <div id="pipelineDetail" style="padding:8px 0;"></div>
+      </div>
+
+
+      <!-- RAG View -->
+      <div class="view" id="view-rag">
+        <div class="rag-container" style="display:flex;flex-direction:column;height:100%;gap:12px;">
+          <!-- RAG Query Area -->
+          <div style="background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:14px;">
+            <div style="font-size:13px;font-weight:600;margin-bottom:10px;">🔍 Multi-Source RAG Query</div>
+            <div style="display:flex;gap:8px;margin-bottom:10px;">
+              <select id="ragDomain" style="flex:0 0 100px;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:8px 10px;border-radius:6px;font-family:inherit;font-size:12px;">
+                <option value="auto">Auto</option>
+                <option value="code">Code</option>
+                <option value="research">Research</option>
+                <option value="medical">Medical</option>
+              </select>
+              <select id="ragFusion" style="flex:0 0 100px;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:8px 10px;border-radius:6px;font-family:inherit;font-size:12px;">
+                <option value="auto">Auto</option>
+                <option value="single">Single</option>
+                <option value="multi">Multi</option>
+              </select>
+              <input type="text" id="ragInput" placeholder="Ask anything — code, research, medical..." style="flex:1;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:8px 10px;border-radius:6px;font-family:inherit;font-size:13px;" onkeydown="if(event.key==='Enter')Kiosk.ragQuery()">
+              <button onclick="Kiosk.ragQuery()" style="padding:8px 14px;border-radius:6px;border:none;background:linear-gradient(135deg,var(--accent),var(--accent3));color:#fff;font-weight:600;font-size:12px;cursor:pointer;">Search</button>
+            </div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;">
+              <label style="display:flex;align-items:center;gap:4px;font-size:11px;color:var(--dim);cursor:pointer;"><input type="checkbox" id="ragSourceGithub" value="github" checked style="accent-color:var(--accent);"> GitHub</label>
+              <label style="display:flex;align-items:center;gap:4px;font-size:11px;color:var(--dim);cursor:pointer;"><input type="checkbox" id="ragSourceArxiv" value="arxiv" checked style="accent-color:var(--accent);"> arXiv</label>
+              <label style="display:flex;align-items:center;gap:4px;font-size:11px;color:var(--dim);cursor:pointer;"><input type="checkbox" id="ragSourcePubmed" value="pubmed" checked style="accent-color:var(--accent);"> PubMed</label>
+            </div>
+          </div>
+
+          <!-- RAG Results -->
+          <div id="ragResults" style="flex:1;overflow-y:auto;padding:0 4px;">
+            <div class="empty-assembly">
+              <div class="icon">🔍</div>
+              <h3>Multi-Source RAG</h3>
+              <p>Query GitHub for code, arXiv for research, and PubMed for medical literature. The system intelligently routes your query to the best source(s).</p>
+              <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;justify-content:center;">
+                <span class="chat-suggestion" onclick="Kiosk.ragSuggest('How to implement a transformer in PyTorch')">PyTorch transformer</span>
+                <span class="chat-suggestion" onclick="Kiosk.ragSuggest('Latest LLM research papers 2024')">LLM papers</span>
+                <span class="chat-suggestion" onclick="Kiosk.ragSuggest('Clinical trials for diabetes treatment')">Diabetes trials</span>
+                <span class="chat-suggestion" onclick="Kiosk.ragSuggest('React state management patterns')">React patterns</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- RAG Sources Status -->
+          <div id="ragStatus" style="background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:12px;font-size:11px;color:var(--dim);">
+            <div style="font-weight:600;margin-bottom:6px;color:var(--text);">Source Status</div>
+            <div id="ragSourceStatus">Loading...</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Chat View -->
+      <div class="view" id="view-chat">
+        <div class="chat-container">
+          <div class="chat-messages" id="chatMessages"></div>
+          <div class="chat-suggestions" id="chatSuggestions"></div>
+          <div class="chat-input-area">
+            <input type="text" class="chat-input" id="chatInput" placeholder="Ask Synthia anything..." onkeydown="if(event.key==='Enter')Kiosk.sendChat()">
+            <button class="chat-send" id="chatSend" onclick="Kiosk.sendChat()">➤</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pipeline Status -->
+    <div class="pipeline">
+      <div class="pipeline-header">
+        <span class="pipeline-title">Assembly Pipeline</span>
+        <span class="pipeline-progress-text" id="pipelineText">0/6 modules</span>
+      </div>
+      <div class="pipeline-flow" id="pipelineFlow"></div>
+      <div class="progress-bar-wrap">
+        <div class="progress-bar" id="progressBar"></div>
+      </div>
+    </div>
+
+    <!-- Action Bar -->
+    <div class="action-bar">
+      <button class="btn" id="buildBtn" onclick="Kiosk.startBuild()">
+        <span>🔨</span> Build
+      </button>
+      <button class="btn btn-primary" id="deployBtn" onclick="Kiosk.startDeploy()">
+        <span>🚀</span> Deploy
+      </button>
+    </div>
+  </div>
+
+<script>
+// ==================== SYNTHIA KIOSK v3 — TRIDENT + CHAT + MCP ====================
+
+(function() {
+  'use strict';
+
+  // --- DATA ---
+  const COMPONENTS = [
+    { id: 'model', name: 'model.py', badge: 'core', badgeClass: 'badge-core', desc: '1M param transformer with 3 specialist heads: Code, Math, Research. Backbone + HeadRouter + RAGFusionGate.', size: '~45KB', deps: ['torch', 'numpy'], config: { head_mode: { type:'select', options:['auto','code','math','research'], default:'auto', label:'Head Mode' }, temperature: { type:'number', default:0.7, min:0.1, max:2.0, step:0.1, label:'Temperature' }, max_tokens: { type:'number', default:512, min:64, max:2048, step:64, label:'Max Tokens' }, use_rag: { type:'checkbox', default:true, label:'Enable RAG' } } },
+    { id: 'rag', name: 'rag.py', badge: 'rag', badgeClass: 'badge-rag', desc: 'Python chunk store + P2P RAG node. Local embedding storage with aiortc WebRTC data channels.', size: '~32KB', deps: ['aiortc','numpy','sentence-transformers'], config: { chunk_size: { type:'number', default:512, min:128, max:2048, step:128, label:'Chunk Size' }, top_k: { type:'number', default:5, min:1, max:20, step:1, label:'Top-K' }, embedding_model: { type:'select', options:['all-MiniLM-L6-v2','all-mpnet-base-v2'], default:'all-MiniLM-L6-v2', label:'Embed Model' }, p2p_enabled: { type:'checkbox', default:true, label:'P2P Mode' } } },
+    { id: 'rag_client', name: 'rag_client.js', badge: 'client', badgeClass: 'badge-client', desc: 'Browser P2P RAG client. WebRTC DataChannel for connecting to Trident nodes from any browser.', size: '~18KB', deps: ['webrtc-adapter'], config: { signaling_url: { type:'text', default:'ws://localhost:8765', label:'Signaling URL' }, stun_server: { type:'text', default:'stun:stun.l.google.com:19302', label:'STUN Server' }, auto_connect: { type:'checkbox', default:false, label:'Auto-Connect' } } },
+    { id: 'signal_server', name: 'signal_server.py', badge: 'signal', badgeClass: 'badge-signal', desc: 'Minimal WebSocket signaling server. Handshake-only (~50 lines). Brokers WebRTC connections.', size: '~3KB', deps: ['websockets'], config: { host: { type:'text', default:'0.0.0.0', label:'Host' }, port: { type:'number', default:8765, min:1000, max:65535, step:1, label:'Port' }, cors_origins: { type:'text', default:'*', label:'CORS Origins' } } },
+    { id: 'mcp_server', name: 'mcp_server.py', badge: 'mcp', badgeClass: 'badge-mcp', desc: 'FastMCP server exposing all Trident tools to Claude Desktop / any MCP client. 5 tools.', size: '~28KB', deps: ['fastmcp','mcp'], config: { transport: { type:'select', options:['stdio','sse','http'], default:'stdio', label:'Transport' }, port: { type:'number', default:3000, min:1000, max:65535, step:1, label:'Port' }, log_level: { type:'select', options:['debug','info','warn','error'], default:'info', label:'Log Level' } } },
+    { id: 'train', name: 'train.py', badge: 'train', badgeClass: 'badge-train', desc: 'Training loop — toy data to real data. CPU-friendly. Supports fine-tuning all 3 heads.', size: '~22KB', deps: ['torch','datasets'], config: { epochs: { type:'number', default:3, min:1, max:100, step:1, label:'Epochs' }, batch_size: { type:'number', default:4, min:1, max:32, step:1, label:'Batch Size' }, learning_rate: { type:'number', default:0.001, min:0.0001, max:0.01, step:0.0001, label:'LR' }, dataset: { type:'select', options:['toy','codeparrot','math_qa','custom'], default:'toy', label:'Dataset' } } },
+  ];
+
+  const SLOTS = [
+    { id:'core', label:'Core Engine', icon:'🧠', accepts:['model'] },
+    { id:'knowledge', label:'Knowledge Layer', icon:'📚', accepts:['rag'] },
+    { id:'client', label:'Client Interface', icon:'🌐', accepts:['rag_client'] },
+    { id:'network', label:'Network Layer', icon:'🔌', accepts:['signal_server'] },
+    { id:'integration', label:'Integration', icon:'🔧', accepts:['mcp_server'] },
+    { id:'training', label:'Training', icon:'🎓', accepts:['train'] },
+  ];
+
+  const PRESETS = {
+    minimal: { name:'Minimal', icon:'⚡', desc:'Core model only', comps:['model'] },
+    full: { name:'Full Stack', icon:'🔱', desc:'All 6 modules', comps:['model','rag','rag_client','signal_server','mcp_server','train'] },
+    p2p: { name:'P2P Node', icon:'🌐', desc:'Model + RAG + P2P', comps:['model','rag','rag_client','signal_server'] },
+    mcp: { name:'MCP Server', icon:'🔧', desc:'Model + RAG + MCP', comps:['model','rag','mcp_server'] },
+  };
+
+  const PIPELINE_STAGES = [
+    { id:'fetch', icon:'📥', label:'Fetch' },
+    { id:'resolve', icon:'🔗', label:'Resolve' },
+    { id:'assemble', icon:'🧩', label:'Assemble' },
+    { id:'config', icon:'⚙️', label:'Config' },
+    { id:'build', icon:'🔨', label:'Build' },
+    { id:'deploy', icon:'🚀', label:'Deploy' },
+  ];
+
+  const CHAT_SUGGESTIONS = [
+    'Deploy my app',
+    'Fix the server',
+    'Screenshot my phone',
+    'Install PostgreSQL',
+    'Check server health',
+    'Build Trident full stack',
+  ];
+
+  // --- STATE ---
+  const state = {
+    assembly: {},
+    configs: {},
+    selectedComp: null,
+    currentView: 'components',
+    isBuilding: false,
+    isDeploying: false,
+    consoleOpen: false,
+    ws: null,
+    wsConnected: false,
+    chatMessages: [],
+  };
+
+  // --- DOM ---
+  const $ = (sel) => document.querySelector(sel);
+  const $$ = (sel) => document.querySelectorAll(sel);
+  const now = () => new Date().toLocaleTimeString('en-US',{hour12:false});
+  const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+  const getComp = (id) => COMPONENTS.find(c => c.id === id);
+  const getSlot = (id) => SLOTS.find(s => s.id === id);
+  const getSlotForComp = (compId) => SLOTS.find(s => s.accepts.includes(compId));
+
+  // --- WEBSOCKET ---
+  function connectWebSocket() {
+    const wsUrl = `ws://${window.location.host}/ws`;
+    const ws = new WebSocket(wsUrl);
+    state.ws = ws;
+
+    ws.onopen = () => {
+      state.wsConnected = true;
+      updateConnStatus();
+      log('WebSocket connected', 'success');
+      ws.send(JSON.stringify({ type: 'ping', payload: {} }));
+    };
+
+    ws.onmessage = (event) => {
+      try {
+        const msg = JSON.parse(event.data);
+        handleWsMessage(msg);
+      } catch (e) {
+        console.error('WS parse error:', e);
+      }
+    };
+
+    ws.onclose = () => {
+      state.wsConnected = false;
+      updateConnStatus();
+      log('WebSocket disconnected', 'warn');
+      setTimeout(connectWebSocket, 3000);
+    };
+
+    ws.onerror = (err) => {
+      log('WebSocket error', 'error');
+      state.wsConnected = false;
+      updateConnStatus();
+    };
+  }
+
+  function handleWsMessage(msg) {
+    switch (msg.type) {
+      case 'connected':
+        log('Connected to Synthia server', 'success');
+        break;
+      case 'log':
+        log(msg.payload.message, msg.payload.level);
+        break;
+      case 'plan':
+        log(`Plan started: ${msg.payload.planId} (${msg.payload.steps} steps)`, 'info');
+        break;
+      case 'build':
+        handleBuildUpdate(msg.payload);
+        break;
+      case 'deploy':
+        handleDeployUpdate(msg.payload);
+        break;
+      case 'chat':
+        addChatMessage(msg.payload.role, msg.payload.content, msg.payload);
+        break;
+      case 'intent_result':
+        addChatMessage('agent', msg.payload.success ? '✅ Task completed!' : '❌ Task failed. Check logs.', msg.payload);
+        break;
+      case 'pong':
+        break;
+    }
+  }
+
+  function updateConnStatus() {
+    const el = $('#connStatus');
+    el.className = 'conn-status';
+    if (state.wsConnected) el.classList.add('connected');
+    else el.classList.add('connecting');
+  }
+
+  function wsSend(type, payload) {
+    if (state.ws && state.ws.readyState === WebSocket.OPEN) {
+      state.ws.send(JSON.stringify({ type, payload }));
+    } else {
+      toast('Not connected to server', 'error');
+    }
+  }
+
+  // --- CHAT ---
+  function addChatMessage(role, content, meta = {}) {
+    const container = $('#chatMessages');
+    const id = `chat_${Date.now()}_${Math.random()}`;
+
+    const msgEl = document.createElement('div');
+    msgEl.className = `chat-msg ${role}`;
+    msgEl.id = id;
+
+    const avatar = role === 'user' ? '👤' : '🧠';
+    let html = `<div class="chat-avatar">${avatar}</div>`;
+    html += `<div class="chat-bubble">${escapeHtml(content)}`;
+
+    if (meta.planId) {
+      html += `<div class="status-badge ${meta.success ? 'success' : 'error'}">${meta.success ? '✓ Success' : '✗ Failed'}</div>`;
+    }
+    if (meta.output && meta.output.length > 0) {
+      html += `<div class="code-block">${escapeHtml(meta.output.substring(0, 300))}${meta.output.length > 300 ? '...' : ''}</div>`;
+    }
+    html += '</div>';
+
+    msgEl.innerHTML = html;
+    container.appendChild(msgEl);
+    container.scrollTop = container.scrollHeight;
+
+    state.chatMessages.push({ role, content, meta, timestamp: Date.now() });
+  }
+
+  function showTyping() {
+    const container = $('#chatMessages');
+    const el = document.createElement('div');
+    el.className = 'chat-typing';
+    el.id = 'typingIndicator';
+    el.innerHTML = '<div class="typing-dots"><span></span><span></span><span></span></div> Synthia is thinking...';
+    container.appendChild(el);
+    container.scrollTop = container.scrollHeight;
+  }
+
+  function hideTyping() {
+    const el = $('#typingIndicator');
+    if (el) el.remove();
+  }
+
+  function sendChat() {
+    const input = $('#chatInput');
+    const text = input.value.trim();
+    if (!text) return;
+
+    input.value = '';
+    addChatMessage('user', text);
+    showTyping();
+
+    wsSend('chat', { text });
+  }
+
+  function renderChatSuggestions() {
+    const container = $('#chatSuggestions');
+    container.innerHTML = CHAT_SUGGESTIONS.map(s => 
+      `<button class="chat-suggestion" onclick="Kiosk.suggestChat('${s.replace(/'/g, "\'")}')">${s}</button>`
+    ).join('');
+  }
+
+  function suggestChat(text) {
+    $('#chatInput').value = text;
+    sendChat();
+  }
+
+  // --- RENDER (Trident Kiosk) ---
+  function renderPresets() {
+    $('#presetGrid').innerHTML = Object.entries(PRESETS).map(([key, p]) => `
+      <div class="preset-card" onclick="Kiosk.loadPreset('${key}')">
+        <div class="preset-icon">${p.icon}</div>
+        <div class="preset-name">${p.name}</div>
+        <div class="preset-desc">${p.desc}</div>
+      </div>
+    `).join('');
+  }
+
+  function renderComponents() {
+    $('#compList').innerHTML = COMPONENTS.map(comp => {
+      const installed = Object.values(state.assembly).includes(comp.id);
+      return `
+        <div class="comp-card ${state.selectedComp === comp.id ? 'selected' : ''} ${installed ? 'installed' : ''}"
+             onclick="Kiosk.selectComp('${comp.id}')">
+          <div class="comp-header">
+            <span class="comp-name">${comp.name}</span>
+            <span class="comp-badge ${comp.badgeClass}">${comp.badge}</span>
+          </div>
+          <div class="comp-desc">${comp.desc}</div>
+          <div class="comp-meta">
+            <span>📦 ${comp.size}</span>
+            <span>🔗 ${comp.deps.join(', ')}</span>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  function renderSlots() {
+    const grid = $('#slotGrid');
+    const assembled = Object.keys(state.assembly).length;
+
+    if (assembled === 0) {
+      grid.innerHTML = `
+        <div class="empty-assembly">
+          <div class="icon">🔱</div>
+          <h3>Nothing assembled yet</h3>
+          <p>Tap a preset above or select components to build your Trident stack.</p>
+        </div>
+      `;
+      return;
+    }
+
+    grid.innerHTML = SLOTS.map(slot => {
+      const compId = state.assembly[slot.id];
+      const comp = compId ? getComp(compId) : null;
+      const config = compId ? (state.configs[compId] || {}) : {};
+
+      if (!comp) {
+        return `
+          <div class="slot-card" id="slot-${slot.id}">
+            <div class="slot-label">${slot.icon} ${slot.label}</div>
+            <div class="slot-empty">
+              <div class="icon">${slot.icon}</div>
+              <p>Empty slot</p>
+              <span class="hint">Tap a component to install</span>
+            </div>
+          </div>
+        `;
+      }
+
+      return `
+        <div class="slot-card occupied" id="slot-${slot.id}">
+          <div class="slot-label">${slot.icon} ${slot.label}</div>
+          <div class="slot-occupied">
+            <div class="slot-occupied-header">
+              <span class="slot-occupied-name">${comp.name}</span>
+              <button class="slot-remove" onclick="Kiosk.removeComp('${slot.id}')">✕</button>
+            </div>
+            <div class="comp-desc">${comp.desc.substring(0, 90)}${comp.desc.length > 90 ? '...' : ''}</div>
+            <div class="slot-config">
+              ${Object.entries(comp.config).map(([key, cfg]) => {
+                const val = config[key] !== undefined ? config[key] : cfg.default;
+                if (cfg.type === 'select') {
+                  return `<div class="config-row"><label>${cfg.label}</label><select onchange="Kiosk.updateConfig('${comp.id}','${key}',this.value)">${cfg.options.map(o => `<option value="${o}" ${o===val?'selected':''}>${o}</option>`).join('')}</select></div>`;
+                } else if (cfg.type === 'checkbox') {
+                  return `<div class="config-row"><label>${cfg.label}</label><input type="checkbox" ${val?'checked':''} onchange="Kiosk.updateConfig('${comp.id}','${key}',this.checked)"></div>`;
+                } else {
+                  return `<div class="config-row"><label>${cfg.label}</label><input type="${cfg.type==='number'?'number':'text'}" value="${val}" ${cfg.min!==undefined?`min="${cfg.min}"`:''} ${cfg.max!==undefined?`max="${cfg.max}"`:''} ${cfg.step!==undefined?`step="${cfg.step}"`:''} onchange="Kiosk.updateConfig('${comp.id}','${key}',this.value)"></div>`;
+                }
+              }).join('')}
+            </div>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  function renderPipeline() {
+    const flow = $('#pipelineFlow');
+    const assembled = Object.keys(state.assembly).length;
+    const total = SLOTS.length;
+
+    flow.innerHTML = PIPELINE_STAGES.map((stage, i) => {
+      let cls = '';
+      const threshold = Math.ceil((i / PIPELINE_STAGES.length) * total);
+      if (assembled === 0) cls = '';
+      else if (assembled >= threshold && assembled < total) cls = 'active';
+      else if (assembled === total) cls = 'completed';
+      const arrow = i < PIPELINE_STAGES.length - 1 ? '<span class="p-arrow">→</span>' : '';
+      return `<div class="p-node ${cls}" id="p-${stage.id}"><span>${stage.icon}</span>${stage.label}</div>${arrow}`;
+    }).join('');
+
+    const pct = Math.round((assembled / total) * 100);
+    $('#progressBar').style.width = pct + '%';
+    $('#pipelineText').textContent = `${assembled}/${total} modules`;
+
+    const detail = $('#pipelineDetail');
+    if (assembled === 0) {
+      detail.innerHTML = `<div class="empty-assembly"><div class="icon">📊</div><h3>Pipeline empty</h3><p>Assemble components to see the deployment pipeline.</p></div>`;
+    } else {
+      const compIds = Object.values(state.assembly);
+      const comps = compIds.map(id => getComp(id)).filter(Boolean);
+      const allDeps = [...new Set(comps.flatMap(c => c.deps))];
+      detail.innerHTML = `
+        <div style="background:var(--panel); border:1px solid var(--border); border-radius:12px; padding:16px; margin-bottom:12px;">
+          <div style="font-size:13px; font-weight:600; margin-bottom:10px;">📦 Assembly Summary</div>
+          <div style="font-size:12px; color:var(--dim); line-height:1.8;">
+            <div><strong style="color:var(--text);">Modules:</strong> ${comps.map(c => c.name).join(', ')}</div>
+            <div><strong style="color:var(--text);">Dependencies:</strong> ${allDeps.join(', ')}</div>
+            <div><strong style="color:var(--text);">Total Size:</strong> ${comps.reduce((a,c) => a + parseInt(c.size), 0)}KB</div>
+            <div><strong style="color:var(--text);">Status:</strong> <span style="color:var(--accent);">Ready to build</span></div>
+          </div>
+        </div>
+        <div style="background:var(--panel); border:1px solid var(--border); border-radius:12px; padding:16px;">
+          <div style="font-size:13px; font-weight:600; margin-bottom:10px;">🔧 Configuration Manifest</div>
+          <pre style="font-size:10px; line-height:1.6; overflow-x:auto;">${JSON.stringify(state.configs, null, 2)}</pre>
+        </div>
+      `;
+    }
+  }
+
+  function updateAssemblyBadge() {
+    const count = Object.keys(state.assembly).length;
+    const badge = $('#assemblyBadge');
+    if (count > 0) { badge.textContent = count; badge.style.display = 'inline-block'; }
+    else { badge.style.display = 'none'; }
+  }
+
+  function updateButtons() {
+    const assembled = Object.keys(state.assembly).length;
+    $('#buildBtn').disabled = state.isBuilding || assembled === 0;
+    $('#deployBtn').disabled = state.isDeploying || assembled === 0;
+    $('#clearBtn').disabled = assembled === 0;
+  }
+
+  // --- ACTIONS ---
+  function selectComp(compId) {
+    state.selectedComp = compId;
+    renderComponents();
+    const slot = getSlotForComp(compId);
+    if (!slot) return;
+    if (!state.assembly[slot.id]) { installComp(slot.id, compId); }
+    else if (state.assembly[slot.id] !== compId) {
+      showModal('Replace Component?', `<p>Slot <strong>${slot.label}</strong> already has <strong>${getComp(state.assembly[slot.id]).name}</strong>.</p><p>Replace with <strong>${getComp(compId).name}</strong>?</p>`, [
+        { label: 'Cancel', action: () => closeModal() },
+        { label: 'Replace', primary: true, action: () => { installComp(slot.id, compId); closeModal(); } }
+      ]);
+    }
+  }
+
+  function installComp(slotId, compId) {
+    const comp = getComp(compId);
+    state.assembly[slotId] = compId;
+    if (!state.configs[compId]) {
+      state.configs[compId] = {};
+      Object.entries(comp.config).forEach(([key, cfg]) => { state.configs[compId][key] = cfg.default; });
+    }
+    toast(`${comp.name} installed`, 'success');
+    log(`Installed ${comp.name} into ${getSlot(slotId).label}`, 'success');
+    renderSlots(); renderComponents(); renderPipeline(); updateAssemblyBadge(); updateButtons();
+  }
+
+  function removeComp(slotId) {
+    const compId = state.assembly[slotId];
+    if (!compId) return;
+    const comp = getComp(compId);
+    delete state.assembly[slotId];
+    toast(`${comp.name} removed`, 'info');
+    log(`Removed ${comp.name} from ${getSlot(slotId).label}`, 'info');
+    renderSlots(); renderComponents(); renderPipeline(); updateAssemblyBadge(); updateButtons();
+  }
+
+  function updateConfig(compId, key, value) {
+    if (!state.configs[compId]) state.configs[compId] = {};
+    const comp = getComp(compId);
+    const cfg = comp.config[key];
+    if (cfg.type === 'number') value = parseFloat(value);
+    if (cfg.type === 'checkbox') value = !!value;
+    state.configs[compId][key] = value;
+    log(`Config: ${comp.name}.${key} = ${value}`, 'info');
+  }
+
+  function loadPreset(key) {
+    const preset = PRESETS[key];
+    if (!preset) return;
+    state.assembly = {}; state.configs = {};
+    preset.comps.forEach(compId => { const slot = getSlotForComp(compId); if (slot) installComp(slot.id, compId); });
+    toast(`Loaded ${preset.name} preset`, 'success');
+    log(`Loaded preset: ${preset.name} (${preset.comps.length} modules)`, 'success');
+    switchView('assembly');
+  }
+
+  function clearAll() {
+    if (Object.keys(state.assembly).length === 0) return;
+    showModal('Clear Assembly?', '<p>Remove all assembled components and reset configurations?</p>', [
+      { label: 'Cancel', action: () => closeModal() },
+      { label: 'Clear All', primary: true, danger: true, action: () => {
+        state.assembly = {}; state.configs = {}; state.selectedComp = null;
+        toast('Assembly cleared', 'info'); log('Assembly cleared', 'info');
+        renderSlots(); renderComponents(); renderPipeline(); updateAssemblyBadge(); updateButtons(); closeModal();
+      }}
+    ]);
+  }
+
+  function switchView(view) {
+    state.currentView = view;
+    $$('.tab').forEach(t => t.classList.toggle('active', t.dataset.view === view));
+    $$('.view').forEach(v => v.classList.toggle('active', v.id === 'view-' + view));
+  }
+
+  // --- BUILD & DEPLOY (via WebSocket) ---
+  async function startBuild() {
+    if (state.isBuilding || state.isDeploying) return;
+    const assembled = Object.keys(state.assembly).length;
+    if (assembled === 0) { toast('Add components first', 'warn'); return; }
+    state.isBuilding = true; updateButtons(); openConsole();
+    log('=== BUILD STARTED ===', 'info');
+    wsSend('build', { assembly: state.assembly });
+  }
+
+  function handleBuildUpdate(payload) {
+    if (payload.status === 'started') log('Build started...', 'info');
+    else if (payload.status === 'progress') log(`[BUILD] ${payload.step} (${payload.pct}%)`, 'info');
+    else if (payload.status === 'complete') {
+      log('=== BUILD SUCCESS ===', 'success');
+      toast('Build complete!', 'success');
+      state.isBuilding = false; updateButtons();
+    }
+  }
+
+  async function startDeploy() {
+    if (state.isDeploying || state.isBuilding) return;
+    const assembled = Object.keys(state.assembly).length;
+    if (assembled === 0) { toast('Nothing to deploy', 'warn'); return; }
+    state.isDeploying = true; updateButtons();
+    const overlay = $('#deployOverlay');
+    overlay.classList.add('active');
+    wsSend('deploy', { assembly: state.assembly });
+  }
+
+  function handleDeployUpdate(payload) {
+    const sub = $('#deploySub');
+    const bar = $('#deployProgressBar');
+    if (payload.status === 'started') { sub.textContent = 'Initializing...'; bar.style.width = '5%'; }
+    else if (payload.status === 'progress') { sub.textContent = payload.step; bar.style.width = payload.pct + '%'; }
+    else if (payload.status === 'complete') {
+      sub.textContent = 'Complete!'; bar.style.width = '100%';
+      setTimeout(() => { $('#deployOverlay').classList.remove('active'); state.isDeploying = false; updateButtons(); showDeploySummary(); }, 500);
+    }
+  }
+
+  function showDeploySummary() {
+    const compIds = Object.values(state.assembly);
+    const comps = compIds.map(id => getComp(id)).filter(Boolean);
+    const allDeps = [...new Set(comps.flatMap(c => c.deps || []))];
+    const body = `
+      <div style="margin-bottom:16px;"><div style="font-size:13px; font-weight:600; margin-bottom:8px;">📦 Deployed Modules</div>
+      <div style="font-size:12px; color:var(--dim); line-height:1.8;">${comps.map(c => `<div>• ${c.name} <span style="color:var(--accent);">(${c.badge})</span></div>`).join('')}</div></div>
+      <div style="margin-bottom:16px;"><div style="font-size:13px; font-weight:600; margin-bottom:8px;">🔗 Dependencies</div><code style="font-size:11px; color:var(--accent);">${allDeps.join(' ')}</code></div>
+      <div style="margin-bottom:16px;"><div style="font-size:13px; font-weight:600; margin-bottom:8px;">⚡ Quick Start</div><pre>pip install ${allDeps.join(' ')}
+python model.py
+python train.py
+python mcp_server.py
+python signal_server.py</pre></div>
+    `;
+    showModal('🚀 Deployment Complete', body, [{ label: 'Close', action: () => closeModal() }]);
+  }
+
+  // --- CONSOLE ---
+  function log(msg, type) {
+    const body = $('#consoleBody');
+    const entry = document.createElement('div');
+    entry.className = 'log-entry log-' + (type || 'info');
+    entry.innerHTML = '<span class="log-time">' + now() + '</span> ' + escapeHtml(msg);
+    body.appendChild(entry);
+    body.scrollTop = body.scrollHeight;
+  }
+
+  function openConsole() {
+    state.consoleOpen = true;
+    $('#consoleOverlay').classList.add('open');
+    $('#consolePanel').classList.add('open');
+    $('#consoleBtn').classList.add('active');
+  }
+
+  function closeConsole() {
+    state.consoleOpen = false;
+    $('#consoleOverlay').classList.remove('open');
+    $('#consolePanel').classList.remove('open');
+    $('#consoleBtn').classList.remove('active');
+  }
+
+  function toggleConsole() {
+    if (state.consoleOpen) closeConsole(); else openConsole();
+  }
+
+  // --- MODAL ---
+  function showModal(title, body, buttons) {
+    $('#modalTitle').textContent = title;
+    $('#modalBody').innerHTML = body;
+    $('#modalFooter').innerHTML = buttons.map(b => `
+      <button class="btn ${b.primary ? 'btn-primary' : ''} ${b.danger ? 'btn-danger' : ''}" onclick="(${b.action.toString()})()">${b.label}</button>
+    `).join('');
+    $('#modal').style.display = '';
+    $('#modalOverlay').classList.add('active');
+  }
+
+  function closeModal() {
+    $('#modalOverlay').classList.remove('active');
+    $('#modal').style.display = 'none';
+  }
+
+  // --- TOAST ---
+  function toast(msg, type) {
+    const container = $('#toastContainer');
+    const el = document.createElement('div');
+    el.className = 'toast ' + (type || 'info');
+    el.innerHTML = msg;
+    container.appendChild(el);
+    setTimeout(() => { if (el.parentNode) el.parentNode.removeChild(el); }, 3000);
+  }
+
+  // --- UTILS ---
+  function escapeHtml(str) {
+    const div = document.createElement('div');
+    div.textContent = String(str);
+    return div.innerHTML;
+  }
+
+  // --- INIT ---
+  function init() {
+    renderPresets();
+    renderComponents();
+    renderSlots();
+    renderPipeline();
+    renderChatSuggestions();
+    loadRagStatus();
+    updateAssemblyBadge();
+    updateButtons();
+    updateConnStatus();
+    connectWebSocket();
+    log('Synthia Kiosk initialized. Ready for assembly.', 'info');
+  }
+
+  // --- EXPOSE ---
+  // RAG functions
+  async function ragQuery() {
+    const input = document.getElementById('ragInput');
+    const text = input.value.trim();
+    if (!text) return;
+
+    const domain = document.getElementById('ragDomain').value;
+    const fusion = document.getElementById('ragFusion').value;
+    const sources = [];
+    if (document.getElementById('ragSourceGithub').checked) sources.push('github');
+    if (document.getElementById('ragSourceArxiv').checked) sources.push('arxiv');
+    if (document.getElementById('ragSourcePubmed').checked) sources.push('pubmed');
+
+    input.value = '';
+
+    const resultsDiv = document.getElementById('ragResults');
+    resultsDiv.innerHTML = `<div class="chat-typing"><div class="typing-dots"><span></span><span></span><span></span></div> Querying ${sources.join(', ')}...</div>`;
+
+    try {
+      const response = await fetch('/api/rag/query', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text, domain: domain === 'auto' ? undefined : domain, sources: sources.length > 0 ? sources : undefined, fusion: fusion === 'auto' ? undefined : fusion })
+      });
+      const result = await response.json();
+
+      let html = `<div style="background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:10px;">`;
+      html += `<div style="font-size:13px;font-weight:600;margin-bottom:8px;color:var(--accent);">🔍 Results for "${escapeHtml(text)}"</div>`;
+      html += `<div style="font-size:11px;color:var(--dim);margin-bottom:10px;">Sources: ${result.sources.join(', ')} · Confidence: ${(result.confidence * 100).toFixed(0)}% · ${result.queryTime}ms</div>`;
+      html += `<div style="font-size:12px;line-height:1.6;white-space:pre-wrap;">${escapeHtml(result.synthesized)}</div>`;
+      html += `</div>`;
+
+      // Document cards
+      if (result.documents && result.documents.length > 0) {
+        html += `<div style="font-size:12px;font-weight:600;margin-bottom:8px;">📄 Documents (${result.documents.length})</div>`;
+        html += `<div style="display:flex;flex-direction:column;gap:8px;">`;
+        result.documents.forEach(doc => {
+          html += `<div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:10px;">`;
+          html += `<div style="font-size:12px;font-weight:600;margin-bottom:4px;">${escapeHtml(doc.title)}</div>`;
+          html += `<div style="font-size:10px;color:var(--dim);margin-bottom:6px;">Source: ${doc.source} · Score: ${doc.score.toFixed(2)}</div>`;
+          html += `<div style="font-size:11px;color:var(--dim);line-height:1.4;">${escapeHtml(doc.content.substring(0, 300))}...</div>`;
+          html += `<a href="${doc.url}" target="_blank" style="font-size:10px;color:var(--accent);text-decoration:none;margin-top:6px;display:inline-block;">🔗 Open</a>`;
+          html += `</div>`;
+        });
+        html += `</div>`;
+      }
+
+      resultsDiv.innerHTML = html;
+    } catch (err) {
+      resultsDiv.innerHTML = `<div style="color:var(--error);padding:10px;">❌ Error: ${escapeHtml(err.message)}</div>`;
+    }
+  }
+
+  function ragSuggest(text) {
+    document.getElementById('ragInput').value = text;
+    ragQuery();
+  }
+
+  async function loadRagStatus() {
+    try {
+      const response = await fetch('/api/rag/sources');
+      const data = await response.json();
+      const statusDiv = document.getElementById('ragSourceStatus');
+      let html = '';
+      for (const [name, stat] of Object.entries(data.stats)) {
+        const s = stat as any;
+        html += `<div style="display:flex;align-items:center;gap:6px;margin:3px 0;">`;
+        html += `<span style="width:8px;height:8px;border-radius:50%;background:${s.available ? 'var(--success)' : 'var(--error)'}"></span>`;
+        html += `<span style="text-transform:capitalize;">${name}</span>`;
+        html += `<span style="margin-left:auto;">${s.documents} docs</span>`;
+        html += `</div>`;
+      }
+      statusDiv.innerHTML = html;
+    } catch {
+      document.getElementById('ragSourceStatus').innerHTML = 'Failed to load status';
+    }
+  }
+
+  window.Kiosk = {
+    selectComp, installComp, removeComp, updateConfig, loadPreset, clearAll, switchView,
+    startBuild, startDeploy, toggleConsole, openConsole, closeConsole, showModal, closeModal,
+    toast, log, sendChat, suggestChat, ragQuery, ragSuggest,
+  };
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+})();
+</script>
+</body>
+</html>

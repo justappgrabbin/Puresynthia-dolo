@@ -1,0 +1,38 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { BookIngestionEngine } from './BookIngestionEngine.mjs';
+import { DependencyResolver } from './DependencyResolver.mjs';
+import { GapChannelFactory } from './GapChannelFactory.mjs';
+import { GapPrimitiveInferer } from './GapPrimitiveInferer.mjs';
+import { NervousSystem } from '../NervousSystem.mjs';
+import { ProtectedSettings } from '../autonomy/ProtectedSettings.mjs';
+import { ApprovalGovernor } from '../autonomy/ApprovalGovernor.mjs';
+import { ArbitraryCodeSandbox } from '../autonomy/ArbitraryCodeSandbox.mjs';
+import { ReversibleChangeLedger } from '../autonomy/ReversibleChangeLedger.mjs';
+import { ToolInstallationController } from '../autonomy/ToolInstallationController.mjs';
+import { ArtifactCoat } from '../security/ArtifactCoat.mjs';
+import { DeclarativeOperatorCompiler } from '../learning/DeclarativeOperatorCompiler.mjs';
+import { PlanSandboxRunner } from '../learning/PlanSandboxRunner.mjs';
+import { LearnedToolCatalog } from '../learning/LearnedToolCatalog.mjs';
+import { AutonomousProcedureLearner } from '../learning/AutonomousProcedureLearner.mjs';
+import { EuclidIIProcedureInferer } from './EuclidIIProcedureInferer.mjs';
+
+test('gap pressure builds extend-line, installs it at the gap address, and makes Euclid I.2 dependency-ready',async()=>{
+  const page={page:36,text:'BOOK I. PROP. II. PROB. From a given point to draw a straight line equal to a given finite straight line. Draw a line (post. 1), describe an equilateral triangle (pr. i.), produce the lines (post. 2), describe circles (post. 3), then is the line required. For the radii are equal (def. 15) and by ax. 3 the constructed line is equal.',visualEvidence:[{kind:'rendered-page',ref:'proofs/euclid-book-I-proposition-II/source-page-36.png'}]};
+  const proposition=new BookIngestionEngine().discover({bookId:'euclid-elements-i-vi-1847',title:'Euclid',pages:[page]})[0];
+  const resolver=new DependencyResolver({knownPrimitives:['postulate:1','postulate:2','postulate:3','definition:15','axiom:3','action:draw','action:describe','action:equal'],propositionTools:{'euclid-elements-i-vi-1847:I.1':'euclid-I-1-equilateral'}});
+  const nervousSystem=new NervousSystem(),gap=await new GapChannelFactory({mind:nervousSystem.organism.mind}).identify(proposition,resolver.resolve(proposition));assert.ok(gap.members.includes('action:produce'));
+  const compiler=new DeclarativeOperatorCompiler(),coatAuthority=new ArtifactCoat(),catalog=new LearnedToolCatalog({compiler,coatAuthority});nervousSystem.learnedTools=catalog;
+  const installer=new ToolInstallationController({mesh:nervousSystem.ato.mesh,sandbox:new ArbitraryCodeSandbox({runner:new PlanSandboxRunner({compiler})}),governor:new ApprovalGovernor({settings:new ProtectedSettings()}),ledger:new ReversibleChangeLedger(),coatAuthority});
+  const learner=new AutonomousProcedureLearner({nervousSystem,inferer:new GapPrimitiveInferer(),compiler,installer,catalog,identity:await coatAuthority.generateIdentity()});
+  const source={text:'Postulate 2: produce a finite straight line continuously in a straight line.',members:gap.members,citation:()=>proposition.span.citation()};
+  const learned=await learner.learn({sourceText:source,examples:[{input:{A:{x:0,y:0},B:{x:10,y:0},extraLength:7},condition:{path:['verification','passed'],equals:true}}],name:'extend-line',resolvedAddress:gap.address});
+  assert.equal(learned.status,'installed');assert.equal(learned.installation.toolId,'extend-line');
+  const output=await nervousSystem.ato.mesh.automatons.get('extend-line').call({A:{x:0,y:0},B:{x:0,y:10},extraLength:5});assert.equal(output.verification.passed,true);const C=output.primitives.find(item=>item.id==='C');assert.deepEqual({x:C.x,y:C.y},{x:0,y:15});
+  resolver.registerPrimitive('action:produce');const retried=resolver.resolve(proposition);assert.equal(retried.ready,true);assert.equal(retried.missing.length,0);
+  const installedAddress=nervousSystem.ato.mesh.automatons.get('extend-line').address;assert.deepEqual([installedAddress.gate,installedAddress.line,installedAddress.color,installedAddress.tone,installedAddress.base],[gap.address.gate,gap.address.line,gap.address.color,gap.address.tone,gap.address.base]);
+  const propositionLearner=new AutonomousProcedureLearner({nervousSystem,inferer:new EuclidIIProcedureInferer(),compiler,installer,catalog,identity:await coatAuthority.generateIdentity()});
+  const propositionSource={text:proposition.span.text,resolution:retried,citation:()=>proposition.span.citation()};
+  const learnedII=await propositionLearner.learn({sourceText:propositionSource,examples:[{input:{A:{x:0,y:0},B:{x:20,y:0},C:{x:20,y:13}},condition:{path:['verification','passed'],equals:true}}],name:'euclid-I-2-copy-segment'});
+  assert.equal(learnedII.status,'installed');const copied=await nervousSystem.ato.mesh.automatons.get('euclid-I-2-copy-segment').call({A:{x:50,y:40},B:{x:200,y:100},C:{x:237,y:100}});assert.equal(copied.verification.passed,true);const AL=copied.primitives.find(item=>item.id==='AL'),BC=copied.primitives.find(item=>item.id==='BC');assert.ok(Math.abs(Math.hypot(AL.end.x-AL.start.x,AL.end.y-AL.start.y)-Math.hypot(BC.end.x-BC.start.x,BC.end.y-BC.start.y))<1e-9);
+});

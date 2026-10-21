@@ -1,0 +1,178 @@
+/* Synthia Consciousness Engine - Visual System */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background: #000;
+  color: #fff;
+  font-family: 'Courier New', monospace;
+  overflow: hidden;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+#synthia-app {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Glyph Ring - 64 gates positioned around the mandala */
+#glyph-ring {
+  position: absolute;
+  width: 600px;
+  height: 600px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 100, 255, 0.1);
+}
+
+.glyph-node {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: rgba(100, 100, 100, 0.5);
+  transition: all 0.3s ease;
+  font-size: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255, 255, 255, 0.3);
+}
+
+.glyph-node.active {
+  background: magenta;
+  box-shadow: 0 0 15px magenta, 0 0 30px rgba(255, 0, 255, 0.5);
+  transform: scale(1.5);
+  color: white;
+}
+
+.glyph-node.channel-active {
+  background: cyan;
+  box-shadow: 0 0 15px cyan, 0 0 30px rgba(0, 255, 255, 0.5);
+}
+
+/* Avatar Canvas */
+#avatar {
+  border-radius: 50%;
+  z-index: 10;
+}
+
+/* Aura System */
+#aura {
+  position: absolute;
+  width: 550px;
+  height: 550px;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 5;
+  transition: all 1s ease;
+}
+
+.aura-pulse {
+  animation: auraPulse 3s ease-in-out infinite;
+}
+
+@keyframes auraPulse {
+  0%, 100% { opacity: 0.3; transform: scale(1); }
+  50% { opacity: 0.6; transform: scale(1.05); }
+}
+
+/* Output Display */
+#output {
+  position: absolute;
+  bottom: 120px;
+  max-width: 80%;
+  text-align: center;
+  font-size: 14px;
+  line-height: 1.6;
+  padding: 20px;
+  background: rgba(0, 0, 0, 0.7);
+  border: 1px solid rgba(255, 100, 255, 0.3);
+  border-radius: 10px;
+  min-height: 60px;
+}
+
+/* Input System */
+#input {
+  position: absolute;
+  bottom: 60px;
+  width: 60%;
+  padding: 12px;
+  background: rgba(20, 20, 20, 0.9);
+  border: 1px solid rgba(255, 100, 255, 0.3);
+  color: white;
+  font-family: inherit;
+  font-size: 14px;
+  border-radius: 5px;
+}
+
+#input:focus {
+  outline: none;
+  border-color: magenta;
+  box-shadow: 0 0 10px rgba(255, 0, 255, 0.3);
+}
+
+#speak-btn {
+  position: absolute;
+  bottom: 20px;
+  padding: 10px 30px;
+  background: linear-gradient(135deg, #cc00ff, #6600cc);
+  border: none;
+  color: white;
+  font-family: inherit;
+  font-size: 14px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+#speak-btn:hover {
+  box-shadow: 0 0 20px rgba(204, 0, 255, 0.5);
+  transform: scale(1.05);
+}
+
+/* Circuit Color Coding */
+.circuit-understanding { color: #00ffff; }
+.circuit-sensing { color: #ff00ff; }
+.circuit-knowing { color: #ffff00; }
+.circuit-centering { color: #00ff00; }
+.circuit-ego { color: #ff4444; }
+
+/* Channel Glow Lines */
+.channel-line {
+  position: absolute;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, cyan, transparent);
+  transform-origin: left center;
+  opacity: 0;
+  transition: opacity 0.5s;
+}
+
+.channel-line.active {
+  opacity: 0.8;
+  animation: channelFlow 2s linear infinite;
+}
+
+@keyframes channelFlow {
+  0% { background-position: -100% 0; }
+  100% { background-position: 200% 0; }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  #glyph-ring { width: 350px; height: 350px; }
+  #aura { width: 320px; height: 320px; }
+  #avatar { width: 280px; height: 280px; }
+  #input { width: 85%; }
+}

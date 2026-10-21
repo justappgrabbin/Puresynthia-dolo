@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Synthia Body</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: #0a0a0f;
+            color: #e0e0ff;
+            font-family: 'Segoe UI', sans-serif;
+            overflow: hidden;
+            height: 100vh;
+        }
+        #body-map {
+            width: 100%;
+            height: 100vh;
+            position: relative;
+        }
+        .center {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid;
+            z-index: 10;
+        }
+        .center.defined {
+            box-shadow: 0 0 20px currentColor;
+            animation: pulse 2s infinite;
+        }
+        .center.undefined {
+            opacity: 0.4;
+        }
+        .center:hover {
+            transform: scale(1.2);
+            z-index: 20;
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        .channel {
+            position: absolute;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #4488ff, transparent);
+            transform-origin: left center;
+            opacity: 0.3;
+            z-index: 1;
+        }
+        .channel.active {
+            opacity: 0.8;
+            animation: flow 3s linear infinite;
+        }
+        @keyframes flow {
+            0% { background-position: 0% 50%; }
+            100% { background-position: 100% 50%; }
+        }
+        .genome {
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            z-index: 5;
+            animation: travel 4s linear infinite;
+        }
+        @keyframes travel {
+            0% { offset-distance: 0%; }
+            100% { offset-distance: 100%; }
+        }
+        #ui-panel {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(10, 10, 15, 0.95);
+            border-top: 1px solid #333;
+            padding: 15px;
+            max-height: 30vh;
+            overflow-y: auto;
+            z-index: 100;
+        }
+        #chat-input {
+            width: 100%;
+            padding: 10px;
+            background: #1a1a2e;
+            border: 1px solid #333;
+            border-radius: 8px;
+            color: #e0e0ff;
+            font-size: 14px;
+        }
+        .message {
+            margin: 5px 0;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 13px;
+        }
+        .message.user { background: #1a3a5c; margin-left: 20px; }
+        .message.system { background: #2a1a3c; margin-right: 20px; }
+        .scenario-card {
+            background: #1a1a2e;
+            border: 1px solid #444;
+            border-radius: 12px;
+            padding: 15px;
+            margin: 10px 0;
+        }
+        .choice-btn {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            margin: 5px 0;
+            background: #2a2a4e;
+            border: 1px solid #555;
+            border-radius: 8px;
+            color: #e0e0ff;
+            cursor: pointer;
+        }
+        .choice-btn:hover { background: #3a3a6e; }
+    </style>
+</head>
+<body>
+    <div id="body-map"></div>
+    <div id="ui-panel">
+        <div id="messages"></div>
+        <input type="text" id="chat-input" placeholder="Speak to your body..." />
+    </div>
+
+    <script>
+        // Synthia Body - Mobile Web Interface
+        // Connects to Python backend via WebSocket or HTTP API
+
+        const centers = {
+            head: { x: 50, y: 5, color: '#ffdd44', defined: false },
+            ajna: { x: 50, y: 15, color: '#aa88ff', defined: false },
+            throat: { x: 50, y: 25, color: '#44ddff', defined: true },
+            g_center: { x: 50, y: 45, color: '#ff8844', defined: true },
+            ego: { x: 30, y: 40, color: '#ff4444', defined: false },
+            sacral: { x: 50, y: 60, color: '#ff44aa', defined: true },
+            spleen: { x: 20, y: 55, color: '#44ff88', defined: false },
+            solar_plexus: { x: 80, y: 55, color: '#ffaa44', defined: false },
+            root: { x: 50, y: 85, color: '#ff4488', defined: false }
+        };
+
+        const bodyMap = document.getElementById('body-map');
+        const messages = document.getElementById('messages');
+        const chatInput = document.getElementById('chat-input');
+
+        // Render centers
+        Object.entries(centers).forEach(([name, data]) => {
+            const el = document.createElement('div');
+            el.className = `center ${data.defined ? 'defined' : 'undefined'}`;
+            el.style.left = `${data.x}%`;
+            el.style.top = `${data.y}%`;
+            el.style.transform = 'translate(-50%, -50%)';
+            el.style.color = data.color;
+            el.style.borderColor = data.color;
+            el.style.background = data.defined ? `${data.color}22` : 'transparent';
+            el.innerHTML = `<div>${name.replace('_', '<br>')}</div>`;
+            el.onclick = () => enterCity(name);
+            bodyMap.appendChild(el);
+        });
+
+        // Render channels (simplified)
+        const channels = [
+            ['throat', 'ajna'], ['ajna', 'head'], ['g_center', 'throat'],
+            ['sacral', 'g_center'], ['ego', 'g_center'], ['root', 'sacral'],
+            ['spleen', 'sacral'], ['solar_plexus', 'sacral']
+        ];
+
+        channels.forEach(([a, b]) => {
+            const ca = centers[a], cb = centers[b];
+            const line = document.createElement('div');
+            line.className = 'channel active';
+            const dx = cb.x - ca.x;
+            const dy = cb.y - ca.y;
+            const length = Math.sqrt(dx*dx + dy*dy);
+            const angle = Math.atan2(dy, dx) * 180 / Math.PI;
+            line.style.left = `${ca.x}%`;
+            line.style.top = `${ca.y}%`;
+            line.style.width = `${length}%`;
+            line.style.transform = `rotate(${angle}deg)`;
+            bodyMap.appendChild(line);
+        });
+
+        function enterCity(centerName) {
+            addMessage('system', `Entering ${centerName.replace('_', ' ')} city...`);
+            // In production: fetch city data from backend
+        }
+
+        function addMessage(type, text) {
+            const msg = document.createElement('div');
+            msg.className = `message ${type}`;
+            msg.textContent = text;
+            messages.appendChild(msg);
+            messages.scrollTop = messages.scrollHeight;
+        }
+
+        chatInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && chatInput.value) {
+                addMessage('user', chatInput.value);
+                // In production: send to backend, get response
+                setTimeout(() => {
+                    addMessage('system', 'Processing your pattern...');
+                }, 500);
+                chatInput.value = '';
+            }
+        });
+
+        // Simulate genomes traveling
+        setInterval(() => {
+            const genome = document.createElement('div');
+            genome.className = 'genome';
+            genome.style.background = ['#44ddff', '#ff8844', '#ff44aa', '#44ff88'][Math.floor(Math.random()*4)];
+            genome.style.left = '50%';
+            genome.style.top = '25%';
+            bodyMap.appendChild(genome);
+            setTimeout(() => genome.remove(), 4000);
+        }, 2000);
+    </script>
+</body>
+</html>

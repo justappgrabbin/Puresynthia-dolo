@@ -1,0 +1,12 @@
+{
+  "name": "synthia-unified-statespace-kimi-emergent",
+  "version": "0.1.1",
+  "private": true,
+  "type": "module",
+  "description": "Non-destructive compositional merge of the recovered Kimi/PureAutomata operational StateSpace with the recovered Emergent geometric StateSpace.",
+  "scripts": {
+    "test": "node test/unified-state-space.test.mjs",
+    "smoke": "node test/smoke.mjs"
+  },
+  "dependencies": {}
+}

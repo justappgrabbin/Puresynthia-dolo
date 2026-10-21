@@ -1,0 +1,64 @@
+{
+  "tests": [
+    {
+      "id": "T1",
+      "name": "state cardinality",
+      "assertion": "len(states)==64",
+      "expected": true
+    },
+    {
+      "id": "T2",
+      "name": "unique identities",
+      "assertion": "all 6-bit vectors unique",
+      "expected": true
+    },
+    {
+      "id": "T3",
+      "name": "primitive degree",
+      "assertion": "every state has exactly six one-bit neighbors",
+      "expected": true
+    },
+    {
+      "id": "T4",
+      "name": "single-flip legality",
+      "assertion": "primitive transition iff Hamming distance == 1",
+      "expected": true
+    },
+    {
+      "id": "T5",
+      "name": "complement involution",
+      "assertion": "C(C(x))=x",
+      "expected": true
+    },
+    {
+      "id": "T6",
+      "name": "reversal involution",
+      "assertion": "R(R(x))=x",
+      "expected": true
+    },
+    {
+      "id": "T7",
+      "name": "decomposition/recomposition",
+      "assertion": "compose(upper_trigram,lower_trigram)=state",
+      "expected": true
+    },
+    {
+      "id": "T8",
+      "name": "context nonmutation",
+      "assertion": "changing interpretation/context alone leaves bit vector unchanged",
+      "expected": true
+    },
+    {
+      "id": "T9",
+      "name": "recursive scale typing",
+      "assertion": "a complete state may be typed as an atom in a higher-order sequence without erasing its decomposition",
+      "expected": "architectural requirement"
+    },
+    {
+      "id": "T10",
+      "name": "codon boundary",
+      "assertion": "no unique codon mapping exists without an explicit nucleotide\u21942-bit convention",
+      "expected": true
+    }
+  ]
+}

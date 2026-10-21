@@ -1,0 +1,186 @@
+{
+  "apps": [
+    {
+      "id": "synthia-admin-hard-bridge",
+      "name": "Synthia Admin Server Hard Bridge Mobile MCP",
+      "role": "main-server",
+      "status": "runnable",
+      "entrypoint": "server.js",
+      "routes": ["/", "/admin", "/client", "/mcp/status", "/mcp/capture", "/mcp/bridge/status", "/apps"],
+      "notes": "This is the active combined server base. It includes the newer mobile MCP capture and Kimi/ChatGPT bridge routes.",
+      "bundle_url": "/bundles-static/synthia-admin-server-hard-bridge-mobile-mcp(4).zip"
+    },
+    {
+      "id": "synthia-admin-applied-ledger",
+      "name": "Synthia Admin Server Applied POC Ledger",
+      "role": "older-server-snapshot",
+      "status": "superseded",
+      "notes": "Older/lighter version of the hard-bridge server. Kept as reference because its ledger documents what is real vs placeholder.",
+      "bundle_url": "/bundles-static/synthia-admin-server-applied-poc-ledger(2).zip"
+    },
+    {
+      "id": "synthia-sass-server",
+      "name": "Synthia SASS Server",
+      "role": "scaffolding-module",
+      "status": "bundled-needs-repair",
+      "local_path": "apps/synthia-sass-server",
+      "routes_claimed": ["/ingest", "/scaffold", "/morphs", "/heal", "/deploy/:platform", "/mcp/terminal", "/admin"],
+      "notes": "Included as a module, but its shipped server.js fails node --check because of unescaped nested template strings in generated code templates.",
+      "static_url": "/apps-static/synthia-sass-server/",
+      "bundle_url": "/bundles-static/synthia-sass-server(3).zip"
+    },
+    {
+      "id": "morphos-android",
+      "name": "MorphOS Android Real Linux",
+      "role": "android-app",
+      "status": "source-bundled",
+      "local_path": "apps/morphos-android",
+      "build": "apps/morphos-android/gradlew assembleDebug",
+      "notes": "Native Android/Kotlin project for a local PRoot Alpine Linux environment. It is source-bundled here, not compiled into the Node server.",
+      "static_url": "/apps-static/morphos-android/",
+      "bundle_url": "/bundles-static/MorphOS_Android_RealLinux (1)(.zip"
+    },
+    {
+      "id": "autobuilder",
+      "name": "AutoBuilder",
+      "role": "tool",
+      "status": "source-bundled",
+      "local_path": "tools/autobuilder",
+      "usage": "python tools/autobuilder/autobuilder.py ingest <zip-or-folder-or-git-url>",
+      "notes": "Non-AI ingestion/build normalizer for app bundles. Exposed as source and ready to run from the combined package.",
+      "static_url": "/tools-static/autobuilder/",
+      "bundle_url": "/bundles-static/AutoBuilder(6).zip"
+    },
+    {
+      "id": "synthia-sovereign-studio",
+      "name": "Synthia Sovereign Studio",
+      "role": "best-prebuilt-phone-ui",
+      "status": "prebuilt-web-ready",
+      "local_path": "apps/synthia-sovereign-studio",
+      "static_url": "/apps-static/synthia-sovereign-studio/dist/public/",
+      "notes": "Best ready-to-go UI bundle found. It ships built PWA assets and an auto-launch pattern."
+    },
+    {
+      "id": "kimi-phone-web-linux",
+      "name": "Kimi Agent Phone-First Web Linux",
+      "role": "phone-agent-ui-source",
+      "status": "source-ready-not-prebuilt",
+      "local_path": "apps/kimi-phone-web-linux",
+      "notes": "Vite React source with package-lock. Local build did not finish within the audit window, so it is included as source."
+    },
+    {
+      "id": "synthia-server-main",
+      "name": "Synthia Server Main",
+      "role": "reference-server",
+      "status": "source-ready-heavy",
+      "local_path": "apps/synthia-server-main",
+      "notes": "Large server/reference system. Its package declares Node 24.x and heavier dependencies, so it is included as reference rather than the phone entrypoint."
+    },
+    {
+      "id": "synthia-browser",
+      "name": "Synthia Browser",
+      "role": "browser-app-source",
+      "status": "source-ready",
+      "local_path": "apps/synthia-browser",
+      "notes": "Vite React browser app source. Build before wrapping as static mobile UI."
+    },
+    {
+      "id": "synthia-os",
+      "name": "Synthia OS",
+      "role": "termux-os-reference",
+      "status": "source-ready",
+      "local_path": "apps/synthia-os",
+      "notes": "TypeScript OS-style project with Termux setup script. Included as a source reference."
+    },
+    {
+      "id": "messy-organism",
+      "name": "MESSY Organism",
+      "role": "monorepo-engine-source",
+      "status": "source-ready-needs-workspace-build",
+      "local_path": "apps/messy-organism",
+      "notes": "Multi-package TypeScript monorepo. Useful as engine source but not a one-command phone artifact yet."
+    },
+    {
+      "id": "synthia-resonance-engine",
+      "name": "Synthia Resonance Engine",
+      "role": "engine-ui-source",
+      "status": "source-ready",
+      "local_path": "apps/synthia-resonance-engine",
+      "notes": "Vite/TypeScript engine UI source."
+    },
+    {
+      "id": "termux-apk-builder",
+      "name": "Synthia Termux APK Builder",
+      "role": "android-build-script",
+      "status": "patched-source-bundled",
+      "local_path": "tools/build-synthia-2026.sh",
+      "notes": "Termux shell script that wraps HTML/JS assets into an Android WebView APK. The generated Java device-info JSON quote bug was patched in this assembled kit.",
+      "bundle_url": "/bundles-static/build-synthia-2026(4).sh"
+    },
+    {
+      "id": "seedbox-swarm",
+      "name": "Synthia Seedbox Swarm",
+      "role": "boot-time-auto-compile-helper",
+      "status": "fixed-local-tool",
+      "local_path": "tools/seedbox-swarm",
+      "usage": "bash phone/run-seedbox-swarm.sh",
+      "notes": "Patched into the kit as a local, isolated head-start compiler pass. It runs once on Synthia startup, uses config/swarm-placement-rules.json for the rule-based intake pre-pass, and can promote APK output to /autoload.",
+      "bundle_url": "/bundles-static/synthia-seedbox-swarm(1).zip"
+    },
+    {
+      "id": "cynthia-lco-organs",
+      "name": "Cynthia Language Contact Organism Organs",
+      "role": "rule-and-organ-source",
+      "status": "source-bundled-wired",
+      "local_path": "tools/lco",
+      "routes": ["/lco/status", "/synthia/chat", "/synthia/public"],
+      "notes": "Bundles Autoling, Diseminer, Klein LCM, LCM v2 chat/compiler, Synthia Python LCM, MESSY, Synthia OS Runtime, and the complete system source as Cynthia organs. Public requests route through Synthia; admin/backend changes route through controlled builder apply/rollback. LCM v2 and syntia.py are private/backend source material, not the public voice."
+    },
+    {
+      "id": "cynthia-organism-browser",
+      "name": "Cynthia Organism Browser",
+      "role": "organism-browser-ui",
+      "status": "static-web-ready",
+      "local_path": "apps/cynthia-organism-browser",
+      "static_url": "/cynthia-organism",
+      "notes": "Browser-facing Cynthia/Klein organism UI served by the same Synthia server."
+    },
+    {
+      "id": "uno-engine-premium",
+      "name": "UNO Engine Premium",
+      "role": "universal-ingest-repair-ui-source",
+      "status": "source-ready",
+      "local_path": "apps/uno-engine-premium",
+      "usage": "bash phone/self-compile-termux.sh apps/uno-engine-premium",
+      "notes": "Vite app with a universal file ingestion, parser, repair, sandbox, repackager, and autoBuilder engine. Included as source/build material.",
+      "bundle_url": "/bundles-static/uno-engine-premium(6).zip"
+    },
+    {
+      "id": "kimi-synth-mobile-linux",
+      "name": "Kimi Synth OS Mobile Linux",
+      "role": "prebuilt-mobile-linux-ui",
+      "status": "prebuilt-web-ready",
+      "local_path": "apps/kimi-synth-mobile-linux",
+      "static_url": "/apps-static/kimi-synth-mobile-linux/",
+      "notes": "Prebuilt mobile Linux UI assets with terminal/files/browser/uploader style modules.",
+      "bundle_url": "/bundles-static/Kimi_Agent_Deployment_Synth OS Mobile Linux_v1(1).zip"
+    },
+    {
+      "id": "synthai-human-design",
+      "name": "SynthAi HumanDesign",
+      "role": "human-design-source-library",
+      "status": "source-ready-dotnet",
+      "local_path": "apps/synthai-human-design",
+      "notes": "C# Human Design object model and charting source. Useful source library, not part of the default Termux compile flow unless .NET is added.",
+      "bundle_url": "/bundles-static/SynthAi.FullPackage(5).zip"
+    },
+    {
+      "id": "github-source-inputs",
+      "name": "Original GitHub Source Inputs",
+      "role": "repo-bootstrap",
+      "status": "clone-script-ready",
+      "local_path": "repos/bootstrap-github.sh",
+      "notes": "Shallow-clones Tribler/superorganism-experiment, Tribler/self-compile-Android, and OpenHands/openhands into vendor-repos."
+    }
+  ]
+}

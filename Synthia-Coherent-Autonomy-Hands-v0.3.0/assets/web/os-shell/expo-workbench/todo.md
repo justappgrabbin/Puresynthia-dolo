@@ -1,0 +1,91 @@
+- [x] Direct-manipulation visual editor: tap interface elements in the preview to select them
+- [x] Mobile property inspector for layout, spacing, colors, typography, borders, and text/content edits
+- [x] Keep preview changes synchronized with the selected element and support undo/reset
+- [x] Export the visually edited project as a ZIP
+- [x] No-code editor mode with no HTML/CSS editing required
+- [x] Drag-and-drop canvas for arranging blocks such as sections, text, images, buttons, and cards
+- [x] Add-block tray with insertable UI components
+- [x] Touch-friendly move, resize, reorder, duplicate, and delete interactions (direct resize handle, move/reorder, duplicate, and delete implemented)
+- [x] Property controls for selected blocks without exposing source code
+- [x] Gallery screen for reusable components and modules
+- [x] Extract recognizable UI sections/components from imported ZIP projects into gallery entries (HTML tag-based extraction)
+- [x] Organize gallery entries by category, including menus, ATO/automation modules, sections, cards, forms, and buttons
+- [x] Save custom selected blocks to the gallery for future projects
+- [x] Insert gallery components into the active visual canvas
+- [x] Add optional code-inspection/editor mode distinct from the primary no-code canvas (mobile source view; full Monaco integration pending)
+- [x] Render the actual imported ZIP interface on the editing canvas (supported HTML elements are extracted into visual blocks)
+- [x] Select extracted real-page elements directly and visually alter their content, position/order, height, and color
+- [x] Ensure gallery entries represent reusable visual elements extracted from the actual imported interface
+- [x] Canvas node system: drag components, tools, and nodes around
+- [x] Canvas node resizing, nesting, reordering, and connection relationships (direct resize, nesting toggle, reordering, and typed connection action implemented)
+- [x] Inspector for editing selected node properties and settings
+- [x] Source view for precise control when desired (Monaco-style visual direction; native text editor in current build)
+- [x] Shared source model for two-way canvas-to-code and code-to-canvas synchronization (content attribute sync implemented)
+- [x] Runtime preview that updates immediately as the project changes
+- [x] Replace generic website blocks with first-class system-object node types
+- [x] Add tool, automaton, state, world-object, input, and output node definitions
+- [x] Add typed input/output ports and mesh connection relationships (typed ports, compatibility checks, live next-node wiring, and export metadata implemented)
+- [x] Add graph canvas affordances for system nodes (connections, grouping, and hierarchy pending)
+- [x] Rename source mode to Open the hood and make it inspect generated system implementation
+- [x] Add synchronized graph-to-source and source-to-graph updates for node properties (link synchronization pending)
+- [x] Add system-object gallery categories (runtime simulation status pending)
+- [x] Make ZIP upload the primary, unmistakable entry action on the home screen
+- [x] Add a visible upload/import action inside the empty project state (hero action is primary; empty-state copy directs to import)
+- [x] Confirm the native phone flow opens the device file picker for ZIP files (`expo-document-picker`, ZIP MIME type)
+- [x] Verify portrait phone layout independently from the desktop web preview (390×844 portrait capture passed)
+- [x] Replace regex-only ZIP import with a real project parser boundary
+- [x] Preserve the imported DOM/component tree in a shared AST model (canvas projection still limited)
+- [x] Preserve CSS/style declarations and asset references in the shared project model
+- [x] Preserve JavaScript/framework source files and identify React/Vue/Svelte/HTML fallbacks
+- [x] Mutate the shared model from visual edits and regenerate the preserved entry source
+- [x] Apply source edits back into the visual model and runtime preview (Apply to canvas reparses source elements and refreshes preview)
+- [x] Implement actual hierarchy nesting and parent-child movement (parentId nesting toggle and canvas indentation)
+- [x] Implement direct resize handles that mutate the source style/layout model
+- [x] Implement typed mesh connections and export their relationships
+- [x] Duplicate and delete actions are implemented; correct stale TODO status
+- [x] Inspect attached Synthia build independently without modifying it
+- [x] Map Synthia State Space, Mesh, ATO/Tool Factory, recognition, transformation, runtime, verification, and memory modules
+- [x] Map zip-visual-editor import, parsing, editor state, drag/drop, selection, inspector, source view, preview, and export modules
+- [x] Return FEATURE | PROJECT | FILE | FUNCTION/CLASS | IMPORTS/EXPORTS table before any integration
+- [x] Freeze editor and Synthia boundaries; do not merge or duplicate engine intelligence
+- [x] Normalize bridge release metadata for the attached Synthia archive (r21.19 filename/tests vs r21.12 README)
+- [x] Define transport-safe bridge methods: openProject, inspect, execute, applyMutation, getState, getTools, validate
+- [x] Implement the Synthia-side adapter routing boundary into injected authoritative modules (runtime attachment remains separate)
+- [x] Implement editor-side bridge client without moving Synthia state/automata/tool/validation/memory logic into the UI
+- [x] Add bridge tests for routing, errors, release metadata, and standalone behavior
+- [x] Reframe the seven bridge contracts as internal Synthia morph interfaces, not external client/server boundaries
+- [x] Model ZIP, Canvas, Inspector, Preview, Source, Gallery, and Runtime/Build/Validation capabilities as Synthia automata
+- [x] Mount editor automata directly into Synthia Mesh/ATO runtime while preserving authoritative engine logic
+- [x] Replace bridge connection status with morph/runtime lifecycle state
+- [ ] Make gallery entries authoritative Tool Factory/ATO identities with stable identity/state
+- [ ] Make drag placement and graph relationships mutate an ATO expression rather than create a dumb local copy
+- [x] Validate automata mounting, morph state, identity preservation, and standalone compatibility (identity preservation beyond generated tools remains follow-up)
+- [x] Remove server/tRPC bridge files and route assumptions from the in-process integration (superseded by preserved compatibility adapter)
+- [x] Keep the seven contracts as direct JavaScript morph interfaces inside Synthia (editor-side runtime contract added; Synthia archive remains authoritative)
+- [x] Fix the intermediate morph contract type errors after converting the design to pure JavaScript
+- [x] Make address → resolve → execute → observe → persist the universal runtime lifecycle
+- [ ] Ensure every recognized tool, automaton, state, world object, artifact, and relationship receives an executable Synthia address
+- [ ] Make canvas and gallery representations reference executable addressed identities rather than passive local blocks
+- [x] Add deterministic tests proving addressed objects can be resolved and run regardless of object category
+- [x] Preserve every existing capability; no destructive removal while addressing is being tightened
+- [x] Restore the optional server/tRPC compatibility adapter alongside the in-process Synthia morph path
+- [ ] Use addressing as the common substrate for in-process and transported execution
+- [x] Ensure existing preview, build, validation, persistence, gallery, and editor flows remain available after morph integration
+- [ ] Add regression tests proving capabilities still resolve and run through both execution paths
+- [x] Create one internal SynthiaMorphAdapter receiving openProject, inspect, execute, applyMutation, getState, getTools, and validate
+- [x] Route inspection to SynthiaUnit + SourceConnectome
+- [x] Route state to StateSpaceModel
+- [x] Route tools and automata to IntegratedToolFactory + AutomataMesh
+- [x] Route execution to GraphRuntime
+- [x] Route mutation/build to SourceMutationProcess + BuildProcess
+- [x] Route validation to ArtifactValidator + CodeImmuneSystem
+- [x] Register ZIP, canvas, inspector, preview, source, and gallery as Mesh automata
+- [x] Add the requested end-to-end ZIP-to-validation integration test
+- [x] Do not add UI, status panel, Monaco, or editor redesign in this milestone
+- [x] Finish morph/runtime lifecycle state with active, mounted, healthy, and failing states (canvas/source/preview state shown in runtime pill; failing state supported)
+- [x] Attach stable Synthia addresses to canvas and gallery objects (generated/imported objects carry stable in-project addresses)
+- [x] Add direct resize handles and complete touch move/reorder/duplicate/delete behavior
+- [x] Add parent-child nesting and typed live mesh connections
+- [x] Make source edits reparse into the visual model and refresh runtime preview
+- [x] Verify the portrait phone layout independently at a mobile viewport
+- [x] Consolidate duplicate typed-port TODO history without deleting task history (duplicate historical item retained as completed note)

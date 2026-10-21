@@ -1,0 +1,242 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Synthia Phone Builder</title>
+  <style>
+    :root { color-scheme: dark; --bg:#07090c; --panel:#10151b; --line:#26313b; --text:#eef3f7; --muted:#9aa6b2; --ok:#20d6a4; --warn:#f4b860; --bad:#ff6b7a; }
+    * { box-sizing:border-box; }
+    body { margin:0; min-height:100svh; background:var(--bg); color:var(--text); font:14px/1.45 system-ui, -apple-system, Segoe UI, sans-serif; }
+    .splash { position:fixed; inset:0; z-index:10; display:grid; place-items:center; padding:24px; background:radial-gradient(circle at 50% 28%, #18342f 0, #07090c 52%); transition:opacity .45s ease, visibility .45s ease; }
+    .splash.hidden { opacity:0; visibility:hidden; pointer-events:none; }
+    .splash-box { width:min(360px, 100%); text-align:center; }
+    .mark { width:72px; height:72px; margin:0 auto 16px; border-radius:24px; display:grid; place-items:center; color:#07110f; font-size:34px; font-weight:800; background:linear-gradient(135deg, #20d6a4, #f4d35e); box-shadow:0 16px 54px rgba(32,214,164,.22); animation:breathe 1.5s ease-in-out infinite; }
+    .splash h2 { margin:0 0 6px; font-size:22px; color:var(--text); text-transform:none; letter-spacing:0; }
+    .splash p { margin:0 0 16px; color:var(--muted); }
+    .boot-steps { display:grid; gap:7px; text-align:left; margin-top:18px; }
+    .boot-step { display:flex; align-items:center; gap:9px; color:var(--muted); }
+    .dot { width:9px; height:9px; border-radius:50%; background:var(--line); }
+    .boot-step.active { color:var(--text); }
+    .boot-step.active .dot { background:var(--ok); box-shadow:0 0 18px rgba(32,214,164,.8); }
+    .loader { height:5px; overflow:hidden; border-radius:999px; background:#111920; }
+    .loader span { display:block; width:44%; height:100%; border-radius:inherit; background:linear-gradient(90deg, #20d6a4, #f4d35e); animation:load 1.2s ease-in-out infinite; }
+    @keyframes load { 0% { transform:translateX(-110%); } 100% { transform:translateX(240%); } }
+    @keyframes breathe { 0%,100% { transform:scale(1); } 50% { transform:scale(1.05); } }
+    header { position:sticky; top:0; z-index:2; display:flex; align-items:center; gap:10px; padding:12px; background:var(--panel); border-bottom:1px solid var(--line); }
+    h1 { margin:0; font-size:17px; margin-right:auto; }
+    .pill { border:1px solid var(--line); border-radius:999px; padding:4px 9px; color:var(--muted); font-size:12px; }
+    main { display:grid; gap:10px; padding:10px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    section { background:var(--panel); border:1px solid var(--line); border-radius:8px; padding:12px; min-width:0; }
+    .wide { grid-column:1 / -1; }
+    h2 { margin:0 0 10px; font-size:13px; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); }
+    .actions { display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:8px; }
+    button, a.button { min-height:44px; border-radius:6px; border:1px solid #24584a; background:#12201d; color:var(--text); font:inherit; text-decoration:none; display:flex; align-items:center; justify-content:center; padding:8px; text-align:center; }
+    .secondary { background:#0b0f15 !important; border-color:var(--line) !important; }
+    .danger { background:#251116 !important; border-color:#69313a !important; }
+    textarea { width:100%; min-height:84px; resize:vertical; border-radius:6px; border:1px solid var(--line); background:#0b0f15; color:var(--text); padding:10px; font:inherit; }
+    .chatlog { display:grid; gap:8px; max-height:220px; overflow:auto; margin-bottom:8px; }
+    .msg { border:1px solid var(--line); border-radius:8px; padding:9px; background:#0b0f15; white-space:pre-wrap; overflow-wrap:anywhere; }
+    .msg.me { border-color:#24584a; background:#10201c; }
+    .metric { display:flex; justify-content:space-between; gap:10px; padding:8px 0; border-bottom:1px solid var(--line); }
+    .metric:last-child { border-bottom:0; }
+    .muted { color:var(--muted); }
+    .ok { color:var(--ok); }
+    .warn { color:var(--warn); }
+    .bad { color:var(--bad); }
+    ul { padding-left:18px; margin:8px 0 0; }
+    li { margin:5px 0; overflow-wrap:anywhere; }
+    pre { white-space:pre-wrap; word-break:break-word; max-height:260px; overflow:auto; background:#0b0f15; border:1px solid var(--line); border-radius:6px; padding:10px; }
+    @media (max-width:760px) { main { grid-template-columns:1fr; } .actions { grid-template-columns:1fr; } }
+  </style>
+</head>
+<body>
+  <div id="splash" class="splash" aria-live="polite">
+    <div class="splash-box">
+      <div class="mark">S</div>
+      <h2>Synthia is waking up</h2>
+      <p id="splash-line">Starting the local builder...</p>
+      <div class="loader"><span></span></div>
+      <div class="boot-steps">
+        <div id="step-server" class="boot-step active"><span class="dot"></span><span>Server</span></div>
+        <div id="step-watch" class="boot-step"><span class="dot"></span><span>Watcher</span></div>
+        <div id="step-tools" class="boot-step"><span class="dot"></span><span>Tools</span></div>
+      </div>
+    </div>
+  </div>
+  <header>
+    <h1>Synthia Phone Builder</h1>
+    <span id="boot" class="pill">checking</span>
+  </header>
+  <main>
+    <section class="wide">
+      <h2>Do Something</h2>
+      <textarea id="writePrompt" placeholder="Ask Synthia to write or change an app..."></textarea>
+      <div class="actions">
+        <button id="write">Write App</button>
+        <button id="sync">Grab Phone Files</button>
+        <button id="scan">Scan Watch Inbox</button>
+        <button id="seedbox">Run Seedbox Swarm</button>
+        <button id="trident">Check Trident</button>
+        <button id="handoff">Ask Trident About Build</button>
+        <button id="ghstatus">GitHub Status</button>
+        <button id="ghpull">Pull Updates</button>
+        <button id="ghprepare">Prepare Commit</button>
+        <button id="rollback" class="danger">Roll Back</button>
+        <a class="button" href="/builder-admin">Edit / Build Admin</a>
+        <a class="button" href="/autoload">Open User App</a>
+        <a class="button" href="/cynthia-organism">Open Cynthia Organism</a>
+        <a class="button secondary" href="/studio">Open Studio</a>
+        <a class="button secondary" href="/terminal-ui">Open Terminal</a>
+      </div>
+    </section>
+    <section class="wide">
+      <h2>Synthia Chat</h2>
+      <div id="chatlog" class="chatlog">
+        <div class="msg">I am here. Tell me what you want to build, fix, upload, or check.</div>
+      </div>
+      <textarea id="chatInput" placeholder="Talk to Synthia..."></textarea>
+      <div class="actions">
+        <button id="chatSend">Send Chat</button>
+        <button id="chatToCode">Send To Writer</button>
+      </div>
+    </section>
+    <section>
+      <h2>System</h2>
+      <div id="system"></div>
+    </section>
+    <section>
+      <h2>Phone Inbox</h2>
+      <p class="muted" id="phone-path"></p>
+      <ul id="phone-files"></ul>
+    </section>
+    <section>
+      <h2>Watch Inbox</h2>
+      <ul id="watch-files"></ul>
+    </section>
+    <section>
+      <h2>Latest Jobs</h2>
+      <ul id="jobs"></ul>
+    </section>
+    <section class="wide">
+      <h2>Last Result</h2>
+      <pre id="result">Ready.</pre>
+    </section>
+  </main>
+  <script>
+    const el = id => document.getElementById(id);
+    const token = new URLSearchParams(location.search).get('admin_token') || localStorage.getItem('synthia_admin_token') || '';
+    if (token) localStorage.setItem('synthia_admin_token', token);
+    const headers = { 'Content-Type':'application/json', ...(token ? {'x-admin-token': token} : {}) };
+    async function api(path, options = {}) {
+      const res = await fetch(path, { ...options, headers: { ...headers, ...(options.headers || {}) } });
+      const data = await res.json();
+      if (!res.ok) throw new Error(JSON.stringify(data));
+      return data;
+    }
+    function list(target, items, render) {
+      target.innerHTML = '';
+      if (!items || !items.length) {
+        const li = document.createElement('li'); li.className='muted'; li.textContent='Nothing found yet.'; target.appendChild(li); return;
+      }
+      items.slice(0, 12).forEach(item => { const li=document.createElement('li'); li.innerHTML=render(item); target.appendChild(li); });
+    }
+    function bootStep(id, active) {
+      const node = el(id);
+      if (node) node.classList.toggle('active', active);
+    }
+    function hideSplash() {
+      const splash = el('splash');
+      if (!splash || splash.classList.contains('hidden')) return;
+      el('splash-line').textContent = 'Ready.';
+      bootStep('step-watch', true);
+      bootStep('step-tools', true);
+      setTimeout(() => splash.classList.add('hidden'), 450);
+    }
+    async function refresh() {
+      const health = await api('/health');
+      const status = await api('/builder/status');
+      const trident = await api('/trident/status');
+      const github = await api('/github/status');
+      const rollbacks = await api('/builder/rollbacks');
+      bootStep('step-watch', status.builder.watcher === 'running');
+      bootStep('step-tools', true);
+      el('boot').textContent = health.ok ? 'online' : 'offline';
+      el('boot').className = `pill ${health.ok ? 'ok' : 'bad'}`;
+      el('system').innerHTML = `
+        <div class="metric"><span>Server</span><strong class="ok">${health.status}</strong></div>
+        <div class="metric"><span>Watcher</span><strong>${status.builder.watcher}</strong></div>
+        <div class="metric"><span>Trident</span><strong>${trident.trident.status}</strong></div>
+        <div class="metric"><span>Builder</span><strong>${status.builder.status}</strong></div>
+        <div class="metric"><span>Queue</span><strong>${status.queue_depth}</strong></div>
+        <div class="metric"><span>GitHub</span><strong>${github.github.enabled ? `${github.github.incoming} incoming` : 'not connected'}</strong></div>
+        <div class="metric"><span>Rollbacks</span><strong>${rollbacks.rollbacks.length}</strong></div>
+        <div class="metric"><span>Latest</span><strong>${status.builder.latest_promoted?.source || 'none'}</strong></div>`;
+      el('phone-path').textContent = status.phone_inbox;
+      list(el('phone-files'), status.phone_items, item => `${item.directory ? '[folder] ' : ''}${item.name}`);
+      list(el('watch-files'), status.watch_items, item => `${item.kind}: ${item.name}`);
+      list(el('jobs'), status.builder.jobs, job => `<strong>${job.status}</strong> ${job.source || job.id}`);
+      hideSplash();
+      return status;
+    }
+    async function action(path) {
+      el('result').textContent = 'Working...';
+      try { const data = await api(path, { method:'POST', body:'{}' }); el('result').textContent = JSON.stringify(data, null, 2); await refresh(); }
+      catch (err) { el('result').textContent = String(err); }
+    }
+    async function writeApp() {
+      const prompt = el('writePrompt').value.trim();
+      if (!prompt) { el('result').textContent = 'Tell Synthia what to write first.'; return; }
+      el('result').textContent = 'Synthia is writing: probabilistic pre-pass, deterministic post-pass...';
+      try {
+        const data = await api('/builder/write', { method:'POST', body: JSON.stringify({ prompt }) });
+        el('result').textContent = JSON.stringify(data, null, 2);
+        await refresh();
+      } catch (err) {
+        el('result').textContent = String(err);
+      }
+    }
+    function addChat(text, mine = false) {
+      const node = document.createElement('div');
+      node.className = `msg ${mine ? 'me' : ''}`;
+      node.textContent = text;
+      el('chatlog').appendChild(node);
+      el('chatlog').scrollTop = el('chatlog').scrollHeight;
+    }
+    async function sendChat() {
+      const message = el('chatInput').value.trim();
+      if (!message) return;
+      addChat(message, true);
+      el('chatInput').value = '';
+      try {
+        const data = await api('/synthia/chat', { method:'POST', body: JSON.stringify({ message }) });
+        addChat(data.reply || JSON.stringify(data, null, 2));
+      } catch (err) {
+        addChat(String(err));
+      }
+    }
+    el('write').onclick = writeApp;
+    el('chatSend').onclick = sendChat;
+    el('chatToCode').onclick = () => {
+      const message = el('chatInput').value.trim();
+      if (message) el('writePrompt').value = message;
+      writeApp();
+    };
+    el('sync').onclick = () => action('/builder/sync-phone-inbox');
+    el('scan').onclick = () => action('/builder/scan');
+    el('seedbox').onclick = () => action('/builder/seedbox/run');
+    el('trident').onclick = () => action('/trident/check');
+    el('handoff').onclick = () => action('/trident/builder/handoff');
+    el('ghstatus').onclick = async () => {
+      el('result').textContent = 'Checking GitHub...';
+      try { el('result').textContent = JSON.stringify(await api('/github/status'), null, 2); await refresh(); }
+      catch (err) { el('result').textContent = String(err); }
+    };
+    el('ghpull').onclick = () => action('/github/pull');
+    el('ghprepare').onclick = () => action('/github/prepare-commit');
+    el('rollback').onclick = () => action('/builder/rollback');
+    refresh().catch(err => el('result').textContent = String(err));
+    setInterval(refresh, 5000);
+  </script>
+</body>
+</html>

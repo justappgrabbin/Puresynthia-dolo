@@ -1,0 +1,78 @@
+{
+  "schema": "synthia.swarm-placement-rules.v1",
+  "principle": "Complete projects stay intact. Loose files move only by explicit WH/organ rules; unknowns go to review.",
+  "wh_order": ["where", "what", "when", "why", "who"],
+  "project_markers": [
+    "package.json",
+    "pnpm-lock.yaml",
+    "yarn.lock",
+    "vite.config.js",
+    "next.config.js",
+    "pyproject.toml",
+    "requirements.txt",
+    "setup.py",
+    "build.gradle",
+    "settings.gradle",
+    "gradlew",
+    "pubspec.yaml",
+    "Cargo.toml",
+    "index.html"
+  ],
+  "manifest_name": "synthia-manifest.json",
+  "organs": [
+    {
+      "id": "expression-autoling",
+      "where": "src/organs/expression",
+      "what": ["autoling", "grammar", "compiler", "interrogative", "language"],
+      "why": "Autoling and WH files belong to Cynthia's expression/compiler organ."
+    },
+    {
+      "id": "perception-diseminer",
+      "where": "src/organs/perception",
+      "what": ["diseminer", "narrative", "archetypal", "monte", "filter"],
+      "why": "Diseminer files belong to perception and recognition."
+    },
+    {
+      "id": "contact-lcm",
+      "where": "src/organs/contact",
+      "what": ["lcm", "language-contact", "contact-model", "klein"],
+      "why": "LCM files belong to the contact and memory model."
+    },
+    {
+      "id": "body-messy",
+      "where": "src/body",
+      "what": ["messy", "body", "lifecycle", "selfmodification", "simulator"],
+      "why": "MESSY files belong to the embodiment/build-world layer."
+    },
+    {
+      "id": "runtime-os",
+      "where": "src/runtime",
+      "what": ["runtime", "os", "substrate", "phase", "coordinate"],
+      "why": "OS runtime files belong to the local runtime substrate."
+    },
+    {
+      "id": "interface-component",
+      "where": "src/components",
+      "what": ["component", "tsx", "jsx", "ui", "frontend"],
+      "why": "UI components belong in the component layer."
+    },
+    {
+      "id": "backend-tool",
+      "where": "src/tools",
+      "what": ["tool", "server", "mcp", "backend", "api"],
+      "why": "Backend tools belong in the controlled tool layer."
+    }
+  ],
+  "extensions": {
+    ".ts": "src/systems",
+    ".js": "src/systems",
+    ".tsx": "src/components",
+    ".jsx": "src/components",
+    ".py": "src/tools",
+    ".json": "config",
+    ".md": "docs",
+    ".html": "public"
+  },
+  "unknown_destination": "review",
+  "conflict_strategy": "keep_both_with_timestamp"
+}

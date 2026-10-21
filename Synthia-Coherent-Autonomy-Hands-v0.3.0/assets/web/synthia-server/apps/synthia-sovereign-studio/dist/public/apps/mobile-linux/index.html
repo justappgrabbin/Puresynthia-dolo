@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Synthia</title>
+    <link rel="stylesheet" href="./assets/index-CtnCSUaH.css">
+    <style>
+      html,body{margin:0;min-height:100%;background:#09070d;color:#f4eef7}
+      #boot-status{position:fixed;inset:0;z-index:2147483647;display:grid;place-items:center;padding:24px;background:#09070d;font:14px/1.45 system-ui,-apple-system,sans-serif;text-align:center}
+      #boot-card{width:min(390px,100%);padding:18px;border:1px solid #3d2b4a;border-radius:14px;background:#13101a;box-shadow:0 18px 50px rgba(0,0,0,.25)}
+      #boot-mark{width:48px;height:48px;margin:0 auto 12px;border-radius:14px;display:grid;place-items:center;font-weight:800;font-size:22px;color:#fff;background:linear-gradient(135deg,#a855f7,#ec4899 60%,#2dd4bf)}
+      #boot-title{font-size:17px;font-weight:750;margin-bottom:5px}
+      #boot-detail{color:#b8adbf;font-size:12px;white-space:pre-wrap;word-break:break-word}
+      #boot-status.error #boot-card{border-color:#f59e8b}
+      #boot-status.error #boot-title{color:#f59e8b}
+      #boot-status.ready{display:none}
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <div id="boot-status" aria-live="polite">
+      <div id="boot-card"><div id="boot-mark">S</div><div id="boot-title">Opening Synthia</div><div id="boot-detail">Loading the local workspace…</div></div>
+    </div>
+    <script>
+      (function(){
+        const status=document.getElementById('boot-status');
+        const detail=document.getElementById('boot-detail');
+        const root=document.getElementById('root');
+        let failed=false;
+        function fail(message){
+          if(failed)return; failed=true; status.classList.add('error');
+          document.getElementById('boot-title').textContent='Synthia renderer did not start';
+          detail.textContent=String(message||'Unknown renderer error');
+        }
+        addEventListener('error',e=>fail(e.message||e.error||'JavaScript error'));
+        addEventListener('unhandledrejection',e=>fail(e.reason?.message||e.reason||'Unhandled renderer error'));
+        const observer=new MutationObserver(()=>{if(root.children.length){status.classList.add('ready');observer.disconnect();}});
+        observer.observe(root,{childList:true,subtree:true});
+        setTimeout(()=>{if(!root.children.length&&!failed)fail('The local UI loaded but did not mount into its root container.');},7000);
+      })();
+    </script>
+    <script defer src="./assets/synthia-local.js"></script>
+    <script defer src="./assets/synthia-sync-connector.js"></script>
+    <script defer src="./assets/synthia-artifact-foundry.js"></script>
+  </body>
+</html>

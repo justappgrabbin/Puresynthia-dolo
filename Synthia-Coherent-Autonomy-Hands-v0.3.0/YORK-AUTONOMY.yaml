@@ -1,0 +1,92 @@
+schema: synthia.york.autonomy.v2
+name: Synthia Coherent Autonomy + Hands
+version: 0.3.0
+
+non_negotiable_authorities:
+  trainable:
+    artifact: Pure-Synthia-Trainable-Assembly-v0.4.2.zip
+    role: learning/training + mandatory StateSpace/ATO/Klein cognition
+    rule: preserve original donor and provenance
+  execution:
+    artifact: Synthia-Universal-Execution-Spine-v0.4.0.zip
+    role: execution/state-space authority
+    rule: preserve runtime-first execution, address resolution, verification and failure evidence
+  automata:
+    artifact: Synthia-PureAutomata-ALIVE-CONTINUOUS-v2-FULL-with-Runner.zip
+    role: preserved automata authority
+    rule: do not silently replace
+
+distributed_agency:
+  event_field: assets/web/app/event-workspace.mjs
+  hand_automaton: assets/web/app/hands.mjs
+  rule: hands observe, decide, act, verify at role level
+  graceful_degradation: true
+  central_planner_required: false
+
+autonomy_addition:
+  may:
+    - run heartbeat/watch loop
+    - queue call/chat/javascript/hand tasks
+    - publish and re-enter bounded witnessed events
+    - persist measured local state
+    - gate promotion candidates with checks/canary/circuit-breaker
+  may_not:
+    - replace Universal Execution Spine
+    - replace Trainable canonical StateSpace/ATO/Klein
+    - silently delete source/provenance
+    - fabricate native success or process completion
+
+mobile_control:
+  donor: mobile-next/mobile-mcp
+  integration: clean local Android accessibility adapter
+  bundled_node_server: false
+  bundled_adb: false
+  bundled_telemetry: false
+  accessibility_required_for_device_actions: true
+  supported:
+    - observe accessibility elements with refs
+    - click ref
+    - tap
+    - swipe
+    - global navigation
+    - list launchable apps
+    - launch app
+    - person-approved text entry
+  explicitly_not_claimed:
+    - arbitrary app termination
+    - adb logs
+    - crash report collection
+    - simulator management
+    - ios control
+
+aion_mechanics:
+  donor: aamunozm/aion-superagente
+  imported_as_brain: false
+  rust_stack_bundled: false
+  ollama_bundled: false
+  mechanics:
+    - reentrant event workspace
+    - measured evidence-only self-state
+    - gated promotion
+    - circuit breaker
+
+android:
+  package: com.synthia.autonomy
+  version_code: 3
+  version_name: 0.3.0
+  web_origin: 127.0.0.1 packaged local server only
+  privileged_webview_external_navigation: forbidden
+  accessibility_service: com.synthia.autonomy.SynthiaAccessibilityService
+  builder: build-apk.sh
+  gradle: forbidden
+
+truth_contract:
+  native_result_shape: "{ok:boolean, complete:boolean, ...}"
+  shell_dispatch_is_completion: false
+  failures_must_be_visible: true
+
+source_integrity:
+  originals: authority-original/
+  runtime_copies: assets/web/vendor/
+  authority_hashes: AUTHORITY-SHA256.json
+  donor_provenance: DONOR-PROVENANCE.json

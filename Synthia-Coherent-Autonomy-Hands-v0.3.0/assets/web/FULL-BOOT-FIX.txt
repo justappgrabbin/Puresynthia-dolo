@@ -1,0 +1,7 @@
+Synthia r22.1 FULL BOOT FIX
+applicationId=com.synthia.phone
+launcher=Unified WebView local-origin residence
+first_paint=https://synthia.local/index.html -> APK assets/index.html
+r22_source=full Synthia-Organism-OS-r22.0-MERGED
+backend=retained, optional for first paint
+versionCode=220200

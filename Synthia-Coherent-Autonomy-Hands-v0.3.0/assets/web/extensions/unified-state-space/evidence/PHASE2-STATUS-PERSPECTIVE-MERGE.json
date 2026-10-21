@@ -1,0 +1,60 @@
+{
+  "phase": "2",
+  "status": "PROVISIONAL-PERSPECTIVE-MERGE-067+BC068",
+  "basis": {
+    "name": "Synthia-Emergent-StateSpace-v0.6.7.zip",
+    "sha256": "6d42168ea692eaa7f76394212278c9c9cf03821577374e65a52be00a6874afb7"
+  },
+  "pending_primary": {
+    "name": "Synthia-Emergent-StateSpace-v0.6.8.zip",
+    "sha256": "b5bd17303e7a3f8293233edfa9c2baa2ade3704c7ca91530f1f80669486b986f"
+  },
+  "verification": {
+    "statespace_067_full_regression": "PASS",
+    "pure_automata": "42 passed, 0 failed",
+    "standalone_ato": "79 passed, 0 failed",
+    "mesh_v1": "PASS",
+    "phase2_integration": "PASS",
+    "dimensions": 5,
+    "nodes_per_dimension": 64,
+    "structural_nodes": 320,
+    "named_pure_transitions": 16,
+    "tool_factory_state_bridge": "PASS",
+    "ato_state_interface": "PASS",
+    "mesh_relation_continuity": "PASS",
+    "internal_second_preserved_outward_omitted": "PASS",
+    "perspective_registry": "PASS",
+    "same_address_multi_view_retention": "PASS",
+    "browser_continuation_v068_embedded_statespace": "5 layers x 64 nodes preserved",
+    "perspective_views_after_clean_init": 640
+  },
+  "not_activated": [
+    "OS shell",
+    "phone host",
+    "full MultiProcess organism",
+    "browser stack",
+    "world/game/economy runtime",
+    "later autonomy/growth layers"
+  ],
+  "next": "Continue Phase 2 as a cumulative perspective merge. Reconcile exact Kimi StateSpace donor and canonical Synthia-Emergent-StateSpace-v0.6.8 when recovered; append their sourced views/relations without replacing existing views. Rerun all gates, then issue PHASE2-COMPLETE. Do not restart Phase 2.",
+  "perspective_policy": {
+    "same_address_different_meaning": "retain all sourced interpretations",
+    "same_address_same_meaning": "retain each provenance occurrence; alignment may mark agreement but does not erase records",
+    "selection": "no semantic winner selection at substrate level",
+    "alignment": "compare convergence/divergence across preserved views"
+  },
+  "recovered_additional_lineage": {
+    "name": "Synthia-browser-continuation-v0.6.8.zip",
+    "sha256": "d6048ceb6f54a7b0cfbddcf19ba3a529ed4248ce72f229aa8335b2bbba3f207a",
+    "phase2_scope": "embedded src-donor StateSpace only; browser runtime not activated",
+    "state_views": "5 layers x 64 nodes = 320 additional sourced views",
+    "layers": [
+      "Fu Xi / KnowledgeGraph",
+      "Mawangdui / CausalGraph",
+      "King Wen / live StateSpace",
+      "Reverse Fu Xi / TemporalGraph",
+      "Complement Fu Xi / DependencyGraph"
+    ]
+  },
+  "unresolved_kimi": "Original Kimi_Agent_Automata State Space Merge archive is not currently materialized by exact provenance; do not substitute an unlabeled StateSpace artifact for it. Merge it as another perspective lineage when exact donor bytes surface."
+}

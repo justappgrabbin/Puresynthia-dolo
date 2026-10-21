@@ -1,0 +1,55 @@
+version: '3.8'
+
+services:
+  messy-core:
+    build: .
+    container_name: messy-modern
+    ports:
+      - "8000:8000"
+    environment:
+      - MESSY_ENV=production
+      - MESSY_LOG_LEVEL=info
+      - MESSY_STIME_SYNC=true
+    volumes:
+      - messy-data:/app/data
+      - messy-logs:/app/logs
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 5s
+    networks:
+      - messy-net
+
+  messy-nginx:
+    image: nginx:alpine
+    container_name: messy-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - messy-core
+    networks:
+      - messy-net
+
+  messy-redis:
+    image: redis:7-alpine
+    container_name: messy-redis
+    volumes:
+      - redis-data:/data
+    networks:
+      - messy-net
+
+volumes:
+  messy-data:
+  messy-logs:
+  redis-data:
+
+networks:
+  messy-net:
+    driver: bridge

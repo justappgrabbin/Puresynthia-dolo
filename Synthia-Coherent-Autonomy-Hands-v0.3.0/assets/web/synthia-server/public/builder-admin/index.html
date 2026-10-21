@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Synthia Builder Admin</title>
+  <style>
+    :root { color-scheme: dark; --bg:#07090c; --panel:#11161d; --line:#26303a; --text:#edf2f7; --muted:#9aa5b1; --ok:#20d6a4; --warn:#f4b860; }
+    * { box-sizing: border-box; }
+    body { margin:0; background:var(--bg); color:var(--text); font:14px/1.4 system-ui, sans-serif; }
+    header, .bar { display:flex; gap:8px; align-items:center; flex-wrap:wrap; padding:10px; background:var(--panel); border-bottom:1px solid var(--line); }
+    h1 { margin:0; font-size:16px; margin-right:auto; }
+    main { display:grid; grid-template-columns: 320px 1fr; min-height:calc(100svh - 55px); }
+    aside { border-right:1px solid var(--line); padding:10px; overflow:auto; }
+    section { padding:10px; display:grid; grid-template-rows:auto 1fr auto; gap:8px; min-width:0; }
+    button, input, select, textarea { border:1px solid var(--line); border-radius:6px; background:#0b0f15; color:var(--text); font:inherit; }
+    button { padding:9px 11px; background:#12201d; border-color:#25584b; }
+    input, select { min-height:40px; padding:0 10px; }
+    textarea { width:100%; min-height:55svh; padding:10px; resize:vertical; font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+    #changeRequest { min-height:80px; font-family:inherit; }
+    .item { width:100%; text-align:left; margin:0 0 6px; background:#0b0f15; border-color:var(--line); overflow:hidden; text-overflow:ellipsis; }
+    .muted { color:var(--muted); }
+    .ok { color:var(--ok); }
+    .warn { color:var(--warn); }
+    pre { white-space:pre-wrap; word-break:break-word; background:#0b0f15; border:1px solid var(--line); border-radius:6px; padding:10px; max-height:220px; overflow:auto; }
+    @media (max-width: 760px) { main { grid-template-columns:1fr; } aside { border-right:0; border-bottom:1px solid var(--line); max-height:38svh; } }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Synthia Builder Admin</h1>
+    <button id="start">Start Watcher</button>
+    <button id="stop">Stop</button>
+    <button id="scan">Scan</button>
+    <button onclick="location.href='/autoload'">User Autoload</button>
+  </header>
+  <main>
+    <aside>
+      <div class="bar">
+        <select id="root"><option value="watch">watch-inbox</option><option value="sandbox">sandbox</option></select>
+        <button id="refresh">Refresh</button>
+      </div>
+      <p class="muted">Admin-only file workbench. Users only see `/autoload`.</p>
+      <div id="files"></div>
+      <pre id="status"></pre>
+    </aside>
+    <section>
+      <div class="bar">
+        <input id="path" placeholder="file path, e.g. note.md">
+        <button id="load">Load</button>
+        <button id="save">Save</button>
+        <button id="promote">Promote Sandbox</button>
+      </div>
+      <div class="bar">
+        <textarea id="changeRequest" placeholder="Backend change request for Trident/Synthia..."></textarea>
+        <select id="changeMode"><option value="sandbox">sandbox patch</option><option value="live">apply live</option></select>
+        <button id="applyChange">Apply Change</button>
+        <button id="codeRollback">Code Rollback</button>
+      </div>
+      <textarea id="editor" spellcheck="false" placeholder="Edit sandbox/watch files here."></textarea>
+      <pre id="log"></pre>
+    </section>
+  </main>
+  <script>
+    const qs = id => document.getElementById(id);
+    const log = data => qs('log').textContent = typeof data === 'string' ? data : JSON.stringify(data, null, 2);
+    const token = new URLSearchParams(location.search).get('admin_token') || localStorage.getItem('synthia_admin_token') || '';
+    if (token) localStorage.setItem('synthia_admin_token', token);
+    const headers = { 'Content-Type': 'application/json', ...(token ? { 'x-admin-token': token } : {}) };
+    async function api(path, options = {}) {
+      const res = await fetch(path, { ...options, headers: { ...headers, ...(options.headers || {}) } });
+      const data = await res.json();
+      if (!res.ok) throw new Error(JSON.stringify(data));
+      return data;
+    }
+    async function refreshStatus() {
+      const data = await api('/builder/status');
+      qs('status').textContent = JSON.stringify(data, null, 2);
+    }
+    async function listFiles(path = '.') {
+      const root = qs('root').value;
+      const data = await api(`/builder/files?root=${encodeURIComponent(root)}&path=${encodeURIComponent(path)}`);
+      const box = qs('files');
+      box.innerHTML = '';
+      if (path !== '.') {
+        const up = document.createElement('button');
+        up.className = 'item';
+        up.textContent = '..';
+        up.onclick = () => listFiles(path.split('/').slice(0, -1).join('/') || '.');
+        box.appendChild(up);
+      }
+      data.entries.forEach(entry => {
+        const btn = document.createElement('button');
+        btn.className = 'item';
+        btn.textContent = `${entry.directory ? '[dir] ' : ''}${entry.path}`;
+        btn.onclick = () => entry.directory ? listFiles(entry.path) : loadFile(entry.path);
+        box.appendChild(btn);
+      });
+      await refreshStatus();
+    }
+    async function loadFile(path = qs('path').value) {
+      const root = qs('root').value;
+      const data = await api(`/builder/file?root=${encodeURIComponent(root)}&path=${encodeURIComponent(path)}`);
+      qs('path').value = data.path;
+      qs('editor').value = data.content;
+      log(`Loaded ${root}:${data.path}`);
+    }
+    async function saveFile() {
+      const data = await api('/builder/file', { method:'POST', body: JSON.stringify({ root: qs('root').value, path: qs('path').value, content: qs('editor').value }) });
+      log(data);
+      await listFiles();
+    }
+    qs('start').onclick = async () => { log(await api('/builder/watch/start', { method:'POST', body:'{}' })); await refreshStatus(); };
+    qs('stop').onclick = async () => { log(await api('/builder/watch/stop', { method:'POST', body:'{}' })); await refreshStatus(); };
+    qs('scan').onclick = async () => { log(await api('/builder/scan', { method:'POST', body:'{}' })); await refreshStatus(); };
+    qs('refresh').onclick = () => listFiles();
+    qs('load').onclick = () => loadFile();
+    qs('save').onclick = saveFile;
+    qs('promote').onclick = async () => log(await api('/builder/promote', { method:'POST', body: JSON.stringify({ path: qs('path').value || 'updates' }) }));
+    qs('applyChange').onclick = async () => {
+      log('Applying change...');
+      const data = await api('/builder/apply-change', { method:'POST', body: JSON.stringify({ request: qs('changeRequest').value, live: qs('changeMode').value === 'live' }) });
+      log(data);
+      await listFiles();
+    };
+    qs('codeRollback').onclick = async () => log(await api('/builder/code-rollback', { method:'POST', body:'{}' }));
+    listFiles().catch(err => log(String(err)));
+  </script>
+</body>
+</html>

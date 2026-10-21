@@ -1,0 +1,43 @@
+{
+  "artifact": "Synthia-Coherent-Autonomy-Hands-v0.3.0",
+  "verified_at": "2026-09-10T06:56:00Z",
+  "js_tests": {
+    "passed": 9,
+    "failed": 0
+  },
+  "button_contract": {
+    "buttons": 26,
+    "passed": true
+  },
+  "hands_contract": {
+    "registered_faculties": 20,
+    "passed": true
+  },
+  "distributed_hand_queue": true,
+  "truthful_native_failure_parser": true,
+  "mobile_android_contract_static": true,
+  "manifest_xml_parse": true,
+  "build_script_bash_syntax": true,
+  "java_parse": {
+    "syntax_errors_detected": false,
+    "full_android_compile_run": false,
+    "reason": "android.jar is not installed in this execution environment; build-apk.sh is configured for the phone Termux Android SDK"
+  },
+  "authority_sha256": {
+    "Pure-Synthia-Trainable-Assembly-v0.4.2.zip": {
+      "expected": "cee899ef720a0e1776f525c959b6e12404a74dd3b4547da7caf34dff5febcc46",
+      "actual": "cee899ef720a0e1776f525c959b6e12404a74dd3b4547da7caf34dff5febcc46",
+      "match": true
+    },
+    "Synthia-Universal-Execution-Spine-v0.4.0.zip": {
+      "expected": "4b407881be4324860d09e3c743b5d518d35b8f0daa0831545a6c7e2b3c62c6af",
+      "actual": "4b407881be4324860d09e3c743b5d518d35b8f0daa0831545a6c7e2b3c62c6af",
+      "match": true
+    },
+    "Synthia-PureAutomata-ALIVE-CONTINUOUS-v2-FULL-with-Runner.zip": {
+      "expected": "e4b6b7d33a43c3cf628bacf38cf2ca5827dfdea2c24fe8ca6533c52373a561c2",
+      "actual": "e4b6b7d33a43c3cf628bacf38cf2ca5827dfdea2c24fe8ca6533c52373a561c2",
+      "match": true
+    }
+  }
+}

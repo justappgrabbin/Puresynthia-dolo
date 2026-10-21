@@ -1,0 +1,39 @@
+{
+  "id": "synthia-build-generative-mesh-v1",
+  "title": "Learn, test, and extend the Synthia generative mesh",
+  "objective": "Use the supplied books, user instructions, Klein tools, ATO materials, Human Design repositories, and GitHub research to build a shared generative mesh whose tools learn from one another while preserving distinct functions.",
+  "instructions": [
+    "Treat the user's stated correspondences as instructions with provenance, not as universal facts unless sources independently support them.",
+    "Keep original source observations immutable.",
+    "AUTOLING reads, normalizes, learns language, and shares learned language with the mesh.",
+    "Control of Grammar learns grammatical constraints and controls expression without replacing meaning.",
+    "DISEMINER extracts candidate semantic triples and implied relationships.",
+    "ATO maps supported semantic triples to recoverable binary transformations.",
+    "The Paraphraser changes surface expression while preserving the supported relation graph.",
+    "AutoNovel writes actual explanations, stories, and reports rather than outlines alone.",
+    "The Symbolic Validator checks generated claims and modules against source evidence.",
+    "A gate-line is a possibility for emergence; emergence activates only when a channel is completed.",
+    "Keep Planetary, Dimension, Gate, Line, Color, Tone, Base, Degree, Minute, Second, Arc, Zodiac, and House as addressable coordinates.",
+    "Keep Degree-Color, Minute-Tone, and Second-Base as instructed proportional pairings.",
+    "Do not equate Zodiac or House with Color or Tone unless repeatable evidence establishes the mapping.",
+    "Every generated tool is a composable input-transform-output triplet with an ATO genome, provenance, tests, and rollback history.",
+    "Generated changes remain proposals until their acceptance tests pass."
+  ],
+  "requiredEvidenceKinds": [
+    "book",
+    "repository",
+    "github",
+    "instruction"
+  ],
+  "acceptanceTests": [
+    "All registered Klein organs receive accepted mesh learning after reload.",
+    "New language learned by AUTOLING is visible to the other organs through shared mesh state.",
+    "Every accepted relation resolves to source ID, location, checksum, and original text.",
+    "ATO transformations are reversible.",
+    "Generated reports contain prose and claim-level evidence.",
+    "Corrections propagate without deleting prior revisions.",
+    "Generated modules remain inactive until automated tests pass.",
+    "A full shutdown and restart preserves accepted learning and tool growth."
+  ],
+  "outputDirectory": "data/synthia/builds/generative-mesh-v1"
+}

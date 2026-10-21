@@ -1,0 +1,32 @@
+{
+  "name": "autoling-pattern-compiler",
+  "version": "1.0.0",
+  "description": "AUTOLING Pattern Recognition Compiler - 69,120-node mesh-based cognitive engine with W-H Interrogative Core, MESSY Simulator, and multi-modal transduction",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "demo": "ts-node demo.ts",
+    "test": "jest",
+    "lint": "eslint src/**/*.ts"
+  },
+  "keywords": [
+    "autoling",
+    "pattern-recognition",
+    "human-design",
+    "iching",
+    "mesh",
+    "cognitive-engine",
+    "transduction",
+    "messy",
+    "sheldon-klein"
+  ],
+  "author": "Synthia OS",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0",
+    "ts-node": "^10.9.0"
+  },
+  "dependencies": {}
+}

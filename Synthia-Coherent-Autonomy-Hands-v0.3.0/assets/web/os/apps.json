@@ -1,0 +1,114 @@
+[
+  {
+    "id": "home",
+    "title": "Synthia",
+    "kind": "organism",
+    "capability": "ask",
+    "source": "core/SynthiaUnit.mjs"
+  },
+  {
+    "id": "world",
+    "title": "World",
+    "kind": "world",
+    "capability": "world",
+    "source": "organs/WorldOrgan.js"
+  },
+  {
+    "id": "morph",
+    "title": "Morph",
+    "kind": "embodiment",
+    "capability": "morph",
+    "source": "browser/MorphicExpressionEngine.mjs + visual/*"
+  },
+  {
+    "id": "browser",
+    "title": "Browser",
+    "kind": "effector",
+    "capability": "browser-effector",
+    "source": "processes/BrowserEffectorProcess.mjs"
+  },
+  {
+    "id": "builder",
+    "title": "Builder",
+    "kind": "construction",
+    "capability": "self-build",
+    "source": "AutoCoder + SourceMutationProcess + BuildProcess + SelfEditCoordinator"
+  },
+  {
+    "id": "workbench",
+    "title": "Workbench",
+    "kind": "editor",
+    "capability": "zip-visual-editor",
+    "source": "os-shell/expo-workbench"
+  },
+  {
+    "id": "paper",
+    "title": "Paper",
+    "kind": "code-workbench",
+    "capability": "parse-mesh-sandbox-repair-export",
+    "source": "workbench/paper-web"
+  },
+  {
+    "id": "research",
+    "title": "Research",
+    "kind": "research",
+    "capability": "research",
+    "source": "organs/ResearchOrgan.js"
+  },
+  {
+    "id": "cultivation",
+    "title": "Cultivation",
+    "kind": "self-cultivation",
+    "capability": "cultivation",
+    "source": "organism/CultivationProgram.mjs"
+  },
+  {
+    "id": "graphs",
+    "title": "Graphs",
+    "kind": "projection",
+    "capability": "multi-graph",
+    "source": "unified state-space + GraphRuntime"
+  },
+  {
+    "id": "media",
+    "title": "Media",
+    "kind": "media",
+    "capability": "recursive-media",
+    "source": "extensions/recursive-media-field"
+  },
+  {
+    "id": "games",
+    "title": "Games",
+    "kind": "world-content",
+    "capability": "game-builder-and-media",
+    "source": "BuilderOrgan + MediaOrgan + WorldOrgan"
+  },
+  {
+    "id": "knowledge",
+    "title": "Knowledge",
+    "kind": "memory",
+    "capability": "knowledge-vault",
+    "source": "browser/KnowledgeVault.mjs"
+  },
+  {
+    "id": "app-center",
+    "title": "App Center",
+    "kind": "capabilities",
+    "capability": "ATO/tool-factory/catalog",
+    "source": "vendor/ato-core + Integrated Tool Factory"
+  },
+  {
+    "id": "admin",
+    "title": "Admin",
+    "kind": "governance",
+    "capability": "approval-permissions-lineage",
+    "source": "SelfEditCoordinator + CodeImmuneSystem + VersionLineageRegistry"
+  },
+  {
+    "id": "settings",
+    "title": "Settings",
+    "kind": "system",
+    "capability": "autonomy-and-interface-controls",
+    "source": "OSKernel"
+  }
+]

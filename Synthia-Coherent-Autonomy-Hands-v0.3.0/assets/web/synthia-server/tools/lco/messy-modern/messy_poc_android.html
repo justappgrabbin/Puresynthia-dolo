@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MESSY — Android Proof of Concept</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://unpkg.com/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --bg: #0a0a0f;
+            --panel: rgba(10, 10, 20, 0.9);
+            --accent: #00d4ff;
+            --accent2: #ff6b6b;
+            --accent3: #51cf66;
+            --text: #e0e0e0;
+            --muted: #667788;
+        }
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            overflow: hidden;
+            height: 100vh;
+        }
+        #canvas-container {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: 1;
+        }
+        #ui-layer {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: 10;
+            pointer-events: none;
+            display: grid;
+            grid-template-columns: 340px 1fr 340px;
+            grid-template-rows: auto 1fr auto;
+            gap: 10px;
+            padding: 10px;
+        }
+        .panel {
+            background: var(--panel);
+            border: 1px solid rgba(0, 212, 255, 0.15);
+            border-radius: 8px;
+            padding: 12px;
+            pointer-events: auto;
+            backdrop-filter: blur(10px);
+            overflow-y: auto;
+            max-height: 90vh;
+        }
+        .panel-header {
+            color: var(--accent);
+            font-size: 0.8rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+            padding-bottom: 6px;
+            border-bottom: 1px solid rgba(0, 212, 255, 0.2);
+        }
+        .left-panel { grid-row: 1 / 4; }
+        .right-panel { grid-row: 1 / 4; grid-column: 3; }
+        .bottom-panel { grid-column: 2; grid-row: 3; max-height: 240px; }
+        .center-top {
+            grid-column: 2; grid-row: 1;
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            justify-content: center;
+            padding: 8px;
+        }
+        button {
+            background: linear-gradient(135deg, var(--accent), #0099cc);
+            border: none;
+            color: #fff;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 0.8rem;
+            transition: all 0.2s;
+            pointer-events: auto;
+        }
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 212, 255, 0.4);
+        }
+        button.secondary {
+            background: linear-gradient(135deg, var(--accent2), #cc5555);
+        }
+        button.tertiary {
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.15);
+        }
+        button.success {
+            background: linear-gradient(135deg, var(--accent3), #3aa34a);
+        }
+        button.android {
+            background: linear-gradient(135deg, #3DDC84, #2aa86a);
+        }
+        .drop-zone {
+            border: 2px dashed rgba(0, 212, 255, 0.3);
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            color: var(--muted);
+            font-size: 0.8rem;
+            transition: all 0.3s;
+            margin-bottom: 10px;
+            cursor: pointer;
+        }
+        .drop-zone.dragover {
+            border-color: var(--accent);
+            background: rgba(0, 212, 255, 0.05);
+            color: var(--accent);
+        }
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 4px 0;
+            font-size: 0.75rem;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        .stat-label { color: var(--muted); }
+        .stat-value { color: var(--accent); font-weight: bold; }
+        .code-output {
+            font-family: 'Courier New', monospace;
+            font-size: 0.7rem;
+            background: rgba(0,0,0,0.3);
+            border-radius: 4px;
+            padding: 8px;
+            max-height: 180px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            color: #aaddff;
+        }
+        .log-output {
+            font-family: 'Courier New', monospace;
+            font-size: 0.7rem;
+            max-height: 120px;
+            overflow-y: auto;
+        }
+        .log-entry {
+            padding: 2px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.03);
+        }
+        .log-time { color: var(--muted); }
+        .log-event { color: var(--accent); }
+        .triple-item {
+            padding: 4px 6px;
+            margin-bottom: 3px;
+            background: rgba(0,0,0,0.2);
+            border-radius: 4px;
+            border-left: 2px solid var(--accent);
+            font-size: 0.75rem;
+            font-family: 'Courier New', monospace;
+        }
+        .android-manifest {
+            font-family: 'Courier New', monospace;
+            font-size: 0.65rem;
+            background: rgba(61, 220, 132, 0.05);
+            border: 1px solid rgba(61, 220, 132, 0.2);
+            border-radius: 4px;
+            padding: 8px;
+            max-height: 150px;
+            overflow-y: auto;
+            color: #3DDC84;
+        }
+        .file-tree { font-size: 0.75rem; max-height: 120px; overflow-y: auto; }
+        .file-item { padding: 3px 6px; border-radius: 3px; cursor: pointer; }
+        .file-item:hover { background: rgba(0, 212, 255, 0.05); }
+        .file-item .file-name { color: var(--accent); }
+        .file-item .file-type { color: var(--muted); font-size: 0.65rem; }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); }
+        ::-webkit-scrollbar-thumb { background: rgba(0, 212, 255, 0.3); border-radius: 3px; }
+    </style>
+</head>
+<body>
+    <div id="canvas-container"></div>
+    <div id="ui-layer">
+        <div class="panel left-panel">
+            <div class="panel-header">🧬 Universal Ingestor</div>
+            <div class="drop-zone" id="drop-zone">
+                📁 Drop files, folders, or ZIPs here<br>
+                <span style="font-size:0.7rem; color:#667788;">JS, Python, HTML, CSS, Java, Kotlin, Android XML</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">Files Ingested</span>
+                <span class="stat-value" id="stat-files">0</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">Blocks Parsed</span>
+                <span class="stat-value" id="stat-blocks">0</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">Nodes</span>
+                <span class="stat-value" id="stat-nodes">0</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">Triples</span>
+                <span class="stat-value" id="stat-triples">0</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">Active</span>
+                <span class="stat-value" id="stat-active">0</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">Time</span>
+                <span class="stat-value" id="stat-time">0</span>
+            </div>
+            <div style="margin-top:15px;">
+                <div class="panel-header" style="font-size:0.7rem;">Assert Triple</div>
+                <div style="display:flex; gap:5px; margin-bottom:8px;">
+                    <input type="text" id="input-subject" placeholder="Subject" value="JOHN" style="flex:1; background:rgba(0,0,0,0.3); border:1px solid rgba(0,212,255,0.2); border-radius:4px; padding:6px; color:#e0e0e0; font-size:0.8rem;">
+                    <input type="text" id="input-relation" placeholder="Relation" value="LOVES" style="flex:1; background:rgba(0,0,0,0.3); border:1px solid rgba(0,212,255,0.2); border-radius:4px; padding:6px; color:#e0e0e0; font-size:0.8rem;">
+                    <input type="text" id="input-object" placeholder="Object" value="MARY" style="flex:1; background:rgba(0,0,0,0.3); border:1px solid rgba(0,212,255,0.2); border-radius:4px; padding:6px; color:#e0e0e0; font-size:0.8rem;">
+                </div>
+                <button onclick="meshUI.assertTriple()" style="width:100%">Assert</button>
+            </div>
+            <div style="margin-top:15px;">
+                <div class="panel-header" style="font-size:0.7rem;">Ingested Files</div>
+                <div class="file-tree" id="file-tree"></div>
+            </div>
+            <div style="margin-top:15px;">
+                <div class="panel-header" style="font-size:0.7rem;">Physics</div>
+                <div style="margin-bottom:10px;">
+                    <label style="display:block; font-size:0.75rem; color:#8899aa; margin-bottom:4px;">Repulsion</label>
+                    <input type="range" id="repulsion-slider" min="0" max="200" value="100" style="width:100%; accent-color:var(--accent);">
+                </div>
+                <div style="margin-bottom:10px;">
+                    <label style="display:block; font-size:0.75rem; color:#8899aa; margin-bottom:4px;">Attraction</label>
+                    <input type="range" id="attraction-slider" min="0" max="100" value="10" style="width:100%; accent-color:var(--accent);">
+                </div>
+                <div style="margin-bottom:10px;">
+                    <label style="display:block; font-size:0.75rem; color:#8899aa; margin-bottom:4px;">Damping</label>
+                    <input type="range" id="damping-slider" min="0" max="100" value="90" style="width:100%; accent-color:var(--accent);">
+                </div>
+            </div>
+        </div>
+        <div class="center-top">
+            <button onclick="meshUI.generate()">✨ Generate</button>
+            <button onclick="meshUI.step()">▶ Step</button>
+            <button class="secondary" onclick="meshUI.toggleAuto()" id="auto-btn">⏵ Auto</button>
+            <button class="tertiary" onclick="meshUI.reset()">↺ Reset</button>
+            <button class="android" onclick="meshUI.generateAndroid()">🤖 Android</button>
+            <button class="success" onclick="meshUI.exportMesh()">💾 Save</button>
+        </div>
+        <div class="panel bottom-panel">
+            <div class="panel-header">Generated Output</div>
+            <div class="code-output" id="code-output">// Drop files to ingest, then generate code or Android APK scaffold.</div>
+        </div>
+        <div class="panel right-panel">
+            <div class="panel-header">🧠 Generation Target</div>
+            <div style="margin-bottom:15px;">
+                <div class="panel-header" style="font-size:0.7rem;">Target Surface</div>
+                <select id="target-surface" style="width:100%; padding:6px; background:rgba(0,0,0,0.3); border:1px solid rgba(0,212,255,0.2); color:#e0e0e0; border-radius:4px;">
+                    <option value="javascript">JavaScript (Game/App)</option>
+                    <option value="html5">HTML5 (Web App)</option>
+                    <option value="threejs">Three.js (3D)</option>
+                    <option value="shader">GLSL (Shader)</option>
+                    <option value="python">Python (Backend)</option>
+                    <option value="react">React (Component)</option>
+                    <option value="android">Android (Java/Kotlin)</option>
+                    <option value="apk">APK Scaffold (Full)</option>
+                </select>
+            </div>
+            <div style="margin-bottom:15px;">
+                <div class="panel-header" style="font-size:0.7rem;">Android Manifest Preview</div>
+                <div class="android-manifest" id="android-manifest">// AndroidManifest.xml will appear here when generating Android output</div>
+            </div>
+            <div style="margin-bottom:15px;">
+                <div class="panel-header" style="font-size:0.7rem;">Semantic Context</div>
+                <div id="context-triples"></div>
+            </div>
+            <div>
+                <div class="panel-header" style="font-size:0.7rem;">System Log</div>
+                <div class="log-output" id="log-output"></div>
+            </div>
+        </div>
+    </div>
+
+<script>

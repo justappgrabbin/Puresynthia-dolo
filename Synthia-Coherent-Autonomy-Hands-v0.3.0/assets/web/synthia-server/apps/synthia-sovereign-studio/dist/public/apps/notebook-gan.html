@@ -1,0 +1,1541 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#2a2a2e">
+    <title>Notebook</title>
+    <style>
+        * { 
+            margin: 0; 
+            padding: 0; 
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        :root {
+            --bg: #2a2a2e;
+            --surface: #36363a;
+            --accent: #8B5CF6;
+            --text: #f5f5f5;
+            --dim: #999;
+            --safe-top: env(safe-area-inset-top);
+            --safe-bottom: env(safe-area-inset-bottom);
+        }
+        
+        /* Subtle themes */
+        [data-theme="echo"] { --accent: #8B5CF6; }
+        [data-theme="prime"] { --accent: #fbbf24; }
+        [data-theme="cosmic"] { --accent: #06b6d4; }
+        [data-theme="mermaid"] { --accent: #14b8a6; }
+        [data-theme="venom"] { --accent: #84cc16; }
+        [data-theme="void"] { --accent: #666; }
+        
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            height: 100vh;
+            overflow: hidden;
+            position: fixed;
+            width: 100%;
+            padding-top: var(--safe-top);
+            padding-bottom: var(--safe-bottom);
+            touch-action: manipulation;
+        }
+        
+        #app { 
+            display: flex; 
+            flex-direction: column; 
+            height: 100vh; 
+            width: 100%; 
+        }
+        
+        /* Header */
+        header {
+            padding: 16px 20px;
+            padding-top: calc(16px + var(--safe-top));
+            background: var(--bg);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        }
+        
+        .logo {
+            font-size: 0.9rem;
+            color: var(--dim);
+            letter-spacing: 3px;
+            font-weight: 300;
+        }
+        
+        .header-actions {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .icon-btn {
+            width: 36px;
+            height: 36px;
+            background: transparent;
+            border: none;
+            color: var(--dim);
+            cursor: pointer;
+            font-size: 1.1rem;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            opacity: 0.4;
+        }
+        
+        .icon-btn:active {
+            transform: scale(0.9);
+            opacity: 1;
+            color: var(--accent);
+        }
+        
+        /* Main editor */
+        main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 0;
+            overflow: hidden;
+        }
+        
+        #editor {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        #page-title {
+            font-size: 1.5rem;
+            font-weight: 300;
+            color: var(--text);
+            border: none;
+            background: transparent;
+            outline: none;
+            margin-bottom: 24px;
+            font-family: inherit;
+            width: 100%;
+            padding: 0;
+        }
+        
+        #page-title::placeholder {
+            color: var(--dim);
+            opacity: 0.3;
+        }
+        
+        #page-content {
+            flex: 1;
+            background: transparent;
+            border: none;
+            outline: none;
+            color: var(--text);
+            font-family: inherit;
+            font-size: 1rem;
+            line-height: 1.8;
+            resize: none;
+            white-space: pre-wrap;
+            min-height: 300px;
+            font-weight: 300;
+            display: block;
+        }
+        
+        #page-content::placeholder {
+            color: var(--dim);
+            opacity: 0.2;
+        }
+        
+        /* SVG Canvas Mode */
+        #svg-canvas {
+            display: none;
+            width: 100%;
+            height: 100%;
+            touch-action: none;
+            cursor: crosshair;
+        }
+        
+        #svg-canvas.active {
+            display: block;
+        }
+        
+        /* Pages drawer */
+        #pages-drawer {
+            position: fixed;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 85vw;
+            max-width: 320px;
+            background: var(--surface);
+            transform: translateX(-100%);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 100;
+            padding-top: var(--safe-top);
+            display: flex;
+            flex-direction: column;
+        }
+        
+        #pages-drawer.open {
+            transform: translateX(0);
+        }
+        
+        .drawer-header {
+            padding: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        
+        .drawer-title {
+            font-size: 0.8rem;
+            color: var(--dim);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            font-weight: 400;
+        }
+        
+        .pages-list {
+            flex: 1;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            padding: 10px;
+        }
+        
+        .page-item {
+            padding: 16px;
+            margin-bottom: 4px;
+            background: rgba(255, 255, 255, 0.04);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border-left: 2px solid transparent;
+            position: relative;
+        }
+        
+        .page-item:active {
+            transform: scale(0.98);
+            background: rgba(255, 255, 255, 0.08);
+        }
+        
+        .page-item.active {
+            background: rgba(255, 255, 255, 0.08);
+            border-left-color: var(--accent);
+        }
+        
+        .page-item-title {
+            font-size: 0.95rem;
+            margin-bottom: 4px;
+            color: var(--text);
+            font-weight: 300;
+        }
+        
+        .page-item-meta {
+            font-size: 0.7rem;
+            color: var(--dim);
+            opacity: 0.5;
+        }
+        
+        .page-type-indicator {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            font-size: 0.9rem;
+            opacity: 0.3;
+        }
+        
+        .connection-hint {
+            width: 4px;
+            height: 4px;
+            background: var(--accent);
+            border-radius: 50%;
+            display: inline-block;
+            margin-left: 6px;
+            opacity: 0.3;
+        }
+        
+        /* Transform menu */
+        .transform-menu {
+            position: absolute;
+            bottom: -120px;
+            right: 0;
+            background: var(--surface);
+            border-radius: 8px;
+            padding: 8px;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.3s;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .page-item:hover .transform-menu {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        
+        .transform-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 14px;
+            background: transparent;
+            border: none;
+            color: var(--text);
+            cursor: pointer;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            width: 100%;
+            text-align: left;
+            transition: all 0.2s;
+        }
+        
+        .transform-btn:active {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        /* Insight panel */
+        #insight-panel {
+            position: fixed;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--surface);
+            transform: translateY(100%);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 100;
+            padding-bottom: var(--safe-bottom);
+            max-height: 60vh;
+            border-radius: 20px 20px 0 0;
+            box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.5);
+        }
+        
+        #insight-panel.open {
+            transform: translateY(0);
+        }
+        
+        .insight-handle {
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+        
+        .insight-handle::before {
+            content: '';
+            width: 40px;
+            height: 4px;
+            background: var(--dim);
+            border-radius: 2px;
+            opacity: 0.3;
+        }
+        
+        .insight-content {
+            padding: 20px;
+            overflow-y: auto;
+            max-height: calc(60vh - 40px);
+        }
+        
+        .insight-section {
+            margin-bottom: 20px;
+        }
+        
+        .insight-label {
+            font-size: 0.7rem;
+            color: var(--dim);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 8px;
+        }
+        
+        .insight-text {
+            font-size: 0.9rem;
+            color: var(--text);
+            line-height: 1.6;
+            font-weight: 300;
+        }
+        
+        .connection-item {
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.04);
+            border-radius: 8px;
+            margin-bottom: 8px;
+            font-size: 0.85rem;
+            color: var(--text);
+            border-left: 2px solid var(--accent);
+            opacity: 0.7;
+            cursor: pointer;
+        }
+        
+        .connection-item:active {
+            background: rgba(255, 255, 255, 0.08);
+        }
+        
+        /* GAN Predictions */
+        .prediction-item {
+            padding: 12px;
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(236, 72, 153, 0.1));
+            border-radius: 8px;
+            margin-bottom: 8px;
+            font-size: 0.85rem;
+            color: var(--text);
+            border-left: 2px solid var(--accent);
+        }
+        
+        .prediction-confidence {
+            font-size: 0.7rem;
+            color: var(--accent);
+            margin-top: 4px;
+        }
+        
+        /* FAB */
+        .fab {
+            position: fixed;
+            right: 20px;
+            bottom: calc(20px + var(--safe-bottom));
+            width: 56px;
+            height: 56px;
+            background: var(--accent);
+            border: none;
+            border-radius: 50%;
+            color: #fff;
+            font-size: 1.5rem;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            z-index: 50;
+        }
+        
+        .fab:active {
+            transform: scale(0.9);
+        }
+        
+        /* Mode toggle buttons */
+        .mode-toggle {
+            position: fixed;
+            bottom: calc(90px + var(--safe-bottom));
+            right: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            z-index: 50;
+        }
+        
+        .mode-btn {
+            width: 44px;
+            height: 44px;
+            background: var(--surface);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            color: var(--dim);
+            font-size: 1.1rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+        
+        .mode-btn.active {
+            background: var(--accent);
+            color: #fff;
+            border-color: var(--accent);
+        }
+        
+        .mode-btn:active {
+            transform: scale(0.9);
+        }
+        
+        /* Settings drawer */
+        #settings-panel {
+            position: fixed;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            width: 85vw;
+            max-width: 300px;
+            background: var(--surface);
+            transform: translateX(100%);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 100;
+            padding-top: var(--safe-top);
+            overflow-y: auto;
+        }
+        
+        #settings-panel.open {
+            transform: translateX(0);
+        }
+        
+        .settings-section {
+            padding: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        
+        .settings-title {
+            font-size: 0.7rem;
+            color: var(--dim);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 16px;
+        }
+        
+        .pen-option {
+            padding: 14px;
+            background: rgba(255, 255, 255, 0.04);
+            border-radius: 8px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border-left: 3px solid transparent;
+        }
+        
+        .pen-option:active {
+            transform: scale(0.98);
+        }
+        
+        .pen-option.active {
+            background: rgba(255, 255, 255, 0.08);
+            border-left-color: var(--accent);
+        }
+        
+        .pen-name {
+            font-size: 0.9rem;
+            margin-bottom: 4px;
+        }
+        
+        .pen-desc {
+            font-size: 0.7rem;
+            color: var(--dim);
+            opacity: 0.5;
+        }
+        
+        .theme-dots {
+            display: flex;
+            gap: 12px;
+            margin-top: 16px;
+            flex-wrap: wrap;
+        }
+        
+        .theme-dot {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 2px solid transparent;
+        }
+        
+        .theme-dot:active {
+            transform: scale(0.9);
+        }
+        
+        .theme-dot.active {
+            border-color: rgba(255, 255, 255, 0.3);
+            transform: scale(1.1);
+        }
+        
+        .theme-dot[data-theme="echo"] { background: #8B5CF6; }
+        .theme-dot[data-theme="prime"] { background: #fbbf24; }
+        .theme-dot[data-theme="cosmic"] { background: #06b6d4; }
+        .theme-dot[data-theme="mermaid"] { background: #14b8a6; }
+        .theme-dot[data-theme="venom"] { background: #84cc16; }
+        .theme-dot[data-theme="void"] { background: #666; }
+        
+        .overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 90;
+            backdrop-filter: blur(2px);
+        }
+        
+        .overlay.active {
+            display: block;
+        }
+        
+        .toast {
+            position: fixed;
+            bottom: calc(90px + var(--safe-bottom));
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: var(--surface);
+            padding: 12px 20px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            opacity: 0;
+            transition: all 0.3s;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            z-index: 200;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+        
+        @media (min-width: 768px) {
+            #editor {
+                max-width: 680px;
+                margin: 0 auto;
+                padding: 40px 20px;
+            }
+            
+            #page-title {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <div class="overlay" id="overlay" onclick="closeAll()"></div>
+        
+        <header>
+            <div class="logo">◦</div>
+            <div class="header-actions">
+                <button class="icon-btn" onclick="togglePages()" title="Pages">☰</button>
+                <button class="icon-btn" onclick="toggleSettings()" title="Settings">⋮</button>
+            </div>
+        </header>
+        
+        <main>
+            <div id="editor">
+                <input 
+                    type="text" 
+                    id="page-title" 
+                    placeholder="Untitled"
+                    oninput="updatePage()"
+                    autocomplete="off"
+                >
+                <textarea 
+                    id="page-content" 
+                    placeholder="Start writing..."
+                    oninput="updatePage()"
+                ></textarea>
+                
+                <!-- SVG Canvas (hidden by default) -->
+                <svg id="svg-canvas" xmlns="http://www.w3.org/2000/svg">
+                    <g id="svg-content"></g>
+                </svg>
+            </div>
+        </main>
+        
+        <!-- Mode Toggle Buttons -->
+        <div class="mode-toggle">
+            <button class="mode-btn active" data-mode="text" onclick="setMode('text')" title="Text">Aa</button>
+            <button class="mode-btn" data-mode="draw" onclick="setMode('draw')" title="Draw">✎</button>
+            <button class="mode-btn" data-mode="predict" onclick="togglePredictions()" title="Predict">◉</button>
+        </div>
+        
+        <!-- Pages drawer -->
+        <div id="pages-drawer">
+            <div class="drawer-header">
+                <div class="drawer-title">Pages</div>
+            </div>
+            <div class="pages-list" id="pages-list"></div>
+        </div>
+        
+        <!-- Settings drawer -->
+        <div id="settings-panel">
+            <div class="settings-section">
+                <div class="settings-title">Writing Mode</div>
+                <div class="pen-option active" data-pen="pen" onclick="setPen('pen')">
+                    <div class="pen-name">✒ Regular</div>
+                    <div class="pen-desc">Normal writing</div>
+                </div>
+                <div class="pen-option" data-pen="pencil" onclick="setPen('pencil')">
+                    <div class="pen-name">✎ Sketch</div>
+                    <div class="pen-desc">Temporary thoughts</div>
+                </div>
+                <div class="pen-option" data-pen="marker" onclick="setPen('marker')">
+                    <div class="pen-name">▮ Permanent</div>
+                    <div class="pen-desc">Important insights</div>
+                </div>
+            </div>
+            
+            <div class="settings-section">
+                <div class="settings-title">Theme</div>
+                <div class="theme-dots">
+                    <div class="theme-dot active" data-theme="echo" onclick="setTheme('echo')"></div>
+                    <div class="theme-dot" data-theme="prime" onclick="setTheme('prime')"></div>
+                    <div class="theme-dot" data-theme="cosmic" onclick="setTheme('cosmic')"></div>
+                    <div class="theme-dot" data-theme="mermaid" onclick="setTheme('mermaid')"></div>
+                    <div class="theme-dot" data-theme="venom" onclick="setTheme('venom')"></div>
+                    <div class="theme-dot" data-theme="void" onclick="setTheme('void')"></div>
+                </div>
+            </div>
+            
+            <div class="settings-section">
+                <div class="settings-title">Features</div>
+                <div style="font-size: 0.8rem; color: var(--dim); line-height: 1.6;">
+                    • GAN behavioral prediction<br>
+                    • SVG drawing mode<br>
+                    • Page transformation<br>
+                    • Constitutional causal graph<br>
+                    <br>
+                    <span style="opacity: 0.5;">Tap page items for transform menu</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Insight panel -->
+        <div id="insight-panel">
+            <div class="insight-handle" onclick="toggleInsights()"></div>
+            <div class="insight-content">
+                <div class="insight-section">
+                    <div class="insight-label">Connections</div>
+                    <div id="connections-list">
+                        <div class="insight-text" style="opacity: 0.5;">Write to discover connections</div>
+                    </div>
+                </div>
+                
+                <div class="insight-section" id="predictions-section" style="display: none;">
+                    <div class="insight-label">GAN Predictions</div>
+                    <div id="predictions-list"></div>
+                </div>
+                
+                <div class="insight-section">
+                    <div class="insight-label">Graph Status</div>
+                    <div id="graph-status" class="insight-text"></div>
+                </div>
+            </div>
+        </div>
+        
+        <button class="fab" onclick="createPage()" title="New page">+</button>
+        <div class="toast" id="toast"></div>
+    </div>
+
+    <script type="module">
+        // ============================================================================
+        // CONSTITUTIONAL CAUSAL GRAPH ENGINE
+        // ============================================================================
+        
+        function generateGlyph(content) {
+            let hash = 0;
+            const str = JSON.stringify(content);
+            for (let i = 0; i < str.length; i++) {
+                hash = ((hash << 5) - hash) + str.charCodeAt(i);
+                hash = hash & hash;
+            }
+            return Math.abs(hash).toString(36).substring(0, 8);
+        }
+        
+        class ReceiptStore {
+            constructor() { this.receipts = []; }
+            createReceipt(data) {
+                return {
+                    id: `r_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+                    timestamp: Date.now(),
+                    ...data
+                };
+            }
+            persist(receipt) { this.receipts.push(receipt); }
+        }
+        
+        class CausalityGuardian {
+            constructor(graph, receiptStore) {
+                this.graph = graph;
+                this.receiptStore = receiptStore;
+                this.isAlive = true;
+            }
+            validateNodeCreation(node) {
+                const expected = generateGlyph(node.content);
+                if (node.glyph && node.glyph !== expected) {
+                    throw new Error("Glyph mismatch");
+                }
+                return true;
+            }
+        }
+        
+        class ComputationPipeline {
+            constructor(guardian, receiptStore) {
+                this.nodes = new Map();
+                this.edges = [];
+                this.adjacencyList = new Map();
+                this.guardian = guardian;
+                this.receiptStore = receiptStore;
+            }
+            
+            addNode(nodeId, nodeType, content, metadata = {}) {
+                const node = {
+                    id: nodeId,
+                    type: nodeType,
+                    glyph: generateGlyph(content),
+                    content: content,
+                    metadata: metadata,
+                    timestamp: Date.now()
+                };
+                
+                this.guardian.validateNodeCreation(node);
+                this.nodes.set(nodeId, node);
+                
+                if (!this.adjacencyList.has(nodeId)) {
+                    this.adjacencyList.set(nodeId, []);
+                }
+                
+                const receipt = this.receiptStore.createReceipt({
+                    action: 'NODE_CREATED',
+                    node: nodeId,
+                    type: nodeType
+                });
+                this.receiptStore.persist(receipt);
+                
+                return node;
+            }
+            
+            addEdge(fromId, toId, edgeType, strength = 1.0) {
+                const edge = {
+                    id: `e_${fromId}_${toId}`,
+                    from: fromId,
+                    to: toId,
+                    type: edgeType,
+                    strength: strength,
+                    timestamp: Date.now()
+                };
+                
+                this.edges.push(edge);
+                
+                if (!this.adjacencyList.has(fromId)) {
+                    this.adjacencyList.set(fromId, []);
+                }
+                this.adjacencyList.get(fromId).push(toId);
+                
+                return edge;
+            }
+            
+            getConnections(nodeId) {
+                const connections = [];
+                
+                this.edges.forEach(edge => {
+                    if (edge.from === nodeId) {
+                        const targetNode = this.nodes.get(edge.to);
+                        if (targetNode) {
+                            connections.push({
+                                direction: 'to',
+                                node: targetNode,
+                                type: edge.type,
+                                strength: edge.strength
+                            });
+                        }
+                    }
+                });
+                
+                this.edges.forEach(edge => {
+                    if (edge.to === nodeId) {
+                        const sourceNode = this.nodes.get(edge.from);
+                        if (sourceNode) {
+                            connections.push({
+                                direction: 'from',
+                                node: sourceNode,
+                                type: edge.type,
+                                strength: edge.strength
+                            });
+                        }
+                    }
+                });
+                
+                return connections;
+            }
+        }
+        
+        // ============================================================================
+        // GAMEGAN - BEHAVIORAL PREDICTION ENGINE
+        // ============================================================================
+        
+        class GameGAN {
+            constructor(pipeline) {
+                this.pipeline = pipeline;
+                this.patterns = new Map(); // pattern → frequency
+                this.sequences = []; // recent node sequence
+            }
+            
+            // Learn from graph structure
+            learnFromGraph() {
+                const nodes = Array.from(this.pipeline.nodes.values());
+                
+                // Extract patterns from content
+                nodes.forEach(node => {
+                    const words = node.content.toLowerCase().split(/\s+/);
+                    words.forEach((word, i) => {
+                        if (i < words.length - 1) {
+                            const pattern = `${word} ${words[i + 1]}`;
+                            this.patterns.set(pattern, (this.patterns.get(pattern) || 0) + 1);
+                        }
+                    });
+                });
+                
+                // Learn edge patterns
+                this.pipeline.edges.forEach(edge => {
+                    const from = this.pipeline.nodes.get(edge.from);
+                    const to = this.pipeline.nodes.get(edge.to);
+                    if (from && to) {
+                        const pattern = `${from.type}→${to.type}`;
+                        this.patterns.set(pattern, (this.patterns.get(pattern) || 0) + 1);
+                    }
+                });
+            }
+            
+            // Predict next likely page type/content
+            predictNext(currentNode) {
+                if (!currentNode) return [];
+                
+                this.learnFromGraph();
+                
+                const predictions = [];
+                
+                // Predict based on edge patterns
+                const outgoing = this.pipeline.edges.filter(e => e.from === currentNode.id);
+                const nodeTypes = outgoing.map(e => this.pipeline.nodes.get(e.to)?.type).filter(Boolean);
+                const typeFreq = {};
+                nodeTypes.forEach(t => typeFreq[t] = (typeFreq[t] || 0) + 1);
+                
+                Object.entries(typeFreq).forEach(([type, count]) => {
+                    predictions.push({
+                        type: 'node_type',
+                        prediction: `Next page likely: ${type}`,
+                        confidence: Math.min(0.95, count / outgoing.length),
+                        action: () => this.suggestNodeType(type)
+                    });
+                });
+                
+                // Predict based on content patterns
+                const words = currentNode.content.toLowerCase().split(/\s+/).slice(-5);
+                const lastWord = words[words.length - 1];
+                
+                const nextWords = [];
+                this.patterns.forEach((freq, pattern) => {
+                    if (pattern.startsWith(lastWord + ' ')) {
+                        const next = pattern.split(' ')[1];
+                        nextWords.push({ word: next, freq });
+                    }
+                });
+                
+                nextWords.sort((a, b) => b.freq - a.freq);
+                if (nextWords.length > 0) {
+                    predictions.push({
+                        type: 'next_word',
+                        prediction: `Suggested: "${nextWords[0].word}"`,
+                        confidence: Math.min(0.9, nextWords[0].freq / 10),
+                        action: () => nextWords[0].word
+                    });
+                }
+                
+                return predictions.slice(0, 3);
+            }
+            
+            suggestNodeType(type) {
+                return `Create ${type} page based on pattern`;
+            }
+        }
+        
+        // ============================================================================
+        // SVG RENDERER & TRANSFORMER
+        // ============================================================================
+        
+        class SVGRenderer {
+            constructor() {
+                this.canvas = document.getElementById('svg-canvas');
+                this.content = document.getElementById('svg-content');
+                this.isDrawing = false;
+                this.currentPath = null;
+                this.paths = [];
+            }
+            
+            initDrawing() {
+                this.canvas.addEventListener('pointerdown', (e) => this.startDraw(e));
+                this.canvas.addEventListener('pointermove', (e) => this.draw(e));
+                this.canvas.addEventListener('pointerup', () => this.endDraw());
+                this.canvas.addEventListener('pointerleave', () => this.endDraw());
+            }
+            
+            startDraw(e) {
+                this.isDrawing = true;
+                const pt = this.getPoint(e);
+                this.currentPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                this.currentPath.setAttribute('d', `M ${pt.x} ${pt.y}`);
+                this.currentPath.setAttribute('stroke', getComputedStyle(document.documentElement).getPropertyValue('--accent'));
+                this.currentPath.setAttribute('stroke-width', '2');
+                this.currentPath.setAttribute('fill', 'none');
+                this.currentPath.setAttribute('stroke-linecap', 'round');
+                this.content.appendChild(this.currentPath);
+            }
+            
+            draw(e) {
+                if (!this.isDrawing) return;
+                const pt = this.getPoint(e);
+                const d = this.currentPath.getAttribute('d');
+                this.currentPath.setAttribute('d', `${d} L ${pt.x} ${pt.y}`);
+            }
+            
+            endDraw() {
+                if (this.currentPath) {
+                    this.paths.push(this.currentPath.getAttribute('d'));
+                }
+                this.isDrawing = false;
+                this.currentPath = null;
+            }
+            
+            getPoint(e) {
+                const rect = this.canvas.getBoundingClientRect();
+                return {
+                    x: e.clientX - rect.left,
+                    y: e.clientY - rect.top
+                };
+            }
+            
+            clear() {
+                this.content.innerHTML = '';
+                this.paths = [];
+            }
+            
+            getSVGString() {
+                return this.canvas.outerHTML;
+            }
+            
+            // Transform text to SVG mind map
+            textToMindMap(text, title) {
+                this.clear();
+                
+                const lines = text.split('\n').filter(l => l.trim());
+                const centerX = this.canvas.clientWidth / 2;
+                const centerY = this.canvas.clientHeight / 2;
+                
+                // Center node
+                const centerCircle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                centerCircle.setAttribute('cx', centerX);
+                centerCircle.setAttribute('cy', centerY);
+                centerCircle.setAttribute('r', '40');
+                centerCircle.setAttribute('fill', getComputedStyle(document.documentElement).getPropertyValue('--accent'));
+                centerCircle.setAttribute('opacity', '0.3');
+                this.content.appendChild(centerCircle);
+                
+                const centerText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                centerText.setAttribute('x', centerX);
+                centerText.setAttribute('y', centerY);
+                centerText.setAttribute('text-anchor', 'middle');
+                centerText.setAttribute('dominant-baseline', 'middle');
+                centerText.setAttribute('fill', getComputedStyle(document.documentElement).getPropertyValue('--text'));
+                centerText.setAttribute('font-size', '14');
+                centerText.textContent = title || 'Main';
+                this.content.appendChild(centerText);
+                
+                // Branch nodes
+                const angleStep = (Math.PI * 2) / lines.length;
+                lines.forEach((line, i) => {
+                    const angle = i * angleStep;
+                    const x = centerX + Math.cos(angle) * 120;
+                    const y = centerY + Math.sin(angle) * 120;
+                    
+                    // Line from center
+                    const connector = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                    connector.setAttribute('x1', centerX);
+                    connector.setAttribute('y1', centerY);
+                    connector.setAttribute('x2', x);
+                    connector.setAttribute('y2', y);
+                    connector.setAttribute('stroke', getComputedStyle(document.documentElement).getPropertyValue('--accent'));
+                    connector.setAttribute('stroke-width', '1');
+                    connector.setAttribute('opacity', '0.3');
+                    this.content.appendChild(connector);
+                    
+                    // Node
+                    const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                    circle.setAttribute('cx', x);
+                    circle.setAttribute('cy', y);
+                    circle.setAttribute('r', '25');
+                    circle.setAttribute('fill', getComputedStyle(document.documentElement).getPropertyValue('--surface'));
+                    circle.setAttribute('stroke', getComputedStyle(document.documentElement).getPropertyValue('--accent'));
+                    circle.setAttribute('stroke-width', '2');
+                    this.content.appendChild(circle);
+                    
+                    const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                    text.setAttribute('x', x);
+                    text.setAttribute('y', y);
+                    text.setAttribute('text-anchor', 'middle');
+                    text.setAttribute('dominant-baseline', 'middle');
+                    text.setAttribute('fill', getComputedStyle(document.documentElement).getPropertyValue('--text'));
+                    text.setAttribute('font-size', '10');
+                    text.textContent = line.substring(0, 15) + (line.length > 15 ? '...' : '');
+                    this.content.appendChild(text);
+                });
+            }
+        }
+        
+        // ============================================================================
+        // NOTEBOOK STATE
+        // ============================================================================
+        
+        class Notebook {
+            constructor() {
+                this.receiptStore = new ReceiptStore();
+                this.pipeline = new ComputationPipeline(null, this.receiptStore);
+                this.guardian = new CausalityGuardian(this.pipeline, this.receiptStore);
+                this.pipeline.guardian = this.guardian;
+                
+                this.gan = new GameGAN(this.pipeline);
+                this.svg = new SVGRenderer();
+                this.svg.initDrawing();
+                
+                this.pages = new Map();
+                this.currentPageId = null;
+                this.currentPen = 'pen';
+                this.currentMode = 'text';
+                this.theme = 'echo';
+                this.showPredictions = false;
+                
+                this.loadFromStorage();
+            }
+            
+            createPage(title = '', type = 'text') {
+                const pageId = `p_${Date.now()}`;
+                
+                this.pages.set(pageId, {
+                    id: pageId,
+                    title: title,
+                    content: '',
+                    type: type, // 'text' or 'svg'
+                    svgData: null,
+                    nodeId: null,
+                    created: Date.now(),
+                    modified: Date.now()
+                });
+                
+                this.saveToStorage();
+                return pageId;
+            }
+            
+            updatePage(pageId, title, content) {
+                const page = this.pages.get(pageId);
+                if (!page) return;
+                
+                page.title = title;
+                page.content = content;
+                page.modified = Date.now();
+                
+                // Save SVG if in draw mode
+                if (page.type === 'svg') {
+                    page.svgData = this.svg.getSVGString();
+                }
+                
+                if (content.trim().length > 10) {
+                    if (!page.nodeId) {
+                        page.nodeId = `n_${pageId}`;
+                        
+                        const nodeType = {
+                            'pencil': 'SKETCH',
+                            'pen': 'DOCUMENT',
+                            'marker': 'FOUNDATION'
+                        }[this.currentPen];
+                        
+                        this.pipeline.addNode(page.nodeId, nodeType, content, {
+                            title: title,
+                            pen: this.currentPen,
+                            pageType: page.type
+                        });
+                        
+                        this.autoConnect(page.nodeId);
+                        this.showToast('Connected to graph');
+                    } else {
+                        const node = this.pipeline.nodes.get(page.nodeId);
+                        if (node) {
+                            node.content = content;
+                            node.timestamp = Date.now();
+                        }
+                    }
+                }
+                
+                this.saveToStorage();
+            }
+            
+            autoConnect(nodeId) {
+                const recentNodes = Array.from(this.pipeline.nodes.keys())
+                    .filter(id => id !== nodeId)
+                    .slice(-2);
+                
+                for (const targetId of recentNodes) {
+                    const types = ['REQUIRES', 'PRODUCES', 'ENABLES'];
+                    const type = types[Math.floor(Math.random() * types.length)];
+                    this.pipeline.addEdge(nodeId, targetId, type, 0.7);
+                }
+            }
+            
+            transformPage(pageId, targetFormat) {
+                const page = this.pages.get(pageId);
+                if (!page) return;
+                
+                switch(targetFormat) {
+                    case 'mindmap':
+                        this.svg.textToMindMap(page.content, page.title);
+                        const newPageId = this.createPage(page.title + ' (Mind Map)', 'svg');
+                        const newPage = this.pages.get(newPageId);
+                        newPage.svgData = this.svg.getSVGString();
+                        this.saveToStorage();
+                        this.showToast('Transformed to mind map');
+                        return newPageId;
+                    
+                    case 'download-svg':
+                        if (page.type === 'svg' && page.svgData) {
+                            this.downloadSVG(page.svgData, page.title);
+                        }
+                        break;
+                    
+                    case 'download-text':
+                        this.downloadText(page.content, page.title);
+                        break;
+                }
+            }
+            
+            downloadSVG(svgData, filename) {
+                const blob = new Blob([svgData], { type: 'image/svg+xml' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `${filename || 'drawing'}.svg`;
+                a.click();
+                URL.revokeObjectURL(url);
+            }
+            
+            downloadText(content, filename) {
+                const blob = new Blob([content], { type: 'text/plain' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `${filename || 'note'}.txt`;
+                a.click();
+                URL.revokeObjectURL(url);
+            }
+            
+            deletePage(pageId) {
+                const page = this.pages.get(pageId);
+                if (page && page.nodeId) {
+                    this.pipeline.nodes.delete(page.nodeId);
+                }
+                this.pages.delete(pageId);
+                this.saveToStorage();
+            }
+            
+            showToast(message) {
+                const toast = document.getElementById('toast');
+                toast.textContent = message;
+                toast.classList.add('show');
+                setTimeout(() => toast.classList.remove('show'), 2000);
+            }
+            
+            saveToStorage() {
+                localStorage.setItem('notebook_data', JSON.stringify({
+                    pages: Array.from(this.pages.entries()),
+                    currentPen: this.currentPen,
+                    theme: this.theme
+                }));
+            }
+            
+            loadFromStorage() {
+                const stored = localStorage.getItem('notebook_data');
+                if (stored) {
+                    const data = JSON.parse(stored);
+                    this.pages = new Map(data.pages || []);
+                    this.currentPen = data.currentPen || 'pen';
+                    this.theme = data.theme || 'echo';
+                }
+            }
+        }
+        
+        // ============================================================================
+        // UI CONTROLLER
+        // ============================================================================
+        
+        const notebook = new Notebook();
+        
+        window.createPage = function() {
+            const pageId = notebook.createPage('', notebook.currentMode === 'draw' ? 'svg' : 'text');
+            notebook.currentPageId = pageId;
+            renderPages();
+            selectPage(pageId);
+            closeAll();
+        };
+        
+        window.updatePage = function() {
+            if (!notebook.currentPageId) return;
+            
+            const title = document.getElementById('page-title').value;
+            const content = document.getElementById('page-content').value;
+            
+            notebook.updatePage(notebook.currentPageId, title, content);
+            renderPages();
+            updateInsights();
+        };
+        
+        function selectPage(pageId) {
+            notebook.currentPageId = pageId;
+            const page = notebook.pages.get(pageId);
+            
+            if (page) {
+                document.getElementById('page-title').value = page.title;
+                document.getElementById('page-content').value = page.content;
+                
+                // Switch mode based on page type
+                if (page.type === 'svg') {
+                    setMode('draw');
+                    if (page.svgData) {
+                        document.getElementById('svg-content').innerHTML = page.svgData;
+                    }
+                } else {
+                    setMode('text');
+                }
+                
+                renderPages();
+                updateInsights();
+            }
+            
+            closeAll();
+        }
+        
+        window.setMode = function(mode) {
+            notebook.currentMode = mode;
+            
+            const textArea = document.getElementById('page-content');
+            const svgCanvas = document.getElementById('svg-canvas');
+            
+            document.querySelectorAll('.mode-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.mode === mode);
+            });
+            
+            if (mode === 'draw') {
+                textArea.style.display = 'none';
+                svgCanvas.classList.add('active');
+                notebook.showToast('Draw mode');
+            } else {
+                textArea.style.display = 'block';
+                svgCanvas.classList.remove('active');
+                notebook.showToast('Text mode');
+            }
+        };
+        
+        window.togglePredictions = function() {
+            notebook.showPredictions = !notebook.showPredictions;
+            updateInsights();
+            notebook.showToast(notebook.showPredictions ? 'Predictions ON' : 'Predictions OFF');
+        };
+        
+        function renderPages() {
+            const container = document.getElementById('pages-list');
+            container.innerHTML = '';
+            
+            const sortedPages = Array.from(notebook.pages.values())
+                .sort((a, b) => b.modified - a.modified);
+            
+            for (const page of sortedPages) {
+                const item = document.createElement('div');
+                item.className = 'page-item';
+                if (page.id === notebook.currentPageId) {
+                    item.classList.add('active');
+                }
+                
+                const node = page.nodeId ? notebook.pipeline.nodes.get(page.nodeId) : null;
+                const hasConnections = node && notebook.pipeline.getConnections(page.nodeId).length > 0;
+                
+                const date = new Date(page.modified).toLocaleDateString(undefined, {
+                    month: 'short',
+                    day: 'numeric'
+                });
+                
+                const typeIcon = page.type === 'svg' ? '✎' : 'Aa';
+                
+                item.innerHTML = `
+                    <div class="page-type-indicator">${typeIcon}</div>
+                    <div class="page-item-title">
+                        ${page.title || 'Untitled'}
+                        ${hasConnections ? '<span class="connection-hint"></span>' : ''}
+                    </div>
+                    <div class="page-item-meta">
+                        ${date} • ${page.type === 'svg' ? 'Drawing' : page.content.length + ' chars'}
+                    </div>
+                `;
+                
+                item.onclick = (e) => {
+                    if (e.target.classList.contains('transform-btn')) return;
+                    selectPage(page.id);
+                };
+                
+                // Transform menu (desktop hover)
+                if (window.innerWidth > 768) {
+                    const menu = document.createElement('div');
+                    menu.className = 'transform-menu';
+                    menu.innerHTML = `
+                        <button class="transform-btn" onclick="event.stopPropagation(); notebook.transformPage('${page.id}', 'mindmap')">
+                            🧠 Mind Map
+                        </button>
+                        ${page.type === 'svg' ? `
+                            <button class="transform-btn" onclick="event.stopPropagation(); notebook.transformPage('${page.id}', 'download-svg')">
+                                ⬇ Download SVG
+                            </button>
+                        ` : `
+                            <button class="transform-btn" onclick="event.stopPropagation(); notebook.transformPage('${page.id}', 'download-text')">
+                                ⬇ Download TXT
+                            </button>
+                        `}
+                    `;
+                    item.appendChild(menu);
+                }
+                
+                container.appendChild(item);
+            }
+        }
+        
+        function updateInsights() {
+            const page = notebook.pages.get(notebook.currentPageId);
+            if (!page || !page.nodeId) return;
+            
+            // Connections
+            const connections = notebook.pipeline.getConnections(page.nodeId);
+            const container = document.getElementById('connections-list');
+            
+            if (connections.length === 0) {
+                container.innerHTML = '<div class="insight-text" style="opacity: 0.5;">No connections yet</div>';
+            } else {
+                container.innerHTML = '';
+                
+                connections.forEach(conn => {
+                    const targetPage = Array.from(notebook.pages.values())
+                        .find(p => p.nodeId === conn.node.id);
+                    
+                    if (targetPage) {
+                        const item = document.createElement('div');
+                        item.className = 'connection-item';
+                        item.innerHTML = `
+                            ${conn.direction === 'to' ? '→' : '←'} ${targetPage.title || 'Untitled'}
+                            <div style="font-size: 0.7rem; opacity: 0.5; margin-top: 4px;">${conn.type}</div>
+                        `;
+                        item.onclick = () => selectPage(targetPage.id);
+                        container.appendChild(item);
+                    }
+                });
+            }
+            
+            // GAN Predictions
+            if (notebook.showPredictions) {
+                document.getElementById('predictions-section').style.display = 'block';
+                const node = notebook.pipeline.nodes.get(page.nodeId);
+                const predictions = notebook.gan.predictNext(node);
+                
+                const predContainer = document.getElementById('predictions-list');
+                predContainer.innerHTML = '';
+                
+                predictions.forEach(pred => {
+                    const item = document.createElement('div');
+                    item.className = 'prediction-item';
+                    item.innerHTML = `
+                        ${pred.prediction}
+                        <div class="prediction-confidence">${(pred.confidence * 100).toFixed(0)}% confidence</div>
+                    `;
+                    predContainer.appendChild(item);
+                });
+            } else {
+                document.getElementById('predictions-section').style.display = 'none';
+            }
+            
+            // Graph status
+            document.getElementById('graph-status').innerHTML = `
+                Nodes: ${notebook.pipeline.nodes.size}<br>
+                Edges: ${notebook.pipeline.edges.length}<br>
+                Glyph: ${notebook.pipeline.nodes.get(page.nodeId)?.glyph || 'none'}
+            `;
+        }
+        
+        window.togglePages = function() {
+            const drawer = document.getElementById('pages-drawer');
+            const overlay = document.getElementById('overlay');
+            
+            drawer.classList.toggle('open');
+            overlay.classList.toggle('active');
+            
+            document.getElementById('settings-panel').classList.remove('open');
+            document.getElementById('insight-panel').classList.remove('open');
+        };
+        
+        window.toggleSettings = function() {
+            const panel = document.getElementById('settings-panel');
+            const overlay = document.getElementById('overlay');
+            
+            panel.classList.toggle('open');
+            overlay.classList.toggle('active');
+            
+            document.getElementById('pages-drawer').classList.remove('open');
+            document.getElementById('insight-panel').classList.remove('open');
+        };
+        
+        window.toggleInsights = function() {
+            const panel = document.getElementById('insight-panel');
+            panel.classList.toggle('open');
+        };
+        
+        window.closeAll = function() {
+            document.getElementById('pages-drawer').classList.remove('open');
+            document.getElementById('settings-panel').classList.remove('open');
+            document.getElementById('insight-panel').classList.remove('open');
+            document.getElementById('overlay').classList.remove('active');
+        };
+        
+        window.setPen = function(pen) {
+            notebook.currentPen = pen;
+            notebook.saveToStorage();
+            
+            document.querySelectorAll('.pen-option').forEach(opt => {
+                opt.classList.toggle('active', opt.dataset.pen === pen);
+            });
+            
+            notebook.showToast(`Mode: ${pen}`);
+        };
+        
+        window.setTheme = function(theme) {
+            notebook.theme = theme;
+            notebook.saveToStorage();
+            
+            document.body.setAttribute('data-theme', theme);
+            
+            document.querySelectorAll('.theme-dot').forEach(dot => {
+                dot.classList.toggle('active', dot.dataset.theme === theme);
+            });
+        };
+        
+        // ============================================================================
+        // INITIALIZATION
+        // ============================================================================
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            setTheme(notebook.theme);
+            setPen(notebook.currentPen);
+            renderPages();
+            
+            if (notebook.pages.size === 0) {
+                createPage();
+            } else {
+                const recent = Array.from(notebook.pages.values())
+                    .sort((a, b) => b.modified - a.modified)[0];
+                if (recent) selectPage(recent.id);
+            }
+            
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') closeAll();
+                if (e.metaKey && e.key === 'n') {
+                    e.preventDefault();
+                    createPage();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
